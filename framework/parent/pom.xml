@@ -10,12 +10,12 @@
         <repository>
             <id>release</id>
             <name>release</name>
-            <url>${repository.baseUrl}/repository/maven-releases/</url>
+            <url>${repository.baseUrl}/maven-releases/</url>
         </repository>
         <snapshotRepository>
             <id>snapshots</id>
             <name>snapshots</name>
-            <url>${repository.baseUrl}/repository/maven-snapshots/</url>
+            <url>${repository.baseUrl}/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
     <properties>
