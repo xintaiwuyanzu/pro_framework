@@ -26,7 +26,11 @@ public class ${className} implements TableInfo {
 
     @Override
     public Column pk() {
+#if($pk)
         return $pk.toUpperCase();
+#else
+        return null;
+#end
     }
 
     @Override
