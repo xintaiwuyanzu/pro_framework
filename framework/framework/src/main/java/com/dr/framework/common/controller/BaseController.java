@@ -26,9 +26,8 @@ import javax.servlet.http.HttpSession;
  */
 public class BaseController<T extends IdEntity> {
     @Autowired
-    CommonService commonService;
+    protected CommonService commonService;
     Logger logger = LoggerFactory.getLogger(BaseController.class);
-
 
     @RequestMapping("/insert")
     public ResultEntity insert(HttpServletRequest request, T entity) {
@@ -111,7 +110,7 @@ public class BaseController<T extends IdEntity> {
      */
     @RequestMapping("/delete")
     public ResultEntity delete(HttpServletRequest request, T entity) {
-        SqlQuery<T> sqlQuery = SqlQuery.from(entity.getClass());
+        SqlQuery<T> sqlQuery = SqlQuery.from(entity);
         if (!StringUtils.isEmpty(entity.getId())) {
             TableInfo tableInfo = SqlQuery.getTableInfo(entity.getClass());
             sqlQuery.in(tableInfo.pk(), entity.getId());

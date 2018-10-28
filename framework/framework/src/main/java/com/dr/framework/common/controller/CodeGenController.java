@@ -5,6 +5,8 @@ import com.dr.framework.common.entity.TreeNode;
 import com.dr.framework.common.query.GenSourceQuery;
 import com.dr.framework.core.orm.annotations.ColumnType;
 import com.dr.framework.core.orm.support.mybatis.spring.MybatisConfigurationBean;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 import liquibase.structure.core.PrimaryKey;
@@ -16,6 +18,7 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/codeGen")
+@Api(tags = "代码生成模块")
 public class CodeGenController {
     @Autowired
     List<MybatisConfigurationBean> mybatisConfigurationBeans;
@@ -37,7 +41,8 @@ public class CodeGenController {
      * @param withDabatase
      * @return
      */
-    @RequestMapping("/tableTree")
+    @ApiOperation(value = "查询所有数据源的数据库树状结构信息")
+    @PostMapping("/tableTree")
     public ResultEntity tableTree(boolean withDabatase) {
         List<TreeNode> treeNodes = mybatisConfigurationBeans.stream()
                 .map(mybatisConfigurationBean -> mybatisConfigurationBean.tableTree(withDabatase))
@@ -58,7 +63,7 @@ public class CodeGenController {
                 filter(mybatisConfigurationBean1 -> mybatisConfigurationBean1.getDatabaseId().equalsIgnoreCase(dataSource))
                 .findFirst();
         if (optional.isPresent()) {
-            Table table = optional.get().getTableMap(tableName).get(tableName);
+            Table table = optional.get().getTableMap(tableName).get(tableName.toUpperCase());
             return ResultEntity.success(
                     table.getColumns()
                             .stream()
@@ -96,7 +101,7 @@ public class CodeGenController {
             if (query.getTables() != null) {
                 Map<String, Table> tableMap = mybatisConfigurationBean.getTableMap(null);
                 List<String> generateMessages = query.getTables().stream()
-                        .map(table -> doGen(query, tableMap.get(table.get("tableName")), table))
+                        .map(table -> doGen(query, tableMap.get(table.get("tableName").toString().toUpperCase()), table))
                         .collect(Collectors.toList());
                 resultEntity = ResultEntity.success("生成成功!", generateMessages);
             } else {

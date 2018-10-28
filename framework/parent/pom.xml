@@ -19,7 +19,7 @@
         </snapshotRepository>
     </distributionManagement>
     <properties>
-        <repository.baseUrl>http://192.168.200.245:8081/repository</repository.baseUrl>
+        <repository.baseUrl>http://58.56.43.98:8081/maven/repository</repository.baseUrl>
         <mybatis.version>3.4.6</mybatis.version>
         <liquibase.version>3.6.2</liquibase.version>
         <mysql.version>6.0.6</mysql.version>
@@ -27,6 +27,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>8</java.version>
         <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
     </properties>
     <dependencyManagement>

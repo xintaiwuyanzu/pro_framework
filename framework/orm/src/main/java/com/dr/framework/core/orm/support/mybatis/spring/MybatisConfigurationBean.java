@@ -305,7 +305,7 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
         DatabaseSnapshot databaseSnapshot = createDabaseSnapshort(tableName, Column.class, PrimaryKey.class);
         if (databaseSnapshot != null) {
 
-            databaseSnapshot.get(liquibase.structure.core.Table.class).stream().forEach(table -> tableMap.put(table.getName(), table));
+            databaseSnapshot.get(liquibase.structure.core.Table.class).stream().forEach(table -> tableMap.put(table.getName().toUpperCase(), table));
         }
         return tableMap;
     }

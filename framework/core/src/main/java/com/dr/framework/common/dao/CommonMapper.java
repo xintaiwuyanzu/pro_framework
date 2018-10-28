@@ -49,7 +49,7 @@ public interface CommonMapper {
      * @param entity
      * @return
      */
-    @Update("update ${table} ${set} where ${pk}=#{id}")
+    @Update({"<default>update ${table} ${set} where ${pk}=#{id}</default>", "<sqlserver>update A ${set} from ${table} where ${pk}=#{id}</sqlserver>"})
     <E> long updateById(E entity);
 
     /**

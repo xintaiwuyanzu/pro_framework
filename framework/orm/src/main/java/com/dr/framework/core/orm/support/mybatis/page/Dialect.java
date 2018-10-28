@@ -1,13 +1,21 @@
 package com.dr.framework.core.orm.support.mybatis.page;
 
+import com.dr.framework.core.orm.support.mybatis.spring.MybatisConfigurationBean;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.sql.DataSource;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -29,8 +37,16 @@ public interface Dialect {
         return sql;
     }
 
+    static String parseSql(MybatisConfigurationBean configuration, String sql) {
+        return getDialect(configuration).parseDialectSql(sql);
+    }
+
+
     static Dialect getDialect(MappedStatement mappedStatement) {
-        Configuration configuration = mappedStatement.getConfiguration();
+        return configDialectMap.get(mappedStatement.getConfiguration());
+    }
+
+    static Dialect getDialect(Configuration configuration) {
         if (!configDialectMap.containsKey(configuration)) {
             DataSource dataSource = configuration.getEnvironment().getDataSource();
             Dialect dialect = createDialect(dataSource);
@@ -103,4 +119,46 @@ public interface Dialect {
      */
     String parseToPageSql(MappedStatement mappedStatement, String sql, RowBounds rowBounds);
 
+    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+
+    /**
+     * 解析sql注解中的sql语句为适用特定数据库的sql
+     *
+     * @param sql
+     * @return
+     */
+    default String parseDialectSql(String sql) {
+        if (StringUtils.isEmpty(sql)) {
+            return sql;
+        } else if (sql.startsWith("<") && !sql.startsWith("<script>") && !sql.startsWith("<SCRIPT>")) {
+            try {
+                DocumentBuilder documentBuilder = dbf.newDocumentBuilder();
+                Document document = documentBuilder.parse(new ByteArrayInputStream(String.format("<scripts>%s</scripts>", sql).getBytes()));
+                Node defaultNode = null;
+                Node dialectNode = null;
+                NodeList nodeList = document.getChildNodes().item(0).getChildNodes();
+                for (int i = 0; i < nodeList.getLength(); i++) {
+                    Node node = nodeList.item(i);
+                    String nodeName = node.getNodeName();
+                    if (nodeName.equalsIgnoreCase("default")) {
+                        defaultNode = node;
+                    } else if (nodeName.equalsIgnoreCase(getName())) {
+                        dialectNode = node;
+                    }
+                }
+                if (dialectNode != null) {
+                    return dialectNode.getTextContent();
+                }
+                if (defaultNode != null) {
+                    return defaultNode.getTextContent();
+                }
+            } catch (Exception e) {
+            }
+        }
+        return sql;
+    }
+
+    default String getName() {
+        return getClass().getSimpleName().toLowerCase().replace("dialect", "").trim();
+    }
 }

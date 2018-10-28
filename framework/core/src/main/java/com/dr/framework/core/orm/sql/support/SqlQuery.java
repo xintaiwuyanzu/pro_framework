@@ -56,15 +56,15 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
         }
     }
 
-    public static SqlQuery from(Class entityClass) {
+    public static <T> SqlQuery<T> from(Class<T> entityClass) {
         return from(entityClass, null, true);
     }
 
-    public static SqlQuery from(Class entityClass, String alias) {
+    public static <T> SqlQuery<T> from(Class<T> entityClass, String alias) {
         return from(entityClass, alias, false);
     }
 
-    public static SqlQuery from(Class entityClass, boolean selectAllColumns) {
+    public static <T> SqlQuery<T> from(Class<T> entityClass, boolean selectAllColumns) {
         return from(entityClass, null, selectAllColumns);
     }
 

@@ -157,6 +157,7 @@ public class CodeGenProcessor extends AbstractProcessor {
                             case "long":
                             case "float":
                             case "boolean":
+                            case "Boolean":
                                 map.put("jdbcType", "NUMERIC");
                                 break;
                             default:

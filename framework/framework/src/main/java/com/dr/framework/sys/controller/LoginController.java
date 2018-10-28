@@ -5,6 +5,7 @@ import com.dr.framework.common.service.CommonService;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.sys.entity.UserLogin;
 import com.dr.framework.sys.entity.UserLoginInfo;
+import com.dr.framework.sys.service.InitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/login")
-public class LoginController {
+public class LoginController implements InitDataService.DataInit {
     @Autowired
     CommonService commonService;
 
@@ -27,6 +28,17 @@ public class LoginController {
             return ResultEntity.success(userLogin);
         } else {
             return ResultEntity.error("未找到指定用户！");
+        }
+    }
+
+    @Override
+    public void initData() {
+        UserLogin userLogin = new UserLogin();
+        userLogin.setLoginId("admin");
+        userLogin.setId("admin");
+        userLogin.setPassword("1234");
+        if (!commonService.exists(UserLogin.class, userLogin.getId())) {
+            commonService.insert(userLogin);
         }
     }
 }

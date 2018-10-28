@@ -19,6 +19,7 @@ import com.dr.framework.common.dao.CommonMapper;
 import com.dr.framework.core.orm.annotations.Mapper;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.orm.support.mybatis.TableInfoProperties;
+import com.dr.framework.core.orm.support.mybatis.page.Dialect;
 import com.dr.framework.core.orm.support.mybatis.spring.MybatisConfigurationBean;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.annotations.Options.FlushCachePolicy;
@@ -541,6 +542,7 @@ public class MyBatisMapperAnnotationBuilder {
 
     private SqlSource buildSqlSourceFromStrings(String[] strings, Method method, Class entityClass, Class<?> parameterTypeClass, LanguageDriver languageDriver) {
         String sql = String.join(" ", strings);
+        sql = Dialect.parseSql(configuration, sql);
         if (entityClass != null) {
             sql = PropertyParser.parse(sql, new TableInfoProperties(entityClass, method));
         }
