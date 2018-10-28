@@ -35,7 +35,7 @@ public class SysMenuController extends BaseController<SysMenu> implements InitDa
 
     @Override
     public void initData() {
-        if (commonService.exists(SysMenu.class, SubSystem.DEFAULT_SYSTEM_ID)) {
+        if (!commonService.exists(SysMenu.class, SubSystem.DEFAULT_SYSTEM_ID)) {
             SysMenu parent = new SysMenu();
             parent.setName("系统管理");
             parent.setParentId(SubSystem.DEFAULT_SYSTEM_ID);
