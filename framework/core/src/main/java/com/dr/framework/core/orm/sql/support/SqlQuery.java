@@ -151,7 +151,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
                     case "$where":
                         value = whereQuery.sql(fromQuery.tableAlias, this, true);
                         break;
-                    case "$whereNO":
+                    case "$whereno":
                         value = whereQuery.sql(fromQuery.tableAlias, this, false);
                         break;
 
