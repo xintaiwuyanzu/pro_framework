@@ -58,13 +58,13 @@ public interface CommonMapper {
      * @param sqlQuery
      * @return
      */
-    @Update({"update", SqlQuery.FROM, "${set}", SqlQuery.WHERE})
+    @Update({"<default>update", SqlQuery.TABLE, "${set}", SqlQuery.WHERE, "</default><sqlserver>update A", "${set}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"})
     <E> long updateByQuery(SqlQuery<E> sqlQuery);
 
-    @Update({"update ${table} ${settest} where ${pk} =#{id}"})
+    @Update({"<default>update ${table} ${settest} where ${pk} =#{id}</default>", "<sqlserver>update A ${settest} from ${table} where ${pk} =#{id}</sqlserver>"})
     <E> long updateIgnoreNullById(E entity);
 
-    @Update({"update", SqlQuery.FROM, "${settest}", SqlQuery.WHERE})
+    @Update({"<default>update", SqlQuery.TABLE, "${settest}", SqlQuery.WHERE, "</default><sqlserver>update A ${settest}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"})
     <E> long updateIgnoreNullByQuery(SqlQuery<E> sqlQuery);
 
     /**

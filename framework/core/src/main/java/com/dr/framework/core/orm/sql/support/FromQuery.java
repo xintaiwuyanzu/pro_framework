@@ -73,6 +73,14 @@ class FromQuery extends AbstractSqlQuery {
         return builder.toString();
     }
 
+    String table(TableAlias tableAlias, SqlQuery sqlQuery) {
+        StringBuilder builder = new StringBuilder();
+        sqlClause(builder, "", Arrays.asList(table + " " + tableAlias.alias(table)), "", "", ", ");
+        joins(tableAlias, builder);
+        return builder.toString();
+    }
+
+
     private void joins(TableAlias tableAlias, StringBuilder builder) {
         sqlClause(builder, " JOIN ", join.parts(tableAlias), "", "", " JOIN ");
         sqlClause(builder, " INNER JOIN ", innerJoin.parts(tableAlias), "", "", " INNER JOIN ");

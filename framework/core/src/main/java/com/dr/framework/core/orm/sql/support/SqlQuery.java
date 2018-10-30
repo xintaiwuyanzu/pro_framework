@@ -16,6 +16,7 @@ import static com.dr.framework.core.orm.sql.support.AbstractSqlQuery.OR;
 public final class SqlQuery<E> extends HashMap<String, Object> {
     public static final String COLUMNS = "${query#$columns}";
     public static final String FROM = "${query#$from}";
+    public static final String TABLE = "${query#$table}";
     public static final String WHERE = "${query#$where}";
     public static final String WHERE_NO_ORERY_BY = "${query#$whereNO}";
     public static final String QUERY_CLASS_SUFFIX = "Info";
@@ -143,6 +144,9 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
                         break;
                     case "$from":
                         value = fromQuery.sql(fromQuery.tableAlias, this);
+                        break;
+                    case "$table":
+                        value = fromQuery.table(fromQuery.tableAlias, this);
                         break;
                     case "$where":
                         value = whereQuery.sql(fromQuery.tableAlias, this, true);
