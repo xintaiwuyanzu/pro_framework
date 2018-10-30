@@ -536,6 +536,7 @@ public class MyBatisMapperAnnotationBuilder {
             }
             return null;
         } catch (Exception e) {
+            logger.error("解析{}的方法{}失败，请检查sql是否正确！", parameterType.getName(), method.getName());
             throw new BuilderException("Could not find value method on SQL annotation.  Cause: " + e, e);
         }
     }
