@@ -187,6 +187,7 @@ public class CodeGenController {
                 break;
             case "decimal":
             case "numeric":
+            case "number":
                 type = "double";
                 columnType = ColumnType.FLOAT;
                 break;
