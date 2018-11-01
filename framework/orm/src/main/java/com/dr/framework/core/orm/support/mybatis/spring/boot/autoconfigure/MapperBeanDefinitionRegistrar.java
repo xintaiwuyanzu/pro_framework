@@ -100,11 +100,12 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
      */
     private void registerSpecifyedDataSource(BeanDefinitionRegistry registry, AnnotationAttributes database, List<String> mapperInterfaces) {
         boolean primary = database.getBoolean("primary");
-        boolean xa = true;
-        try {
-            xa = database.getBoolean("xa");
-        } catch (Exception e) {
+        String prefix = database.getString("prefix");
+        String name = database.getString("name");
+        if (!StringUtils.isEmpty(name)) {
+            prefix = prefix + "." + name;
         }
+        boolean xa = Boolean.getBoolean(environment.getProperty(prefix + ".xa", "true"));
         DataSourceProperties dataSourceProperties = readDataSourceProties(database.getString("prefix"), database.getString("name"));
         BeanDefinition beanDefinition = buildBeanDefinition(dataSourceProperties, xa, primary);
         registerBeanDefintionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
