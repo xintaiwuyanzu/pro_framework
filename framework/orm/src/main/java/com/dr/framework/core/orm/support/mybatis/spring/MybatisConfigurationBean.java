@@ -92,6 +92,8 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
                 } else {
                     new MyBatisMapperAnnotationBuilder(this, mapperInterface).parse();
                 }
+            } else {
+                new MyBatisMapperAnnotationBuilder(this, mapperInterface).parse();
             }
         }
         switch (autoDDl) {

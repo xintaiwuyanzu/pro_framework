@@ -75,7 +75,7 @@ public abstract class AbstractMapperProxy implements InvocationHandler, Serializ
                 }
             }
             Type returnType = method.getGenericReturnType();
-            if (returnType instanceof Class) {
+            if (returnType instanceof Class && returnType != Object.class) {
                 return (Class<?>) returnType;
             } else if (returnType instanceof GenericArrayType) {
                 //TODO
