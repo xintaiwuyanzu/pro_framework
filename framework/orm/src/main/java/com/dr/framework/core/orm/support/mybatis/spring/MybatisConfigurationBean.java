@@ -1,6 +1,7 @@
 package com.dr.framework.core.orm.support.mybatis.spring;
 
 import com.dr.framework.common.entity.TreeNode;
+import com.dr.framework.core.orm.annotations.Mapper;
 import com.dr.framework.core.orm.annotations.Table;
 import com.dr.framework.core.orm.sql.TableInfo;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
@@ -78,7 +79,20 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
         Assert.notNull(environment, "没有设置environment属性，不能管理事务");
         sqlSessionTemplate = new SqlSessionTemplate(new DefaultSqlSessionFactory(this));
         for (Class mapperInterface : mapperInterfaces) {
-            new MyBatisMapperAnnotationBuilder(this, mapperInterface).parse();
+            if (mapperInterface.isAnnotationPresent(Mapper.class)) {
+                Mapper mapper = (Mapper) mapperInterface.getAnnotation(Mapper.class);
+                String[] module = mapper.module();
+                if (module.length > 0) {
+                    for (String mo : module) {
+                        if (containModules(mo)) {
+                            new MyBatisMapperAnnotationBuilder(this, mapperInterface).parse();
+                            break;
+                        }
+                    }
+                } else {
+                    new MyBatisMapperAnnotationBuilder(this, mapperInterface).parse();
+                }
+            }
         }
         switch (autoDDl) {
             case "validate":

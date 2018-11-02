@@ -11,10 +11,7 @@ import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 
 public abstract class AbstractMapperProxy implements InvocationHandler, Serializable {
     protected Class<?> mapperInterface;
@@ -34,7 +31,7 @@ public abstract class AbstractMapperProxy implements InvocationHandler, Serializ
         } catch (Throwable t) {
             throw ExceptionUtil.unwrapThrowable(t);
         }
-        Class entityClass = findEntityClass(args);
+        Class entityClass = findEntityClass(method, args);
         MybatisConfigurationBean mybatisConfigurationBean = findConfigBean(method, entityClass);
         Assert.notNull(mybatisConfigurationBean, "没有找到指定的config类，请检查配置是否正确：" + mapperInterface.getName());
         MapperMethod mapperMethod = cachedMapperMethod(method, entityClass, mybatisConfigurationBean);
@@ -61,7 +58,7 @@ public abstract class AbstractMapperProxy implements InvocationHandler, Serializ
 
     abstract protected MybatisConfigurationBean findConfigBean(Method method, Class entityClass);
 
-    protected Class<?> findEntityClass(Object[] args) {
+    protected Class<?> findEntityClass(Method method, Object[] args) {
         if (args != null) {
             for (Object obj : args) {
                 if (obj instanceof SqlQuery) {
@@ -76,6 +73,14 @@ public abstract class AbstractMapperProxy implements InvocationHandler, Serializ
                 if (AnnotationUtils.isAnnotationDeclaredLocally(Table.class, clazz)) {
                     return clazz;
                 }
+            }
+            Type returnType = method.getGenericReturnType();
+            if (returnType instanceof Class) {
+                return (Class<?>) returnType;
+            } else if (returnType instanceof GenericArrayType) {
+                //TODO
+            } else if (returnType instanceof WildcardType) {
+                //TODO
             }
         }
         return null;
