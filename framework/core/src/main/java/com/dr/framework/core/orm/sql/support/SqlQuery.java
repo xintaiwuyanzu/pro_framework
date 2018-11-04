@@ -176,6 +176,16 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     }
 
     /**
+     * ==================
+     * set相关
+     * ==================
+     */
+    public SqlQuery set(Column column, Serializable data) {
+        put(column.getName(), data);
+        return this;
+    }
+
+    /**
      * ==================================
      * column相关
      * ==================================
