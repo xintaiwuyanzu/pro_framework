@@ -33,8 +33,11 @@ public class MapperMethod {
         if (method.isFlush()) {
             sqlCommandType = SqlCommandType.FLUSH;
         } else {
-            mappedStatement = config.getMappedStatement(statementId);
-            Assert.notNull(mappedStatement, "没找到" + statementId + "对应的sql映射信息");
+            try {
+                mappedStatement = config.getMappedStatement(statementId);
+            } catch (Exception e) {
+                Assert.notNull(mappedStatement, "没找到方法【" + method + "】\nstatementId【" + statementId + "】对应的sql映射信息");
+            }
             sqlCommandType = mappedStatement.getSqlCommandType();
         }
         switch (sqlCommandType) {

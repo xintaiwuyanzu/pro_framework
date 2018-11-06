@@ -12,6 +12,7 @@ import org.springframework.util.Assert;
 import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
+import java.util.Map;
 
 public abstract class AbstractMapperProxy implements InvocationHandler, Serializable {
     protected Class<?> mapperInterface;
@@ -75,7 +76,7 @@ public abstract class AbstractMapperProxy implements InvocationHandler, Serializ
                 }
             }
             Type returnType = method.getGenericReturnType();
-            if (returnType instanceof Class && returnType != Object.class) {
+            if (returnType instanceof Class && returnType != Object.class && returnType != Map.class) {
                 return (Class<?>) returnType;
             } else if (returnType instanceof GenericArrayType) {
                 //TODO
