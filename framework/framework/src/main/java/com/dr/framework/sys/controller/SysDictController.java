@@ -24,7 +24,8 @@ public class SysDictController extends BaseController<SysDict> {
     @Override
     protected void onBeforePageQuery(HttpServletRequest request, SqlQuery<SysDict> sqlQuery, SysDict entity) {
         super.onBeforePageQuery(request, sqlQuery, entity);
+        sqlQuery.orderBy(SysDictInfo.ID);
         sqlQuery.equalIfNotNull(SysDictInfo.STATUS);
-        sqlQuery.like(SysDictInfo.KEY, SysDictInfo.VALUE, SysDictInfo.DESCRIPTION);
+        sqlQuery.like(SysDictInfo.KEYINFO, SysDictInfo.VALUE, SysDictInfo.DESCRIPTION);
     }
 }
