@@ -167,6 +167,7 @@ public class CodeGenController {
         switch (dataType.getTypeName().toLowerCase()) {
             case "varchar":
             case "nvarchar":
+            case "char":
             case "text":
                 type = "String";
                 columnType = ColumnType.VARCHAR;
