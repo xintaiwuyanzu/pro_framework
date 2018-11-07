@@ -116,7 +116,7 @@ public interface CommonMapper {
     @Select("select count(${pk}) from ${table}")
     long count(Class entityClass);
 
-    @Select({"select count(${pk}) from ${table}", SqlQuery.WHERE_NO_ORERY_BY})
+    @Select({"select count(${pk})", SqlQuery.FROM, SqlQuery.WHERE_NO_ORERY_BY})
     long countByQuery(SqlQuery sqlQuery);
 
     /**

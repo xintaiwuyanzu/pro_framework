@@ -79,6 +79,10 @@ class WhereQuery extends AbstractSqlQuery {
         whereSqls.concat(part, null);
     }
 
+    void between(Column column, Comparable start, Comparable end) {
+        whereSqls.concat(AND_, new Between(column, start, end));
+    }
+
     String getColumnKey() {
         return QUERYPATAM + atomicInteger.incrementAndGet();
     }
@@ -318,6 +322,36 @@ class WhereQuery extends AbstractSqlQuery {
             String key = getColumnKey();
             sqlQuery.put(key, data);
             return formatColumn(column, alias).append(preffix).append(columnKey(sqlQuery, key)).append(suffix).toString();
+        }
+    }
+
+    class Between extends WhereSql {
+        Column column;
+        Comparable start, end;
+
+        public Between(Column column, Comparable start, Comparable end) {
+            this.column = column;
+            this.start = start;
+            this.end = end;
+        }
+
+        @Override
+        boolean test(MetaObject metaobject) {
+            return !(StringUtils.isEmpty(start) || StringUtils.isEmpty(end)) && start.compareTo(end) <= 0;
+        }
+
+        @Override
+        String getSql(TableAlias alias, SqlQuery sqlQuery) {
+            String statKey = getColumnKey();
+            String endKey = getColumnKey();
+            StringBuilder sqlBuilder = formatColumn(column, alias);
+            sqlBuilder.append(" between ");
+            sqlQuery.put(statKey, start);
+            sqlBuilder.append(columnKey(sqlQuery, statKey));
+            sqlBuilder.append(" and ");
+            sqlQuery.put(endKey, end);
+            sqlBuilder.append(columnKey(sqlQuery, endKey));
+            return sqlBuilder.toString();
         }
     }
 

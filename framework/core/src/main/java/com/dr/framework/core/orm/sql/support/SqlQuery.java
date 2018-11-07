@@ -406,6 +406,11 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
         return concatWithData(column, " not in (", ")", datas);
     }
 
+    public SqlQuery between(Column column, Comparable start, Comparable end) {
+        whereQuery.between(column, start, end);
+        return this;
+    }
+
     /**
      * =====================
      * 排序语句
