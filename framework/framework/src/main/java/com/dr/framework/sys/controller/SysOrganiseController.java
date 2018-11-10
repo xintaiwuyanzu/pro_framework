@@ -23,7 +23,6 @@ public class SysOrganiseController extends BaseController<Organise> {
         if (!all) {
             sqlQuery.equal(SysMenuInfo.STATUS, "1");
         }
-        sqlQuery.equal(SysMenuInfo.SYSID);
         List<Organise> organises = commonService.selectList(sqlQuery);
         return ResultEntity.success(CommonService.listToTree(organises, sysId, organise -> organise.getOrganiseName()));
     }

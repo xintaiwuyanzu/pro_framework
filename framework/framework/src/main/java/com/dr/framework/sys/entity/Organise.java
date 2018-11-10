@@ -25,8 +25,18 @@ public class Organise extends BaseTreeEntity<String> implements SourceRefEntity 
     private String address;
     @Column(name = "address_id", comment = "地点id", length = 50)
     private String addressId;
+    @Column(name = "summary", comment = "简介", length = 4000)
+    private String summary;
     @Column(name = "source_ref", comment = "数据来源", length = 100)
     private String sourceRef;
+    @Column(name = "sys_id", comment = "所属子系统")
+    private String sysId;
+    @Column(name = "latitude", comment = "经度", precision = 3, scale = 15)
+    private double latitude;
+    @Column(name = "longitude", comment = "维度", precision = 3, scale = 15)
+    private double longitude;
+    @Column(name = "coordinate_type", comment = "坐标系", length = 100)
+    private String coordinateType;
 
     public String getOrganiseName() {
         return organiseName;
@@ -108,5 +118,45 @@ public class Organise extends BaseTreeEntity<String> implements SourceRefEntity 
     @Override
     public void setSourceRef(String sourceRef) {
         this.sourceRef = sourceRef;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public String getSysId() {
+        return sysId;
+    }
+
+    public void setSysId(String sysId) {
+        this.sysId = sysId;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getCoordinateType() {
+        return coordinateType;
+    }
+
+    public void setCoordinateType(String coordinateType) {
+        this.coordinateType = coordinateType;
     }
 }

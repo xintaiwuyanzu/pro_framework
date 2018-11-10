@@ -181,7 +181,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
      * ==================
      */
     public SqlQuery set(Column column, Serializable data) {
-        put(column.getName(), data);
+        put(column.getAlias(), data);
         return this;
     }
 

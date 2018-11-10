@@ -43,9 +43,10 @@ public class SysMenuController extends BaseController<SysMenu> implements InitDa
             parent.setLeaf(false);
             parent.setIcon("grid");
             parent.setSysId(SubSystem.DEFAULT_SYSTEM_ID);
-            parent.setId(UUID.randomUUID().toString());
+            parent.setId(SubSystem.DEFAULT_SYSTEM_ID + "main");
 
             SysMenu sysMenu = new SysMenu();
+            sysMenu.setId("sysMenu");
             sysMenu.setName("菜单管理");
             sysMenu.setParentId(parent.getId());
             sysMenu.setStatus("1");

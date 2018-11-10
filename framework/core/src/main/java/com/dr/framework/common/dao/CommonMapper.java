@@ -102,10 +102,10 @@ public interface CommonMapper {
     @Select("select ${columns} from ${table} where ${pk} ${in#coll}")
     <E> List<E> selectBatchIds(Class<E> entityClass, @Param("coll") Serializable... idList);
 
-    @Select("select count(${pk}) from ${table}")
-    boolean exists(Class entityClass, Serializable id);
+    @Select("select count(${pk}) from ${table} where ${pk}=#{id}")
+    boolean exists(Class entityClass, @Param("id") Serializable id);
 
-    @Select({"select count({pk}) from ", SqlQuery.FROM, "where", SqlQuery.WHERE})
+    @Select({"select count(${pk})", SqlQuery.FROM, SqlQuery.WHERE})
     boolean existsByQuery(SqlQuery query);
 
     /**
@@ -130,7 +130,8 @@ public interface CommonMapper {
      * @param id
      * @return
      */
-    @Delete("delete from ${table} where ${pk}= #{id}")
+    @Delete({"<default>delete from ${table} where ${pk}= #{id}</default>",
+            "<sqlserver>delete A from ${table} where ${pk}= #{id}</sqlserver>"})
     long deleteById(Class entityClass, Serializable... id);
 
     /**
@@ -139,9 +140,10 @@ public interface CommonMapper {
      * @param idList
      * @return
      */
-    @Delete("delete from ${table} where ${pk} ${in#coll}")
+    @Delete({"<default>delete from ${table} where ${pk} ${in#coll}</default>",
+            "<sqlserver>delete A from ${table} where ${pk} ${in#coll}</sqlserver>"})
     long deleteBatchIds(Class entityClass, @Param("coll") Serializable... idList);
 
-    @Delete({"delete from ${table}", SqlQuery.WHERE})
+    @Delete({"<default>delete from ${table}", SqlQuery.WHERE, "</default><sqlserver>delete A from ${table}", SqlQuery.WHERE, "</sqlserver>"})
     long deleteByQuery(SqlQuery query);
 }
