@@ -8,6 +8,8 @@ import com.dr.framework.core.orm.annotations.Table;
 public class Extend extends BaseEntity {
     @Column(name = "ref_table", comment = "主表名称", length = 50)
     private String refTable;
+    @Column(name = "ref_id", comment = "主表Id", length = 50)
+    private String refId;
     @Column(name = "ext_str1", comment = "扩展字段string1")
     private String extStr1;
     @Column(name = "ext_str2", comment = "扩展字段string2", length = 1000)
@@ -35,6 +37,14 @@ public class Extend extends BaseEntity {
 
     public void setRefTable(String refTable) {
         this.refTable = refTable;
+    }
+
+    public String getRefId() {
+        return refId;
+    }
+
+    public void setRefId(String refId) {
+        this.refId = refId;
     }
 
     public String getExtStr1() {

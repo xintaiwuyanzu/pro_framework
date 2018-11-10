@@ -125,6 +125,11 @@ public class CommonService {
         return exists(entity.getClass(), id);
     }
 
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
+    public boolean exists(SqlQuery sqlQuery) {
+        return commonMapper.existsByQuery(sqlQuery);
+    }
+
     /**
      * 根据id查询表中的单条数据
      */
