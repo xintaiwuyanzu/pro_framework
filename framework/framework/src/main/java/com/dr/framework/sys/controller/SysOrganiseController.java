@@ -5,7 +5,6 @@ import com.dr.framework.common.entity.ResultEntity;
 import com.dr.framework.common.service.CommonService;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.sys.entity.Organise;
-import com.dr.framework.sys.entity.SysMenu;
 import com.dr.framework.sys.entity.SysMenuInfo;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

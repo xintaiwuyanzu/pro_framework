@@ -139,6 +139,17 @@ public class CommonService {
     }
 
     /**
+     * count查询
+     *
+     * @param query
+     * @return
+     */
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
+    public long countByQuery(SqlQuery query) {
+        return commonMapper.countByQuery(query);
+    }
+
+    /**
      * 将list转换为tree
      *
      * @param treeList

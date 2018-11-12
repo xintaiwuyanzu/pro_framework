@@ -1,10 +1,20 @@
 package com.dr.framework.core.orm.sql;
 
 import org.apache.ibatis.type.JdbcType;
+import org.springframework.util.StringUtils;
 
 public class Column {
+    public static Column function(Column column, String function, String alias) {
+        Column column1 = new Column(column.table, column.name, column.alias, column.type);
+        column1.function = function;
+        if (!StringUtils.isEmpty(alias)) {
+            column1.alias = alias;
+        }
+        return column1;
+    }
+
     public static Column distinct(Column column, String alias) {
-        return column;
+        return function(column, "distinct", alias);
     }
 
     public static Column distinct(Column column) {
@@ -12,7 +22,7 @@ public class Column {
     }
 
     public static Column count(Column column, String alias) {
-        return column;
+        return function(column, "count", alias);
     }
 
     public static Column count(Column column) {
@@ -20,7 +30,7 @@ public class Column {
     }
 
     public static Column sum(Column column, String alias) {
-        return column;
+        return function(column, "sum", alias);
     }
 
     public static Column sum(Column column) {
@@ -28,7 +38,7 @@ public class Column {
     }
 
     public static Column avg(Column column, String alias) {
-        return column;
+        return function(column, "avg", alias);
     }
 
     public static Column avg(Column column) {
@@ -36,7 +46,7 @@ public class Column {
     }
 
     public static Column max(Column column, String alias) {
-        return column;
+        return function(column, "max", alias);
     }
 
     public static Column max(Column column) {
@@ -44,7 +54,7 @@ public class Column {
     }
 
     public static Column min(Column column, String alias) {
-        return column;
+        return function(column, "min", alias);
     }
 
     public static Column min(Column column) {
@@ -63,7 +73,10 @@ public class Column {
      * 别名，一般用作映射do的属性
      */
     private String alias;
-
+    /**
+     * 数据库函数
+     */
+    private String function;
     /**
      * 数据库类型
      */
@@ -104,6 +117,10 @@ public class Column {
         return alias;
     }
 
+    public String getFunction() {
+        return function;
+    }
+
     public JdbcType getType() {
         return type;
     }
@@ -111,5 +128,6 @@ public class Column {
     public void setType(JdbcType type) {
         this.type = type;
     }
+
 
 }

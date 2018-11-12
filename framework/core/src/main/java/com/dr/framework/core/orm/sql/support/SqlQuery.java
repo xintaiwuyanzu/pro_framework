@@ -201,6 +201,42 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
         return this;
     }
 
+    public SqlQuery max(Column column, String alias) {
+        columnsQuery.column(Column.max(column, alias));
+        return this;
+    }
+
+    public SqlQuery max(Column... columns) {
+        for (Column column : columns) {
+            max(column, null);
+        }
+        return this;
+    }
+
+    public SqlQuery min(Column column, String alias) {
+        columnsQuery.column(Column.min(column, alias));
+        return this;
+    }
+
+    public SqlQuery min(Column... columns) {
+        for (Column column : columns) {
+            min(column, null);
+        }
+        return this;
+    }
+
+    public SqlQuery count(Column column, String alias) {
+        columnsQuery.column(Column.count(column, alias));
+        return this;
+    }
+
+    public SqlQuery count(Column... columns) {
+        for (Column column : columns) {
+            count(column, null);
+        }
+        return this;
+    }
+
     public SqlQuery exclude(Column... columns) {
         columnsQuery.exclude(columns);
         return this;
@@ -308,6 +344,22 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
 
     public SqlQuery notLike(Column column, Serializable data) {
         return like(column, false, true, true, data);
+    }
+
+    public SqlQuery notStartingWith(Column... columns) {
+        return like(false, false, true, columns);
+    }
+
+    public SqlQuery notStartingWith(Column column, Serializable data) {
+        return like(column, false, false, true, data);
+    }
+
+    public SqlQuery notEndingWith(Column... columns) {
+        return like(false, true, false, columns);
+    }
+
+    public SqlQuery notEndingWith(Column column, Serializable data) {
+        return like(column, false, true, false, data);
     }
 
     public SqlQuery startingWith(Column... columns) {

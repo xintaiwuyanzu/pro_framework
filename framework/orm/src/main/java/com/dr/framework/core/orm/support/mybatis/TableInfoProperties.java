@@ -107,8 +107,8 @@ public class TableInfoProperties extends Properties {
                     break;
                 case VALUES_TEST_KEY:
                     value = String.format("<trim prefix='(' suffix=')' suffixOverrides=','>%s</trim><trim prefix='values (' suffix=')' suffixOverrides=','>%s</trim>",
-                            join(false, "<if test='%2$s!=null and %2$s !=\"\"'>%1$s,</if>", ""),
-                            join(false, "<if test='%2$s!=null and %2$s !=\"\"'>#{%2$s,jdbcType=%4$s},</if>", ""));
+                            join(false, "<if test='%2$s!=null and %2$s !=\"\" or %2$s==0'>%1$s,</if>", ""),
+                            join(false, "<if test='%2$s!=null and %2$s !=\"\" or %2$s==0'>#{%2$s,jdbcType=%4$s},</if>", ""));
                     break;
                 case PK_KEY:
                     value = tableAlias + "." + tableInfo.pk().getName();
@@ -120,7 +120,7 @@ public class TableInfoProperties extends Properties {
                     value = " set " + join(true, "%3$s.%1$s = #{%2$s,jdbcType=%4$s}", ",");
                     break;
                 case SET_TEST_KEY:
-                    value = String.format("<set>%s</set>", join(true, "<if test=\"%2$s!=null and %2$s!=''\">%3$s.%1$s=#{%2$s,jdbcType=%4$s},</if>", ""));
+                    value = String.format("<set>%s</set>", join(true, "<if test=\"%2$s!=null and %2$s!='' or %2$s==0\">%3$s.%1$s=#{%2$s,jdbcType=%4$s},</if>", ""));
                     break;
                 case IN_KEY:
                     value = String.format("in <foreach item='item' index='index' collection='%s' open='(' separator=',' close=')'>#{item}</foreach>", append);
