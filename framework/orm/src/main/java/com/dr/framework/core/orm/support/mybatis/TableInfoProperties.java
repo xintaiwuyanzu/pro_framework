@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -107,8 +108,36 @@ public class TableInfoProperties extends Properties {
                     break;
                 case VALUES_TEST_KEY:
                     value = String.format("<trim prefix='(' suffix=')' suffixOverrides=','>%s</trim><trim prefix='values (' suffix=')' suffixOverrides=','>%s</trim>",
-                            join(false, "<if test='%2$s!=null and %2$s !=\"\" or %2$s==0'>%1$s,</if>", ""),
-                            join(false, "<if test='%2$s!=null and %2$s !=\"\" or %2$s==0'>#{%2$s,jdbcType=%4$s},</if>", ""));
+                            join(false, column -> {
+                                String template;
+                                switch (column.getType()) {
+                                    case TIME:
+                                    case TIMESTAMP:
+                                    case DATE:
+                                    case DATETIMEOFFSET:
+                                        template = "<if test=\"%2$s!=null\">%1$s,</if>";
+                                        break;
+                                    default:
+                                        template = "<if test='%2$s!=null and %2$s !=\"\" or %2$s==0'>%1$s,</if>";
+                                        break;
+                                }
+                                return template;
+                            }, ""),
+                            join(false, column -> {
+                                String template;
+                                switch (column.getType()) {
+                                    case TIME:
+                                    case TIMESTAMP:
+                                    case DATE:
+                                    case DATETIMEOFFSET:
+                                        template = "<if test='%2$s!=null'>#{%2$s,jdbcType=%4$s},</if>";
+                                        break;
+                                    default:
+                                        template = "<if test='%2$s!=null and %2$s !=\"\" or %2$s==0'>#{%2$s,jdbcType=%4$s},</if>";
+                                        break;
+                                }
+                                return template;
+                            }, ""));
                     break;
                 case PK_KEY:
                     value = tableAlias + "." + tableInfo.pk().getName();
@@ -120,7 +149,21 @@ public class TableInfoProperties extends Properties {
                     value = " set " + join(true, "%3$s.%1$s = #{%2$s,jdbcType=%4$s}", ",");
                     break;
                 case SET_TEST_KEY:
-                    value = String.format("<set>%s</set>", join(true, "<if test=\"%2$s!=null and %2$s!='' or %2$s==0\">%3$s.%1$s=#{%2$s,jdbcType=%4$s},</if>", ""));
+                    value = String.format("<set>%s</set>", join(true, column -> {
+                        String template;
+                        switch (column.getType()) {
+                            case TIME:
+                            case TIMESTAMP:
+                            case DATE:
+                            case DATETIMEOFFSET:
+                                template = "<if test=\"%2$s!=null\">%3$s.%1$s=#{%2$s,jdbcType=%4$s},</if>";
+                                break;
+                            default:
+                                template = "<if test=\"%2$s!=null and %2$s!='' or %2$s==0\">%3$s.%1$s=#{%2$s,jdbcType=%4$s},</if>";
+                                break;
+                        }
+                        return template;
+                    }, ""));
                     break;
                 case IN_KEY:
                     value = String.format("in <foreach item='item' index='index' collection='%s' open='(' separator=',' close=')'>#{item}</foreach>", append);
@@ -133,6 +176,22 @@ public class TableInfoProperties extends Properties {
             }
         }
         return value;
+    }
+
+    /**
+     * 主要是处理不同类型的数据字段，判读空表达式不同
+     *
+     * @param filterId
+     * @param templateFunction
+     * @param delimiter
+     * @return
+     */
+    private String join(boolean filterId, Function<Column, String> templateFunction, CharSequence delimiter) {
+        Stream<Column> stream = tableInfo.columns().stream();
+        if (filterId) {
+            stream = stream.filter(column -> !column.getName().equalsIgnoreCase(tableInfo.pk().getName()));
+        }
+        return stream.map(column -> String.format(templateFunction.apply(column), column.getName(), column.getAlias(), tableAlias, column.getType().name())).collect(Collectors.joining(delimiter));
     }
 
 

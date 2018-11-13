@@ -6,10 +6,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static com.dr.framework.core.orm.sql.support.AbstractSqlQuery.OR;
 
@@ -450,12 +452,32 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
         return concatTest(">=", "", columns);
     }
 
+    /**
+     * TODO 先用丑陋的方法实现
+     *
+     * @param column
+     * @param datas
+     * @return
+     */
     public SqlQuery in(Column column, Serializable... datas) {
-        return concatWithData(column, "in (", ")", datas);
+        if (datas != null && datas.length > 0) {
+            whereQuery.pureSql(column, "in (" + Arrays.asList(datas).stream().map(serializable -> String.format("'%s'", serializable)).collect(Collectors.joining(",")) + ")");
+        }
+        return this;
     }
 
+    /**
+     * TODO 先用丑陋的方法实现
+     *
+     * @param column
+     * @param datas
+     * @return
+     */
     public SqlQuery notIn(Column column, Serializable... datas) {
-        return concatWithData(column, " not in (", ")", datas);
+        if (datas != null && datas.length > 0) {
+            whereQuery.pureSql(column, "not in (" + Arrays.asList(datas).stream().map(serializable -> String.format("'%s'", serializable)).collect(Collectors.joining(",")) + ")");
+        }
+        return this;
     }
 
     public SqlQuery between(Column column, Comparable start, Comparable end) {

@@ -65,6 +65,10 @@ class WhereQuery extends AbstractSqlQuery {
         whereSqls.concat(AND_, new ConcatTestSql(column, prefix, suffix));
     }
 
+    void pureSql(Column column, String sql) {
+        whereSqls.concat(AND_, new PureSql(column, sql));
+    }
+
     void like(Column column, boolean isLike, boolean pre, boolean end, Serializable data) {
         if (!StringUtils.isEmpty(data)) {
             whereSqls.concat(AND_, new LikeSqlWithData(column, isLike, pre, end, data));
@@ -250,6 +254,26 @@ class WhereQuery extends AbstractSqlQuery {
         @Override
         boolean test(MetaObject metaobject) {
             return true;
+        }
+    }
+
+    class PureSql extends WhereSql {
+        Column column;
+        String sql;
+
+        public PureSql(Column column, String sql) {
+            this.column = column;
+            this.sql = sql;
+        }
+
+        @Override
+        boolean test(MetaObject metaobject) {
+            return !StringUtils.isEmpty(sql);
+        }
+
+        @Override
+        String getSql(TableAlias alias, SqlQuery sqlQuery) {
+            return formatColumn(column, alias).append(sql).toString();
         }
     }
 
