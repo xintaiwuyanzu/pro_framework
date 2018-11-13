@@ -32,7 +32,7 @@ class WhereQuery extends AbstractSqlQuery {
     void orderBy(Column... columns) {
         if (columns != null) {
             for (Column column : columns) {
-                orderBys.add(new OrderBy(column));
+                orderBys.add(new ColumnOrderBy(column, false));
             }
         }
     }
@@ -40,8 +40,14 @@ class WhereQuery extends AbstractSqlQuery {
     void orderByDesc(Column... columns) {
         if (columns != null) {
             for (Column column : columns) {
-                orderBys.add(new OrderBy(column, true));
+                orderBys.add(new ColumnOrderBy(column, true));
             }
+        }
+    }
+
+    public void orderBy(String alias, boolean desc) {
+        if (!StringUtils.isEmpty(alias)) {
+            orderBys.add(new AliasOrderBy(alias, desc));
         }
     }
 
@@ -124,18 +130,7 @@ class WhereQuery extends AbstractSqlQuery {
     }
 
     private List<String> orderByParts(TableAlias tableAlias) {
-        return orderBys.stream().map(orderBy -> {
-            StringBuilder sb = new StringBuilder();
-            if (!StringUtils.isEmpty(orderBy.column.getTable())) {
-                sb.append(tableAlias.alias(orderBy.column.getTable()));
-                sb.append(".");
-            }
-            sb.append(orderBy.column.getName());
-            if (orderBy.desc) {
-                sb.append(" desc");
-            }
-            return sb.toString();
-        }).collect(Collectors.toList());
+        return orderBys.stream().map(orderBy -> orderBy.sql(tableAlias)).collect(Collectors.toList());
     }
 
     private List<String> groupByParts(TableAlias tableAlias) {
@@ -434,17 +429,50 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    private static class OrderBy {
+    abstract class OrderBy {
         boolean desc = false;
+
+        OrderBy(boolean desc) {
+            this.desc = desc;
+        }
+
+        abstract String sql(TableAlias alias);
+    }
+
+    class ColumnOrderBy extends OrderBy {
         Column column;
 
-        OrderBy(Column column) {
+        public ColumnOrderBy(Column column, boolean desc) {
+            super(desc);
             this.column = column;
         }
 
-        OrderBy(Column column, boolean desc) {
-            this.column = column;
-            this.desc = desc;
+        @Override
+        String sql(TableAlias alias) {
+            StringBuilder sb = new StringBuilder();
+            if (!StringUtils.isEmpty(column.getTable())) {
+                sb.append(alias.alias(column.getTable()));
+                sb.append(".");
+            }
+            sb.append(column.getName());
+            if (desc) {
+                sb.append(" desc");
+            }
+            return sb.toString();
+        }
+    }
+
+    class AliasOrderBy extends OrderBy {
+        String alias;
+
+        public AliasOrderBy(String alias, boolean desc) {
+            super(desc);
+            this.alias = alias;
+        }
+
+        @Override
+        String sql(TableAlias tableAlias) {
+            return desc ? alias + " desc" : alias;
         }
     }
 }

@@ -228,7 +228,18 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     }
 
     public SqlQuery count(Column column, String alias) {
+        return count(column, alias, false);
+    }
+
+    public SqlQuery count(Column column, String alias, boolean desc) {
+        return count(column, alias, true, desc);
+    }
+
+    public SqlQuery count(Column column, String alias, boolean orderBy, boolean desc) {
         columnsQuery.column(Column.count(column, alias));
+        if (orderBy) {
+            whereQuery.orderBy(alias, desc);
+        }
         return this;
     }
 

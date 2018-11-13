@@ -52,7 +52,7 @@ class FromQuery extends AbstractSqlQuery {
             tableName = left.getTable().toUpperCase();
         }
         if (!tableAlias.alias.containsKey(tableName)) {
-            alias(right.getTable(), null);
+            alias(tableName, null);
         }
     }
 
