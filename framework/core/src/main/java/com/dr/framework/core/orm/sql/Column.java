@@ -13,6 +13,10 @@ public class Column {
         return column1;
     }
 
+    public static Column function(Column column, String function) {
+        return function(column, function, null);
+    }
+
     public static Column distinct(Column column, String alias) {
         return function(column, "distinct", alias);
     }

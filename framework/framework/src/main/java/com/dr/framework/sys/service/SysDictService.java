@@ -3,8 +3,7 @@ package com.dr.framework.sys.service;
 import com.dr.framework.common.entity.TreeNode;
 import com.dr.framework.common.service.CommonService;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
-import com.dr.framework.sys.entity.SysDict;
-import com.dr.framework.sys.entity.SysDictInfo;
+import com.dr.framework.sys.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -20,6 +19,9 @@ public class SysDictService {
     CommonService commonService;
 
     public List<TreeNode> dict(String type) {
+        if (type.startsWith("organise")) {
+            return organiseDict(type);
+        }
         if (StringUtils.isEmpty(type)) {
             return new ArrayList<>();
         } else {
@@ -39,6 +41,15 @@ public class SysDictService {
                     TreeNode treeNode = new TreeNode(key, sysDict.getValue(), sysDict);
                     return treeNode;
                 })
+                .collect(Collectors.toList());
+    }
+
+    private List<TreeNode> organiseDict(String type) {
+        String[] types = type.split(".");
+        String sysId = types.length > 1 ? types[types.length] : SubSystem.DEFAULT_SYSTEM_ID;
+        SqlQuery<Organise> sqlQuery = SqlQuery.from(Organise.class).equal(OrganiseInfo.STATUS, 1).equal(OrganiseInfo.SYSID, sysId).orderBy(OrganiseInfo.ORDERBY);
+        return commonService.selectList(sqlQuery).stream()
+                .map(organise -> new TreeNode(organise.getOrganiseCode(), organise.getOrganiseName(), organise))
                 .collect(Collectors.toList());
     }
 }

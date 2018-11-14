@@ -46,16 +46,19 @@ abstract class AbstractSqlQuery {
         StringBuilder sb = new StringBuilder();
         boolean hasFunction = !StringUtils.isEmpty(column.getFunction());
         if (hasFunction) {
-            sb.append(column.getFunction());
-            sb.append("(");
-        }
-        if (!StringUtils.isEmpty(column.getTable())) {
-            sb.append(tableAlias.alias(column.getTable()));
-            sb.append(".");
-        }
-        sb.append(column.getName());
-        if (hasFunction) {
-            sb.append(")");
+            String columnStr = "";
+            if (!StringUtils.isEmpty(column.getTable())) {
+                columnStr += tableAlias.alias(column.getTable()) + ".";
+            }
+            columnStr += column.getName();
+            String template = column.getFunction().indexOf("(") > 0 ? column.getFunction() : column.getFunction() + "(%s)";
+            sb.append(String.format(template, columnStr));
+        } else {
+            if (!StringUtils.isEmpty(column.getTable())) {
+                sb.append(tableAlias.alias(column.getTable()));
+                sb.append(".");
+            }
+            sb.append(column.getName());
         }
         if (!StringUtils.isEmpty(column.getAlias())) {
             sb.append(" as ");
