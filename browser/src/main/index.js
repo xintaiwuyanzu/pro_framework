@@ -5,7 +5,7 @@ import * as path from 'path'
 import config from 'common/config'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
-const icon = path.join(process.cwd(), '/static/icons/icon.ico')
+const icon = path.join(__static, 'icons/icon.ico')
 let mainWindow
 
 function createMainWindow () {
