@@ -336,11 +336,21 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     }
 
     public SqlQuery isNull(Column... columns) {
-        return concat("is null", "", columns);
+        for (Column column : columns) {
+            if (column != null) {
+                whereQuery.pureSql(column, " is null");
+            }
+        }
+        return this;
     }
 
     public SqlQuery isNotNull(Column... columns) {
-        return concat("is not null", "", columns);
+        for (Column column : columns) {
+            if (column != null) {
+                whereQuery.pureSql(column, " is not null");
+            }
+        }
+        return this;
     }
 
     public SqlQuery like(Column... columns) {

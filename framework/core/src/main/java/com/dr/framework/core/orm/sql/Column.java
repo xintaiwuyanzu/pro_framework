@@ -133,5 +133,13 @@ public class Column {
         this.type = type;
     }
 
-
+    public Column alias(String alias) {
+        if (StringUtils.isEmpty(alias)) {
+            return this;
+        } else {
+            Column column = new Column(table, name, alias, type);
+            column.function = function;
+            return column;
+        }
+    }
 }
