@@ -1,5 +1,5 @@
 {
-  "url": "http://192.168.60.44:8080/",
+  "url": "http://192.168.40.6:8081/autoBrrow.html",
   "node": true,
   "worker": true
 }
