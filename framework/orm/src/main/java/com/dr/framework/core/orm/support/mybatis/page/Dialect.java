@@ -87,7 +87,11 @@ public interface Dialect {
                     dialect = new PostgreDialect();
                     break;
                 case "Microsoft SQL Server":
-                    dialect = new SQLServerDialect();
+                    if (version < 11) {
+                        dialect = new SQLServer2008Dialect();
+                    } else {
+                        dialect = new SQLServerDialect();
+                    }
                     break;
                 case "Oracle":
                     dialect = new OracleDialect();
