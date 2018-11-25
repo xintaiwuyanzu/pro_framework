@@ -1,5 +1,8 @@
 {
-  "url": "http://192.168.40.6:8081/autoBrrow.html",
-  "node": true,
-  "worker": true
+  //自助借还
+  //"url": "http://192.168.40.6:8081/autoBrrow.html",
+  //数字留声机
+  "url": "http://192.168.40.6:8081/ncpa.html",
+  "node": false,
+  "worker": false
 }
