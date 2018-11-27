@@ -8,4 +8,6 @@ cd ../orm
 call mvn clean deploy -Dmaven.test.skip=true
 cd ../framework
 call mvn clean deploy -Dmaven.test.skip=true
-cd ..
+cd ../common/dpsdk
+call mvn clean deploy -Dmaven.test.skip=true
+cd ../..
