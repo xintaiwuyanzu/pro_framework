@@ -1,6 +1,6 @@
 {
   "name": "drclient",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "drsoft",
   "description": "达融客户端",
   "scripts": {
@@ -10,7 +10,8 @@
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "dependencies": {
-    "source-map-support": "^0.5.9"
+    "source-map-support": "^0.5.9",
+    "usb": "^1.5.0"
   },
   "devDependencies": {
     "electron": "3.0.9",
