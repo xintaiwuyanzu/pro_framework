@@ -134,13 +134,14 @@ public class BaseController<T extends IdEntity> {
 
     @RequestMapping("/detail")
     public ResultEntity detail(String id, T entity) {
-        SqlQuery sqlQuery = SqlQuery.from(entity.getClass());
-        T t = (T) commonService.selectOne(sqlQuery);
-        if (t == null) {
-            return ResultEntity.error("找不到指定记录！");
-        } else {
-            return ResultEntity.success(t);
+        if (!StringUtils.isEmpty(id)) {
+            T t = (T) commonService.findById(entity.getClass(), id);
+            if (t != null) {
+                return ResultEntity.success(t);
+            }
         }
+        return ResultEntity.error("找不到指定记录！");
+
     }
 
     protected UserLogin getUserlogin(HttpServletRequest request) {
