@@ -132,6 +132,17 @@ public class BaseController<T extends IdEntity> {
 
     }
 
+    @RequestMapping("/detail")
+    public ResultEntity detail(String id, T entity) {
+        SqlQuery sqlQuery = SqlQuery.from(entity.getClass());
+        T t = (T) commonService.selectOne(sqlQuery);
+        if (t == null) {
+            return ResultEntity.error("找不到指定记录！");
+        } else {
+            return ResultEntity.success(t);
+        }
+    }
+
     protected UserLogin getUserlogin(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         UserLogin userLogin = null;
