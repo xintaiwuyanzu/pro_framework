@@ -31,6 +31,17 @@ public interface CommonMapper {
     <E> long insert(E entity);
 
     /**
+     * 主建自增长
+     *
+     * @param entity
+     * @param <E>
+     * @return
+     */
+    @Insert("insert into ${table} ${valuesTest}")
+    @Options(useGeneratedKeys = true)
+    <E> long insertAutoGenKey(E entity);
+
+    /**
      * 根据参数插入所有数据
      *
      * @param entity
@@ -38,6 +49,17 @@ public interface CommonMapper {
      */
     @Insert("insert into ${table} ${values}")
     <E> long insertIgnoreNull(E entity);
+
+    /**
+     * 主建自增长
+     *
+     * @param entity
+     * @param <E>
+     * @return
+     */
+    @Insert("insert into ${table} ${values}")
+    @Options(useGeneratedKeys = true)
+    <E> long insertIgnoreNullAutoGenKey(E entity);
     /**
      * =============================
      * 改

@@ -17,6 +17,7 @@ package com.dr.framework.core.orm.support.mybatis.spring.mapper;
 
 import com.dr.framework.common.dao.CommonMapper;
 import com.dr.framework.core.orm.annotations.Mapper;
+import com.dr.framework.core.orm.sql.TableInfo;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.orm.support.mybatis.TableInfoProperties;
 import com.dr.framework.core.orm.support.mybatis.page.Dialect;
@@ -49,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -355,7 +357,6 @@ public class MyBatisMapperAnnotationBuilder {
             boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
             boolean flushCache = !isSelect;
             boolean useCache = isSelect;
-
             KeyGenerator keyGenerator;
             String keyProperty = "id";
             String keyColumn = null;
@@ -369,8 +370,15 @@ public class MyBatisMapperAnnotationBuilder {
                     keyGenerator = configuration.isUseGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
                 } else {
                     keyGenerator = options.useGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
+                    TableInfo tableInfo = SqlQuery.getTableInfo(entityClass);
                     keyProperty = options.keyProperty();
+                    if ((StringUtils.isEmpty(keyProperty) || keyProperty.equalsIgnoreCase("id")) && options.useGeneratedKeys()) {
+                        keyProperty = tableInfo.pk().getAlias();
+                    }
                     keyColumn = options.keyColumn();
+                    if (StringUtils.isEmpty(keyColumn) && options.useGeneratedKeys()) {
+                        keyColumn = tableInfo.pk().getName();
+                    }
                 }
             } else {
                 keyGenerator = NoKeyGenerator.INSTANCE;

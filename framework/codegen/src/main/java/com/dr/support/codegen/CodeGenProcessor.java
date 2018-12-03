@@ -67,7 +67,7 @@ public class CodeGenProcessor extends AbstractProcessor {
             messager.printMessage(checkWordKind, String.format("表%s【%s】包含数据库关键字，请更正！", tableName, table.comment()));
         }
         if (tables.contains(tableName.toUpperCase() + table.module().toUpperCase())) {
-            messager.printMessage(Diagnostic.Kind.ERROR, String.format("发现重复表%s【%s】，请更正！", tableName, table.comment()));
+            messager.printMessage(Diagnostic.Kind.WARNING, String.format("发现重复表%s【%s】，请更正！", tableName, table.comment()));
         } else {
             tables.add(tableName.toUpperCase() + table.module().toUpperCase());
         }
