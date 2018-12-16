@@ -2,7 +2,9 @@
   //自助借还
   //"url": "http://192.168.40.6:8081/autoBrrow.html",
   //数字留声机
-  "url": "http://192.168.40.6:8081/ncpa.html",
+  //"url": "http://192.168.40.6:8081/ncpa.html",
+  //有声读物
+  "url": "http://192.168.40.6:8081/ysdw.html",
   "node": false,
   "worker": false
 }
