@@ -75,10 +75,6 @@ if (!gotTheLock) {
     globalShortcut.register('F10', () => {
       if (mainWindow) {
         mainWindow.webContents.toggleDevTools()
-        setImmediate(() => {
-          let dev = mainWindow.webContents.isDevToolsOpened()
-          mainWindow.setAlwaysOnTop(!dev)
-        })
       }
     })
   })
