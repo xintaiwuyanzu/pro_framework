@@ -67,7 +67,9 @@ if (!gotTheLock) {
     })
     globalShortcut.register('F11', () => {
       if (mainWindow) {
-        mainWindow.setFullScreen(!mainWindow.isFullScreen())
+        let full = !mainWindow.isFullScreen()
+        mainWindow.setFullScreen(full)
+        mainWindow.setAlwaysOnTop(full)
       }
     })
     globalShortcut.register('F10', () => {
