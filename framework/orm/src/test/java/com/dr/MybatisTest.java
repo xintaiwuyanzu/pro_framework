@@ -6,31 +6,22 @@ import com.dr.framework.common.page.Page;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = "spring.liquibase.enabled=false", classes = BeanRegisterTest.Application.class)
+@SpringBootTest(properties = "spring.liquibase.enabled=false", classes = TestApplication.class)
 public class MybatisTest {
     Logger logger = LoggerFactory.getLogger(MybatisTest.class);
     @Autowired
-    ApplicationContext applicationContext;
-    @Autowired
     CommonMapper testMapper;
-
-    @Before
-    public void initDb() {
-        //LiquibaseUtil.genAndUpdate(sourceCodeDatabaseSnapshot);
-    }
 
     @Test
     public void testfanxing() {
@@ -49,7 +40,6 @@ public class MybatisTest {
     public void afterPropertiesSet() {
         TestEntity testEntity = new TestEntity();
         testEntity.setBlobCol("BlobCo111111");
-        testEntity.setBooleanCol(true);
         testEntity.setClobCol("ClobCol");
         testEntity.setDateCol(2222222);
         testEntity.setDoubleCol(0.000);

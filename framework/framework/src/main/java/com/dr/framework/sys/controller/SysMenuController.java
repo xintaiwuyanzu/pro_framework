@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 系统菜单
@@ -30,7 +29,7 @@ public class SysMenuController extends BaseController<SysMenu> implements InitDa
         }
         sqlQuery.equal(SysMenuInfo.SYSID);
         List<SysMenu> sysMenus = commonService.selectList(sqlQuery);
-        return ResultEntity.success(CommonService.listToTree(sysMenus, sysId, sysMenu -> sysMenu.getName()));
+        return ResultEntity.success(CommonService.listToTree(sysMenus, sysId, SysMenu::getName));
     }
 
     @Override

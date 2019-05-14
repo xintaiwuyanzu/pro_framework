@@ -16,6 +16,6 @@ public class LiquibaseTest {
         GenerateChangeLogFromCodeCommand changeLogFromCodeCommand = new GenerateChangeLogFromCodeCommand();
         changeLogFromCodeCommand.setCompareControl(new CompareControl());
         changeLogFromCodeCommand.setSourceCodeDatabaseSnapshot(sourceCodeDatabaseSnapshot);
-        changeLogFromCodeCommand.genToFile("d:/11.xml");
+        changeLogFromCodeCommand.genToFile("./orm/target/11.xml");
     }
 }

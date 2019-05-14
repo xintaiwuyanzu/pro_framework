@@ -5,7 +5,7 @@ import com.dr.framework.core.orm.annotations.ColumnType;
 import com.dr.framework.core.orm.annotations.Id;
 import com.dr.framework.core.orm.annotations.Table;
 
-@Table(name = "databasechangelog", comment = "测试表", simple = "测试表", module = "test1")
+@Table(name = "databasechangelog111", comment = "测试表", simple = "测试表", module = "test1")
 public class TestEntity1 {
 
     @Column(name = "name2", comment = "姓名", simple = "用户名", order = 1)
@@ -23,7 +23,7 @@ public class TestEntity1 {
     double doubleCol;
     @Column
     long longCol;
-    @Column(scale = 5)
+    @Column(scale = 5, length = 10)
     float floatCol;
     @Column(type = ColumnType.DATE)
     double dateCol;

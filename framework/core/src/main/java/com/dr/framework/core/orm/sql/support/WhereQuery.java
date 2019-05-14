@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -61,7 +62,7 @@ class WhereQuery extends AbstractSqlQuery {
             if (data.length == 1) {
                 parsedData = data[0];
             } else {
-                parsedData = Arrays.asList(data).stream().map(d -> d.toString()).collect(Collectors.joining(","));
+                parsedData = Arrays.asList(data).stream().map(Objects::toString).collect(Collectors.joining(","));
             }
             whereSqls.concat(AND_, new ConcatTestSqlWithData(column, prefix, suffix, parsedData));
         }
@@ -190,21 +191,21 @@ class WhereQuery extends AbstractSqlQuery {
                 }
             }
             if (next != null) {
-                String sql = next.sql(metaObject, alias, sqlQuery);
-                if (!StringUtils.isEmpty(sql)) {
-                    boolean canCancat = (builder.length() > 0 || !concat.equalsIgnoreCase(AND_)) && canCancat(sql);
+                String nextSql = next.sql(metaObject, alias, sqlQuery);
+                if (!StringUtils.isEmpty(nextSql)) {
+                    boolean canCancat = (builder.length() > 0 || !concat.equalsIgnoreCase(AND_)) && canCancat(nextSql);
                     if (canCancat) {
                         builder.append(concat);
                     }
-                    builder.append(sql);
+                    builder.append(nextSql);
                 }
             }
             return builder.toString();
         }
 
         private boolean canCancat(String sql) {
-            for (String concat : concats) {
-                if (sql.startsWith(concat)) {
+            for (String cs : concats) {
+                if (sql.startsWith(cs)) {
                     return false;
                 }
             }
@@ -346,7 +347,8 @@ class WhereQuery extends AbstractSqlQuery {
 
     class Between extends WhereSql {
         Column column;
-        Comparable start, end;
+        Comparable start,
+                end;
 
         public Between(Column column, Comparable start, Comparable end) {
             this.column = column;

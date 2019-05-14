@@ -2,6 +2,8 @@ package com.dr.framework.core.orm.sql.support;
 
 import com.dr.framework.core.orm.sql.Column;
 import com.dr.framework.core.orm.sql.TableInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -24,7 +26,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     public static final String QUERY_CLASS_SUFFIX = "Info";
     public static final String QUERY_PARAM = "$QP";
     public static final String ENTITY_KEY = "ENTITY";
-
+    static Logger logger = LoggerFactory.getLogger(SqlQuery.class);
     private static Map<Class, Class<? extends TableInfo>> sqlQueryMap = new ConcurrentHashMap<>();
 
     /**
@@ -42,7 +44,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
             try {
                 return (T) sqlQueryMap.get(modelClass).newInstance();
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("获取" + modelClass.getName() + "表基本信息失败,请检查" + modelClass.getName() + "TableInfo是否生成！", modelClass);
             }
         }
         return null;

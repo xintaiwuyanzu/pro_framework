@@ -5,11 +5,15 @@ import liquibase.command.core.DiffCommand;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
@@ -36,7 +40,7 @@ public class GenerateChangeLogFromCodeCommand extends DiffCommand {
         return new CommandResult(new String(baos.toByteArray(), StandardCharsets.UTF_8));
     }
 
-    public void genToFile(String file) throws Exception {
+    public void genToFile(String file) throws DatabaseException, InvalidExampleException, IOException, ParserConfigurationException {
         DiffResult diffResult = createDiffResult();
         DiffToChangeLog changeLogWriter = new DiffToChangeLogWithoutDrop(diffResult, new DiffOutputControl());
         logger.debug("生成diff文件：【{}】", file);

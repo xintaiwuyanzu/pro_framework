@@ -20,14 +20,14 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ResultEntity handleEmployeeNotFoundException(HttpServletRequest request, Exception ex) {
         logger.warn("服务器错误", ex);
-        if (JudgeIsMoblie(request)) {
+        if (judgeIsMoblie(request)) {
             return ResultEntity.error("服务器链接超时。");
         }
         return ResultEntity.error("服务器错误：" + ex.getMessage());
     }
 
     //判断是否为手机浏览器
-    public boolean JudgeIsMoblie(HttpServletRequest request) {
+    public boolean judgeIsMoblie(HttpServletRequest request) {
         boolean isMoblie = false;
         String[] mobileAgents = {"iphone", "android", "ipad", "phone", "mobile", "wap", "netfront", "java", "opera mobi",
                 "opera mini", "ucweb", "windows ce", "symbian", "series", "webos", "sony", "blackberry", "dopod",

@@ -51,7 +51,7 @@ abstract class AbstractSqlQuery {
                 columnStr += tableAlias.alias(column.getTable()) + ".";
             }
             columnStr += column.getName();
-            String template = column.getFunction().indexOf("(") > 0 ? column.getFunction() : column.getFunction() + "(%s)";
+            String template = column.getFunction().indexOf('(') > -1 ? column.getFunction() : column.getFunction() + "(%s)";
             sb.append(String.format(template, columnStr));
         } else {
             if (!StringUtils.isEmpty(column.getTable())) {

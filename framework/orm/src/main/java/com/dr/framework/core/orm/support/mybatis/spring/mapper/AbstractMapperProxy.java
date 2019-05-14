@@ -12,7 +12,6 @@ import org.springframework.util.Assert;
 import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
-import java.util.Map;
 
 public abstract class AbstractMapperProxy implements InvocationHandler, Serializable {
     protected Class<?> mapperInterface;
@@ -57,7 +56,7 @@ public abstract class AbstractMapperProxy implements InvocationHandler, Serializ
         return (method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC)) == Modifier.PUBLIC && method.getDeclaringClass().isInterface();
     }
 
-    abstract protected MybatisConfigurationBean findConfigBean(Method method, Class entityClass);
+    protected abstract MybatisConfigurationBean findConfigBean(Method method, Class entityClass);
 
     protected Class<?> findEntityClass(Method method, Object[] args) {
         if (args != null) {

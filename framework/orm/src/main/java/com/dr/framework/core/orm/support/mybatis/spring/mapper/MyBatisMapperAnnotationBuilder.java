@@ -15,16 +15,14 @@
  */
 package com.dr.framework.core.orm.support.mybatis.spring.mapper;
 
-import com.dr.framework.common.dao.CommonMapper;
 import com.dr.framework.core.orm.annotations.Mapper;
 import com.dr.framework.core.orm.sql.TableInfo;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.orm.support.mybatis.TableInfoProperties;
-import com.dr.framework.core.orm.support.mybatis.page.Dialect;
 import com.dr.framework.core.orm.support.mybatis.spring.MybatisConfigurationBean;
 import org.apache.ibatis.annotations.*;
-import org.apache.ibatis.annotations.Options.FlushCachePolicy;
 import org.apache.ibatis.annotations.ResultMap;
+import org.apache.ibatis.annotations.Options.FlushCachePolicy;
 import org.apache.ibatis.binding.MapperMethod.ParamMap;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.IncompleteElementException;
@@ -252,28 +250,12 @@ public class MyBatisMapperAnnotationBuilder {
 
     void parseStatement(Method method) {
         List<Class> entityClass = readMethodEntityClasss(method);
-        if (entityClass.size() == 0) {
+        if (entityClass.isEmpty()) {
             logger.debug("找不到方法{}能够处理的实体类，不做处理", method);
             doParseStatement(method, null);
         } else {
             for (Class ec : entityClass) {
                 doParseStatement(method, ec);
-            }
-        }
-    }
-
-
-    public static void main(String[] args) {
-        Class c = CommonMapper.class;
-        for (Method method : c.getDeclaredMethods()) {
-            for (Type type : method.getGenericParameterTypes()) {
-                if (type instanceof ParameterizedType) {
-                    System.out.println(((ParameterizedType) type).getRawType());
-                    for (Type type1 : ((ParameterizedType) type).getActualTypeArguments()) {
-                        System.out.println(type1);
-                    }
-                } else if (type instanceof TypeVariable) {
-                }
             }
         }
     }
@@ -287,9 +269,9 @@ public class MyBatisMapperAnnotationBuilder {
     private List<Class> readMethodEntityClasss(Method method) {
         List<Class> entityClass = new ArrayList<>();
         //先从参数中获取
-        for (Type type : method.getGenericParameterTypes()) {
-            if (type instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = (ParameterizedType) type;
+        for (Type paramType : method.getGenericParameterTypes()) {
+            if (paramType instanceof ParameterizedType) {
+                ParameterizedType parameterizedType = (ParameterizedType) paramType;
                 Type rawType = parameterizedType.getRawType();
                 if (rawType.equals(SqlQuery.class) || rawType.equals(Class.class)) {
                     for (Type actType : parameterizedType.getActualTypeArguments()) {
@@ -300,24 +282,24 @@ public class MyBatisMapperAnnotationBuilder {
                         }
                     }
                 }
-            } else if (type instanceof TypeVariable) {
+            } else if (paramType instanceof TypeVariable) {
                 //如果方法声明了泛型
-                if (((TypeVariable) type).getGenericDeclaration().equals(method)) {
-                    entityClass.addAll(filterBounds((Class) ((TypeVariable) type).getBounds()[0]));
+                if (((TypeVariable) paramType).getGenericDeclaration().equals(method)) {
+                    entityClass.addAll(filterBounds((Class) ((TypeVariable) paramType).getBounds()[0]));
                 }
-            } else if (type instanceof GenericArrayType) {
+            } else if (paramType instanceof GenericArrayType) {
                 //如果方法参数有list之类的泛型参数
-                Type genericArrayType = ((GenericArrayType) type).getGenericComponentType();
+                Type genericArrayType = ((GenericArrayType) paramType).getGenericComponentType();
                 // TODO
-            } else if (type instanceof Class) {
-                if (type.equals(SqlQuery.class) || type.equals(Class.class)) {
+            } else if (paramType instanceof Class) {
+                if (paramType.equals(SqlQuery.class) || paramType.equals(Class.class)) {
                     entityClass.addAll(filterBounds(Object.class));
                     //entityClass.add(configuration.getEntityClass().get(0));
                 }
             }
         }
         //再从返回类型中获取
-        if (entityClass.size() == 0) {
+        if (entityClass.isEmpty()) {
             Type returnType = method.getGenericReturnType();
             if (returnType instanceof Class) {
                 entityClass.addAll(filterBounds((Class) returnType));
@@ -455,11 +437,11 @@ public class MyBatisMapperAnnotationBuilder {
 
     private LanguageDriver getLanguageDriver(Method method) {
         Lang lang = method.getAnnotation(Lang.class);
-        Class<?> langClass = null;
+        Class<? extends LanguageDriver> langClass = null;
         if (lang != null) {
             langClass = lang.value();
         }
-        return assistant.getLanguageDriver(langClass);
+        return configuration.getLanguageDriver(langClass);
     }
 
     private Class<?> getParameterType(Method method) {
@@ -551,7 +533,7 @@ public class MyBatisMapperAnnotationBuilder {
 
     private SqlSource buildSqlSourceFromStrings(String[] strings, Method method, Class entityClass, Class<?> parameterTypeClass, LanguageDriver languageDriver) {
         String sql = String.join(" ", strings);
-        sql = Dialect.parseSql(configuration, sql);
+        sql = configuration.getDataSourceProperties().getDialect().parseDialectSql(sql);
         if (entityClass != null) {
             sql = PropertyParser.parse(sql, new TableInfoProperties(entityClass, method));
         }
@@ -562,27 +544,24 @@ public class MyBatisMapperAnnotationBuilder {
     }
 
     private SqlCommandType getSqlCommandType(Method method) {
-        Class<? extends Annotation> type = getSqlAnnotationType(method);
-
-        if (type == null) {
-            type = getSqlProviderAnnotationType(method);
-
-            if (type == null) {
+        Class<? extends Annotation> annotationType = getSqlAnnotationType(method);
+        if (annotationType == null) {
+            annotationType = getSqlProviderAnnotationType(method);
+            if (annotationType == null) {
                 return SqlCommandType.UNKNOWN;
             }
-
-            if (type == SelectProvider.class) {
-                type = Select.class;
-            } else if (type == InsertProvider.class) {
-                type = Insert.class;
-            } else if (type == UpdateProvider.class) {
-                type = Update.class;
-            } else if (type == DeleteProvider.class) {
-                type = Delete.class;
+            if (annotationType == SelectProvider.class) {
+                annotationType = Select.class;
+            } else if (annotationType == InsertProvider.class) {
+                annotationType = Insert.class;
+            } else if (annotationType == UpdateProvider.class) {
+                annotationType = Update.class;
+            } else if (annotationType == DeleteProvider.class) {
+                annotationType = Delete.class;
             }
         }
 
-        return SqlCommandType.valueOf(type.getSimpleName().toUpperCase(Locale.ENGLISH));
+        return SqlCommandType.valueOf(annotationType.getSimpleName().toUpperCase(Locale.ENGLISH));
     }
 
     private Class<? extends Annotation> getSqlAnnotationType(Method method) {
@@ -594,10 +573,10 @@ public class MyBatisMapperAnnotationBuilder {
     }
 
     private Class<? extends Annotation> chooseAnnotationType(Method method, Set<Class<? extends Annotation>> types) {
-        for (Class<? extends Annotation> type : types) {
-            Annotation annotation = method.getAnnotation(type);
+        for (Class<? extends Annotation> aClass : types) {
+            Annotation annotation = method.getAnnotation(aClass);
             if (annotation != null) {
-                return type;
+                return aClass;
             }
         }
         return null;

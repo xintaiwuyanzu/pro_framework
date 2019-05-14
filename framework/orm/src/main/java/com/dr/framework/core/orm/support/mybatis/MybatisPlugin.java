@@ -1,7 +1,7 @@
 package com.dr.framework.core.orm.support.mybatis;
 
 import com.dr.framework.core.orm.sql.support.SqlQuery;
-import com.dr.framework.core.orm.support.mybatis.page.Dialect;
+import com.dr.framework.core.orm.support.mybatis.spring.MybatisConfigurationBean;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
@@ -51,7 +51,10 @@ public class MybatisPlugin implements Interceptor {
                 String organalSql = boundSql.getSql();
                 String parsedSql = parseSql(organalSql);
                 if (!isDefaultRowBounds(rowBounds)) {
-                    parsedSql = Dialect.pageSql(mappedStatement, parsedSql, rowBounds);
+
+                    MybatisConfigurationBean configurationBean = (MybatisConfigurationBean) mappedStatement.getConfiguration();
+                    com.dr.framework.core.orm.database.Dialect dialect = configurationBean.getDataSourceProperties().getDialect();
+                    parsedSql = dialect.parseToPageSql(parsedSql, rowBounds.getOffset(), rowBounds.getLimit());
                     rowBounds = RowBounds.DEFAULT;
                 }
                 if (!organalSql.equalsIgnoreCase(parsedSql)) {
@@ -63,7 +66,7 @@ public class MybatisPlugin implements Interceptor {
                 }
 
                 if (rowBounds.getLimit() == rowBounds.getOffset() && rowBounds.getOffset() == 0) {
-                    return Collections.EMPTY_LIST;
+                    return Collections.emptyList();
                 }
                 return executor.query(mappedStatement, parameter, rowBounds, resultHandler, cacheKey, boundSql);
             }
@@ -73,10 +76,7 @@ public class MybatisPlugin implements Interceptor {
 
 
     private boolean isDefaultRowBounds(RowBounds bounds) {
-        if (bounds != null && bounds.getOffset() == RowBounds.NO_ROW_OFFSET && bounds.getLimit() == RowBounds.NO_ROW_LIMIT) {
-            return true;
-        }
-        return false;
+        return bounds != null && bounds.getOffset() == RowBounds.NO_ROW_OFFSET && bounds.getLimit() == RowBounds.NO_ROW_LIMIT;
     }
 
 

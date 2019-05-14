@@ -61,7 +61,7 @@ public class TableInfoProperties extends Properties {
                 }
             }
             if (name == null) {
-                name = "param" + String.valueOf(paramCount);
+                name = "param" + paramCount;
             }
             if (type == SqlQuery.class) {
                 sqlQueryParamKey = name;

@@ -38,8 +38,7 @@ public class SysDictService {
                 .map(sysDict -> {
                     String[] keyArr = sysDict.getKey().split("\\.");
                     String key = keyArr[keyArr.length - 1];
-                    TreeNode treeNode = new TreeNode(key, sysDict.getValue(), sysDict);
-                    return treeNode;
+                    return new TreeNode(key, sysDict.getValue(), sysDict);
                 })
                 .collect(Collectors.toList());
     }

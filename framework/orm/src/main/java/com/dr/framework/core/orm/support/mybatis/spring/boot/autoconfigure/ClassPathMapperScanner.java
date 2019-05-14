@@ -10,10 +10,17 @@ import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
-public class ClassPathMapperScanner extends ClassPathBeanDefinitionScanner {
-    public ClassPathMapperScanner(BeanDefinitionRegistry registry) {
+/**
+ * 扫描所有包下面的mapper接口并注解
+ */
+class ClassPathMapperScanner extends ClassPathBeanDefinitionScanner {
+    private List<String> interfaces = new ArrayList<>();
+
+    ClassPathMapperScanner(BeanDefinitionRegistry registry) {
         super(registry, false);
         addIncludeFilter(new AnnotationTypeFilter(Mapper.class));
         addIncludeFilter(new AnnotationTypeFilter(com.dr.framework.core.orm.annotations.Mapper.class));
@@ -23,9 +30,8 @@ public class ClassPathMapperScanner extends ClassPathBeanDefinitionScanner {
         });
     }
 
-    @Override
-    public Set<BeanDefinitionHolder> doScan(String... basePackages) {
-        return super.doScan(basePackages);
+    public List<String> getInterfaces() {
+        return interfaces;
     }
 
     @Override
@@ -33,7 +39,8 @@ public class ClassPathMapperScanner extends ClassPathBeanDefinitionScanner {
         super.postProcessBeanDefinition(beanDefinition, beanName);
         String mapperInterface = beanDefinition.getBeanClassName();
         beanDefinition.setBeanClass(MapperFactoryBean.class);
-        beanDefinition.getPropertyValues().add("mapperInterface", mapperInterface);
+        beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(mapperInterface);
+        interfaces.add(mapperInterface);
     }
 
     @Override

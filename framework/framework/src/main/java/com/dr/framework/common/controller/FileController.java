@@ -22,6 +22,6 @@ public class FileController {
     @RequestMapping("/images/{id}")
     public void images(HttpServletRequest request, HttpServletResponse response, @PathVariable String id) throws IOException {
         response.setContentType(MediaType.IMAGE_JPEG_VALUE);
-        FileUtils.copyFile(new File("C:\\Users\\dr\\Desktop\\bd3eb13533fa828bafc235bcf71f4134960a5a8f.jpg"), response.getOutputStream());
+        //FileUtils.copyFile(new File("C:\\Users\\dr\\Desktop\\bd3eb13533fa828bafc235bcf71f4134960a5a8f.jpg"), response.getOutputStream());
     }
 }

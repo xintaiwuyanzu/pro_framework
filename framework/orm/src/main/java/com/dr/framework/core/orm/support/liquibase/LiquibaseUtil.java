@@ -5,7 +5,6 @@ import liquibase.Liquibase;
 import liquibase.command.CommandResult;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
-import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.DatabaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.snapshot.InvalidExampleException;
@@ -60,17 +59,13 @@ public class LiquibaseUtil {
             Liquibase liquibase = new Liquibase(file.getAbsolutePath(), new FileSystemResourceAccessor(file.getParent()), database);
             liquibase.update("");
         } catch (Exception e) {
-            if (e instanceof ChangeLogParseException) {
-                logger.warn("\n Changlog文件解析失败，默认为没有变更信息。【{}】", e.getMessage());
-            } else {
-                e.printStackTrace();
-            }
+            logger.warn("数据库" + mybatisConfigurationBean.getDatabaseId() + "表结构更新失败！", e);
         } finally {
             if (database != null) {
                 try {
                     database.close();
                 } catch (DatabaseException e) {
-                    e.printStackTrace();
+                    logger.warn("关闭数据库失败", e);
                 }
             }
         }

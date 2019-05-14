@@ -19,6 +19,8 @@ import java.util.Set;
 
 /**
  * 从源码当中读取数据库配置信息
+ *
+ * @author dr
  */
 public class SourceCodeDatabaseSnapshot extends DatabaseSnapshot {
     private SourceCodeDatabaseObjectCollection allFound;
@@ -26,17 +28,16 @@ public class SourceCodeDatabaseSnapshot extends DatabaseSnapshot {
     private Database proxySourceCodeDatabase;
     private Database proxyTargetDatabase;
 
+    public SourceCodeDatabaseSnapshot(Database targetDatabase, String... pkgs) throws DatabaseException, InvalidExampleException {
+        this(targetDatabase, new SourceCodeDatabaseObjectCollection(targetDatabase, pkgs));
+    }
+
     public SourceCodeDatabaseSnapshot(Database targetDatabase, SourceCodeDatabaseObjectCollection allFound) throws DatabaseException, InvalidExampleException {
         super(null, targetDatabase);
         this.allFound = allFound;
         init(targetDatabase);
     }
 
-    public SourceCodeDatabaseSnapshot(Database targetDatabase, String... pkgs) throws DatabaseException, InvalidExampleException {
-        super(null, targetDatabase);
-        allFound = new SourceCodeDatabaseObjectCollection(targetDatabase, pkgs);
-        init(targetDatabase);
-    }
 
     private void init(Database targetDatabase) {
         if (targetDatabase.supportsCatalogs()) {
@@ -73,7 +74,7 @@ public class SourceCodeDatabaseSnapshot extends DatabaseSnapshot {
                     return true;
                 }
                 DatabaseObject databaseObject = (DatabaseObject) objects[0];
-                if (databaseObject != null && databaseObject instanceof Table) {
+                if (databaseObject instanceof Table) {
                     for (Table table : sourceCodeDatabaseSnapshot.allFound.getTables()) {
                         if (table.getName().equalsIgnoreCase(databaseObject.getName())) {
                             return false;
@@ -87,12 +88,12 @@ public class SourceCodeDatabaseSnapshot extends DatabaseSnapshot {
     }
 
     @Override
-    public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType get(DatabaseObjectType example) {
+    public <D extends DatabaseObject> D get(D example) {
         return allFound.get(example, getSchemaComparisons());
     }
 
     @Override
-    public <DatabaseObjectType extends DatabaseObject> Set<DatabaseObjectType> get(Class<DatabaseObjectType> type) {
+    public <D extends DatabaseObject> Set<D> get(Class<D> type) {
         return allFound.get(type);
     }
 

@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * 单数据源的mapperproxy
  */
 public class SingleMapperProxy extends AbstractMapperProxy {
-    private MybatisConfigurationBean configurationBean;
-    private final Map<Method, MapperMethod> methodCache;
+    private transient MybatisConfigurationBean configurationBean;
+    private final transient Map<Method, MapperMethod> methodCache;
 
     public SingleMapperProxy(MybatisConfigurationBean configurationBean, Class<?> mapperInterface) {
         super(mapperInterface);
@@ -22,12 +22,7 @@ public class SingleMapperProxy extends AbstractMapperProxy {
 
     @Override
     protected MapperMethod cachedMapperMethod(Method method, Class entityClass, MybatisConfigurationBean mybatisConfigurationBean) {
-        MapperMethod mapperMethod = methodCache.get(method);
-        if (mapperMethod == null) {
-            mapperMethod = new MapperMethod(mapperInterface, method, mybatisConfigurationBean);
-            methodCache.put(method, mapperMethod);
-        }
-        return mapperMethod;
+        return methodCache.computeIfAbsent(method, k -> new MapperMethod(mapperInterface, k, mybatisConfigurationBean));
     }
 
     @Override

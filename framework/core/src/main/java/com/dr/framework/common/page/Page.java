@@ -15,7 +15,9 @@ public class Page<T> {
     /**
      * 起始页，每页分页大小，总共几页
      */
-    private long start, size = DEFAULT_PAGE_SIZE, total;
+    private long start,
+            size = DEFAULT_PAGE_SIZE,
+            total;
     private List<T> data;
     private Object other;
 

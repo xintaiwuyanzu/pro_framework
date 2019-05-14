@@ -10,56 +10,38 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 扫描所有包下面的entity类
+ * 扫描所有包下面的entity类，只扫描不注册
  */
-public class ClassPathEntityScanner extends ClassPathBeanDefinitionScanner {
-    private List<String> includeModules = new ArrayList<>();
-    private List<String> excludeModules = new ArrayList<>();
+class ClassPathEntityScanner extends ClassPathBeanDefinitionScanner {
+    private MultiDataSourceProperties dataSourceProperties;
 
-    public ClassPathEntityScanner(BeanDefinitionRegistry registry) {
+    ClassPathEntityScanner(BeanDefinitionRegistry registry, MultiDataSourceProperties dataSourceProperties) {
         super(registry, false);
+        this.dataSourceProperties = dataSourceProperties;
     }
 
-    public List<String> scan(List<String> pkgs) {
+    List<String> scan(List<String> pkgs) {
+        addIncludeFilter(new EntityModuleTypeFilter(dataSourceProperties.getIncludeModules()));
+        if (dataSourceProperties.getExcludeModules().size() > 0) {
+            addExcludeFilter(new EntityModuleTypeFilter(dataSourceProperties.getExcludeModules()));
+        }
         Set<BeanDefinitionHolder> definitionHolders = doScan(pkgs.toArray(new String[pkgs.size()]));
         return definitionHolders.stream().map(beanDefinitionHolder -> beanDefinitionHolder.getBeanDefinition().getBeanClassName()).collect(Collectors.toList());
     }
 
-    public void registerFilters() {
-        addIncludeFilter(new EntityModuleTypeFilter(includeModules));
-        if (excludeModules.size() > 0) {
-            addExcludeFilter(new EntityModuleTypeFilter(excludeModules));
-        }
-    }
-
-    public void addModuleInclude(String... modules) {
-        if (modules != null) {
-            for (String module : modules) {
-                includeModules.add(module.toLowerCase().trim());
-            }
-        }
-    }
-
-    public void addModuleExclude(String... modules) {
-        if (modules != null) {
-            for (String module : modules) {
-                excludeModules.add(module.toLowerCase().trim());
-            }
-        }
-    }
 
     @Override
     protected void registerBeanDefinition(BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry) {
+        //UNDO
     }
 
-    class EntityModuleTypeFilter implements TypeFilter {
+    static class EntityModuleTypeFilter implements TypeFilter {
         List<String> modules;
 
         public EntityModuleTypeFilter(List<String> modules) {
@@ -71,7 +53,7 @@ public class ClassPathEntityScanner extends ClassPathBeanDefinitionScanner {
             AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
             String tableAnnName = Table.class.getName();
             if (annotationMetadata.hasAnnotation(tableAnnName)) {
-                if (modules.size() > 0) {
+                if (!modules.isEmpty()) {
                     Map<String, Object> tableAttrs = annotationMetadata.getAnnotationAttributes(tableAnnName);
                     Object moduleObj = tableAttrs.get("module");
                     if (!StringUtils.isEmpty(moduleObj)) {

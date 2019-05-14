@@ -7,7 +7,6 @@ import com.dr.framework.common.entity.TreeNode;
 import com.dr.framework.common.page.Page;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.SecurityManager;
-import javafx.collections.transformation.SortedList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +15,9 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * @author dr
+ */
 @Service
 public class CommonService {
     @Autowired

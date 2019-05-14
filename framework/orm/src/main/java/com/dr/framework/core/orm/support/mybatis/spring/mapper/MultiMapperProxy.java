@@ -8,13 +8,16 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author dr
+ */
 public class MultiMapperProxy extends AbstractMapperProxy {
-    private Map<String, MybatisConfigurationBean> mybatisConfigurationBeanMap;
-    private final Map<MybatisConfigurationBean, Map<Method, MapperMethod>> methodCache;
+    private transient Map<String, MybatisConfigurationBean> mybatisConfigurationBeanMap;
+    private final transient Map<MybatisConfigurationBean, Map<Method, MapperMethod>> methodCache;
     /**
      * 默认主要数据源
      */
-    private MybatisConfigurationBean primaryBean;
+    private transient MybatisConfigurationBean primaryBean;
 
     public MultiMapperProxy(MybatisConfigurationBean primaryBean, Map<String, MybatisConfigurationBean> mybatisConfigurationBeanMap, Class<?> mapperInterface) {
         super(mapperInterface);
@@ -25,17 +28,8 @@ public class MultiMapperProxy extends AbstractMapperProxy {
 
     @Override
     protected MapperMethod cachedMapperMethod(Method method, Class entityClass, MybatisConfigurationBean mybatisConfigurationBean) {
-        Map<Method, MapperMethod> methodMapperMethodMap = methodCache.get(mybatisConfigurationBean);
-        if (methodMapperMethodMap == null) {
-            methodMapperMethodMap = new ConcurrentHashMap<>(mapperInterface.getDeclaredMethods().length);
-            methodCache.put(mybatisConfigurationBean, methodMapperMethodMap);
-        }
-        MapperMethod mapperMethod = methodMapperMethodMap.get(method);
-        if (mapperMethod == null) {
-            mapperMethod = new MapperMethod(mapperInterface, method, mybatisConfigurationBean);
-            methodMapperMethodMap.put(method, mapperMethod);
-        }
-        return mapperMethod;
+        Map<Method, MapperMethod> methodMapperMethodMap = methodCache.computeIfAbsent(mybatisConfigurationBean, k -> new ConcurrentHashMap<>(mapperInterface.getDeclaredMethods().length));
+        return methodMapperMethodMap.computeIfAbsent(method, k -> new MapperMethod(mapperInterface, k, mybatisConfigurationBean));
     }
 
     @Override

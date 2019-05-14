@@ -5,6 +5,7 @@ import com.dr.framework.core.orm.annotations.ColumnType;
 import com.dr.framework.core.orm.annotations.Id;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.snapshot.SnapshotIdService;
 import liquibase.structure.DatabaseObjectCollection;
@@ -32,6 +33,9 @@ import java.sql.Types;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author dr
+ */
 public class SourceCodeDatabaseObjectCollection extends DatabaseObjectCollection {
     Logger logger = LoggerFactory.getLogger(SourceCodeDatabaseObjectCollection.class);
     private static final String RESOURCE_PATTERN = "/**/*.class";
@@ -63,7 +67,7 @@ public class SourceCodeDatabaseObjectCollection extends DatabaseObjectCollection
             parseClass(reader);
             return metaTables.get(reader);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(String.format("读取表[%s]信息失败", modelClass.getName()), e);
         }
         return null;
     }
@@ -85,7 +89,7 @@ public class SourceCodeDatabaseObjectCollection extends DatabaseObjectCollection
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("扫描实体类失败", e);
             }
         }
     }
@@ -132,9 +136,9 @@ public class SourceCodeDatabaseObjectCollection extends DatabaseObjectCollection
                 }
             });
             Collections.sort(columnList, ((o1, o2) -> o2.getOrder() - o1.getOrder()));
-            columnList.stream().forEach(column -> add(column));
+            columnList.stream().forEach(this::add);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.error(String.format("读取表[%s]信息失败", clssName), e);
         }
     }
 
@@ -182,24 +186,21 @@ public class SourceCodeDatabaseObjectCollection extends DatabaseObjectCollection
             case FLOAT:
                 int length = column.precision();
                 int scale = column.scale();
-                if (database instanceof OracleDatabase) {
-                    if (length == 0) {
-                        length = column.length();
-                    }
-                } else if (database instanceof MSSQLDatabase) {
-                    if (length == 0) {
-                        length = column.length();
-                    } else {
+                if (length == 0) {
+                    length = column.length();
+                    if (length < scale) {
                         length = length + scale;
                     }
                 }
-
                 if (length > 38) {
                     length = 38;
                 }
                 dataType.setColumnSizeUnit(DataType.ColumnSizeUnit.BYTE);
                 dataType.setDataTypeId(Types.NUMERIC);
                 dataType.setTypeName("numeric");
+                if (length < scale) {
+                    logger.error("{}数据长度{}不能小于精度{}", field, length, scale);
+                }
                 dataType.setColumnSize(length);
                 dataType.setDecimalDigits(scale);
                 break;
@@ -216,7 +217,7 @@ public class SourceCodeDatabaseObjectCollection extends DatabaseObjectCollection
                     dataType.setColumnSize(1);
                     dataType.setDecimalDigits(0);
                     dataType.setDataTypeId(Types.DECIMAL);
-                } else if (database instanceof MSSQLDatabase) {
+                } else if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase) {
                     dataType.setTypeName("bit");
                     dataType.setColumnSizeUnit(DataType.ColumnSizeUnit.BYTE);
                     dataType.setDataTypeId(Types.BIT);

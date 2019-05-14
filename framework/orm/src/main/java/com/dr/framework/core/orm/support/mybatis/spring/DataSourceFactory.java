@@ -1,7 +1,10 @@
 package com.dr.framework.core.orm.support.mybatis.spring;
 
+import com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure.MultiDataSourceProperties;
+import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.*;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
@@ -22,18 +25,20 @@ import javax.sql.XADataSource;
 
 /**
  * 用来动态创建datasource，有可能配置多个数据源
+ *
+ * @author dr
  */
 public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
-    private DataSourceProperties properties;
+    private MultiDataSourceProperties properties;
     private ClassLoader classLoader;
-    private boolean xa;
     private BeanFactory beanFactory;
     private String beanName;
     private DataSource dataSource;
+    Logger logger = LoggerFactory.getLogger(DataSourceFactory.class);
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (isXa()) {
+        if (properties.isXa()) {
             try {
                 XADataSource xaDataSource = createXaDataSource();
                 XADataSourceWrapper wrapper = beanFactory.getBean(XADataSourceWrapper.class);
@@ -42,13 +47,16 @@ public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoad
                     ((AtomikosDataSourceBean) dataSource).setMaxPoolSize(50);
                 }
             } catch (Exception e) {
-                throw new IllegalStateException("创建多数据源失败，请检查添加spring-jta相关的依赖或数据库驱动版本", e);
+                logger.error("创建多数据源失败，请检查添加spring-jta相关的依赖或数据库驱动版本", e);
             }
         } else {
             dataSource = properties.initializeDataSourceBuilder().build();
         }
         if (dataSource instanceof BeanNameAware) {
             ((BeanNameAware) dataSource).setBeanName(beanName);
+        }
+        if (dataSource instanceof HikariDataSource) {
+            ((HikariDataSource) dataSource).setPoolName("HikariPool-" + properties.getName() + "-");
         }
         if (dataSource instanceof InitializingBean) {
             ((InitializingBean) dataSource).afterPropertiesSet();
@@ -57,11 +65,10 @@ public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoad
 
     @Override
     public void destroy() throws Exception {
-        if (dataSource != null) {
-            if (dataSource instanceof DisposableBean) {
-                ((DisposableBean) dataSource).destroy();
-            }
+        if (dataSource instanceof DisposableBean) {
+            ((DisposableBean) dataSource).destroy();
         }
+        properties.close();
     }
 
     @Override
@@ -80,9 +87,9 @@ public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoad
             className = DatabaseDriver.fromJdbcUrl(this.properties.determineUrl()).getXaDataSourceClassName();
         }
         Assert.state(StringUtils.hasLength(className), "No XA DataSource class name specified");
-        XADataSource dataSource = createXaDataSourceInstance(className);
-        bindXaProperties(dataSource, this.properties);
-        return dataSource;
+        XADataSource xaDataSourceInstance = createXaDataSourceInstance(className);
+        bindXaProperties(xaDataSourceInstance, this.properties);
+        return xaDataSourceInstance;
     }
 
     private XADataSource createXaDataSourceInstance(String className) {
@@ -113,7 +120,7 @@ public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoad
     }
 
     @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+    public void setBeanFactory(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
     }
 
@@ -122,19 +129,11 @@ public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoad
         this.classLoader = classLoader;
     }
 
-    public boolean isXa() {
-        return xa;
-    }
-
-    public void setXa(boolean xa) {
-        this.xa = xa;
-    }
-
-    public DataSourceProperties getProperties() {
+    public MultiDataSourceProperties getProperties() {
         return properties;
     }
 
-    public void setProperties(DataSourceProperties properties) {
+    public void setProperties(MultiDataSourceProperties properties) {
         this.properties = properties;
     }
 

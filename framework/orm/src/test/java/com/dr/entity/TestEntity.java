@@ -29,8 +29,6 @@ public class TestEntity {
     double dateCol;
     @Column(type = ColumnType.DATE)
     double dateCol1;
-    @Column
-    boolean booleanCol;
     @Column(type = ColumnType.CLOB, nullable = false)
     String clobCol;
     @Column(type = ColumnType.BLOB)
@@ -106,14 +104,6 @@ public class TestEntity {
 
     public void setDateCol1(double dateCol1) {
         this.dateCol1 = dateCol1;
-    }
-
-    public boolean isBooleanCol() {
-        return booleanCol;
-    }
-
-    public void setBooleanCol(boolean booleanCol) {
-        this.booleanCol = booleanCol;
     }
 
     public String getClobCol() {

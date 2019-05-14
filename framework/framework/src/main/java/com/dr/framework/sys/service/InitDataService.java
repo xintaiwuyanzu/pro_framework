@@ -1,7 +1,5 @@
 package com.dr.framework.sys.service;
 
-import com.dr.framework.common.service.CommonService;
-import com.dr.framework.sys.entity.UserLogin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;

@@ -427,7 +427,7 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
                     sqlSession.commit(true);
                 }
                 return result;
-            } catch (Throwable t) {
+            } catch (Exception t) {
                 Throwable unwrapped = unwrapThrowable(t);
                 if (SqlSessionTemplate.this.exceptionTranslator != null && unwrapped instanceof PersistenceException) {
                     // release the connection to avoid a deadlock if the translator is no loaded. See issue #22

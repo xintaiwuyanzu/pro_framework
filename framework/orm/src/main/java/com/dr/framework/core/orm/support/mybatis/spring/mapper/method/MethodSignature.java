@@ -18,8 +18,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MethodSignature {
-    private static final String GENERIC_NAME_PREFIX = "param";
-
     private final boolean returnsMany;
     private final boolean returnsMap;
     private final boolean returnsVoid;
@@ -128,14 +126,14 @@ public class MethodSignature {
     }
 
     private String getMapKey(Method method) {
-        String mapKey = null;
+        String mapkey = null;
         if (Map.class.isAssignableFrom(method.getReturnType())) {
             final MapKey mapKeyAnnotation = method.getAnnotation(MapKey.class);
             if (mapKeyAnnotation != null) {
-                mapKey = mapKeyAnnotation.value();
+                mapkey = mapKeyAnnotation.value();
             }
         }
-        return mapKey;
+        return mapkey;
     }
 
     public boolean isFlush() {
