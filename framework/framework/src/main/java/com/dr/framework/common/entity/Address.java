@@ -7,9 +7,9 @@ import com.dr.framework.core.orm.annotations.Table;
 public class Address extends BaseEntity {
     //TODO 这里要内置几个常用的坐标系变量
 
-    @Column(name = "latitude", comment = "经度", precision = 3, scale = 15)
+    @Column(name = "latitude", comment = "经度", precision = 18, scale = 15)
     private long latitude;
-    @Column(name = "longitude", comment = "维度", precision = 3, scale = 15)
+    @Column(name = "longitude", comment = "维度", precision = 18, scale = 15)
     private long longitude;
     @Column(name = "add_name", comment = "地址名称", length = 200)
     private String name;

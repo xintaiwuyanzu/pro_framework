@@ -70,11 +70,10 @@ public enum DataBase {
         public Class<? extends Dialect> getDialectClass(DataBaseMetaData dataBaseMetaData) {
             if (match(dataBaseMetaData.getDatabaseProductName())) {
                 switch (dataBaseMetaData.getDatabaseMajorVersion()) {
-
-                    case 10: {
-                        return SQLServer2008Dialect.class;
-                    }
                     default:
+                        if (dataBaseMetaData.getDatabaseMajorVersion() <= 10) {
+                            return SQLServer2008Dialect.class;
+                        }
                         return lastestDialect();
                 }
             }

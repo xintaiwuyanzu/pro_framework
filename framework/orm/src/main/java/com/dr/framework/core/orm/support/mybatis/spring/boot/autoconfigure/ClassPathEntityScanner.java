@@ -28,7 +28,7 @@ class ClassPathEntityScanner extends ClassPathBeanDefinitionScanner {
 
     List<String> scan(List<String> pkgs) {
         addIncludeFilter(new EntityModuleTypeFilter(dataSourceProperties.getIncludeModules()));
-        if (dataSourceProperties.getExcludeModules().size() > 0) {
+        if (!dataSourceProperties.getExcludeModules().isEmpty()) {
             addExcludeFilter(new EntityModuleTypeFilter(dataSourceProperties.getExcludeModules()));
         }
         Set<BeanDefinitionHolder> definitionHolders = doScan(pkgs.toArray(new String[pkgs.size()]));

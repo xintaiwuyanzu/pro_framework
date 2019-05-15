@@ -202,7 +202,12 @@ public class SourceCodeDatabaseObjectCollection extends DatabaseObjectCollection
                     logger.error("{}数据长度{}不能小于精度{}", field, length, scale);
                 }
                 dataType.setColumnSize(length);
-                dataType.setDecimalDigits(scale);
+                if (scale > 0) {
+                    if (database instanceof OracleDatabase) {
+                        dataType.setTypeName("NUMBER");
+                    }
+                    dataType.setDecimalDigits(scale);
+                }
                 break;
             case BLOB:
                 dataType.setTypeName("blob");

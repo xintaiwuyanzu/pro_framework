@@ -3,7 +3,6 @@ package com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure;
 import com.dr.framework.core.orm.support.mybatis.spring.mapper.MapperFactoryBean;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
@@ -12,7 +11,6 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 扫描所有包下面的mapper接口并注解

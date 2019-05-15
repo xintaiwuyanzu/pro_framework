@@ -31,9 +31,9 @@ public class Organise extends BaseTreeEntity<String> implements SourceRefEntity 
     private String sourceRef;
     @Column(name = "sys_id", comment = "所属子系统")
     private String sysId;
-    @Column(name = "latitude", comment = "经度", precision = 3, scale = 15)
+    @Column(name = "latitude", comment = "经度", precision = 18, scale = 15)
     private double latitude;
-    @Column(name = "longitude", comment = "维度", precision = 3, scale = 15)
+    @Column(name = "longitude", comment = "维度", precision = 18, scale = 15)
     private double longitude;
     @Column(name = "coordinate_type", comment = "坐标系", length = 100)
     private String coordinateType;
