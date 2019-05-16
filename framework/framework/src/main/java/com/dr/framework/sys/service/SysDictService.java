@@ -22,6 +22,9 @@ public class SysDictService {
         if (type.startsWith("organise")) {
             return organiseDict(type);
         }
+        if (type.indexOf("person") != -1) {
+            return personDict(type);
+        }
         if (StringUtils.isEmpty(type)) {
             return new ArrayList<>();
         } else {
@@ -51,4 +54,13 @@ public class SysDictService {
                 .map(organise -> new TreeNode(organise.getOrganiseCode(), organise.getOrganiseName(), organise))
                 .collect(Collectors.toList());
     }
+
+    private List<TreeNode> personDict(String type) {
+        SqlQuery<Person> sqlQuery = SqlQuery.from(Person.class).orderBy(PersonInfo.ORDERBY);
+        return commonService.selectList(sqlQuery).stream()
+                .map(person -> new TreeNode(person.getUserCode(), person.getUserName(), person))
+                .collect(Collectors.toList());
+    }
+
+
 }
