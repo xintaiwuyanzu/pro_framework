@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,9 +58,16 @@ public class SysDictService {
 
     private List<TreeNode> personDict(String type) {
         SqlQuery<Person> sqlQuery = SqlQuery.from(Person.class).orderBy(PersonInfo.ORDERBY);
-        return commonService.selectList(sqlQuery).stream()
+        List list = commonService.selectList(sqlQuery).stream()
                 .map(person -> new TreeNode(person.getUserCode(), person.getUserName(), person))
                 .collect(Collectors.toList());
+        List list1 = commonService.selectList(sqlQuery).stream()
+                .map(person -> new TreeNode(person.getOrder() + "", person.getUserName(), person))
+                .collect(Collectors.toList());
+        for (Object treenode : list1) {
+            list.add(treenode);
+        }
+        return list;
     }
 
 
