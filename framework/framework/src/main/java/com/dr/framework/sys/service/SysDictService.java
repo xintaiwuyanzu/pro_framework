@@ -64,7 +64,13 @@ public class SysDictService {
         List list1 = commonService.selectList(sqlQuery).stream()
                 .map(person -> new TreeNode(person.getOrder() + "", person.getUserName(), person))
                 .collect(Collectors.toList());
+        List list2 = commonService.selectList(sqlQuery).stream()
+                .map(person -> new TreeNode(person.getId()+ "", person.getUserName(), person))
+                .collect(Collectors.toList());
         for (Object treenode : list1) {
+            list.add(treenode);
+        }
+        for (Object treenode : list2) {
             list.add(treenode);
         }
         return list;
