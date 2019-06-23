@@ -1,28 +1,22 @@
 package com.dr.framework.core.orm.support.mybatis.spring;
 
 import com.dr.framework.common.entity.TreeNode;
+import com.dr.framework.common.service.DataBaseService;
+import com.dr.framework.common.service.DefaultDataBaseService;
 import com.dr.framework.core.orm.annotations.Mapper;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.core.orm.database.tools.AnnotationTableReader;
+import com.dr.framework.core.orm.database.tools.DataBaseChangeInfo;
+import com.dr.framework.core.orm.jdbc.Column;
+import com.dr.framework.core.orm.jdbc.Relation;
+import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.TableInfo;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
-import com.dr.framework.core.orm.support.liquibase.LiquibaseUtil;
 import com.dr.framework.core.orm.support.mybatis.MybatisPlugin;
 import com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure.MultiDataSourceProperties;
 import com.dr.framework.core.orm.support.mybatis.spring.mapper.MyBatisMapperAnnotationBuilder;
 import com.dr.framework.core.orm.support.mybatis.spring.sqlsession.SqlSessionTemplate;
 import com.dr.framework.core.orm.support.mybatis.spring.transaction.SpringManagedTransactionFactory;
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.DatabaseException;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.JdbcDatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Schema;
 import org.apache.ibatis.binding.MapperRegistry;
 import org.apache.ibatis.logging.slf4j.Slf4jImpl;
 import org.apache.ibatis.mapping.Environment;
@@ -39,7 +33,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +49,7 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
     Logger logger = LoggerFactory.getLogger(MybatisConfigurationBean.class);
     private SqlSessionTemplate sqlSessionTemplate;
     private MultiDataSourceProperties dataSourceProperties;
+    private DefaultDataBaseService dataBaseService;
     private ApplicationContext applicationContext;
 
     private List<Class> mapperInterfaces = new Vector<>();
@@ -67,12 +65,69 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
         setLogImpl(Slf4jImpl.class);
     }
 
-
     @Override
-    public void afterPropertiesSet() {
+    public void afterPropertiesSet() throws Exception {
+        dataSourceProperties.afterPropertiesSet();
         DataSource dataSource = applicationContext.getBean(dataSourceProperties.getName(), DataSource.class);
         setEnvironment(new Environment(dataSourceProperties.getName(), new SpringManagedTransactionFactory(), dataSource));
         Assert.notNull(getEnvironment(), "没有设置environment属性，不能管理事务");
+        dataBaseService = (DefaultDataBaseService) applicationContext.getBean(DataBaseService.class);
+        Assert.notNull(dataBaseService, "没有找到数据库管理service:" + DataBaseService.class);
+        dataBaseService.addDb(dataSourceProperties.getDataBaseMetaData());
+
+        AnnotationTableReader annotationTableReader = new AnnotationTableReader();
+
+        //先执行数据库ddl
+        if (MultiDataSourceProperties.DDL_VALIDATE.equalsIgnoreCase(dataSourceProperties.getAutoDDl())
+                || MultiDataSourceProperties.DDL_UPDATE.equalsIgnoreCase(dataSourceProperties.getAutoDDl())
+        ) {
+            //作为参数吧，强制加载所有数据库表结构信息
+            //dataSourceProperties.getDataBaseMetaData().getTables(true);
+            boolean update = MultiDataSourceProperties.DDL_UPDATE.equalsIgnoreCase(dataSourceProperties.getAutoDDl());
+            entityClass.stream()
+                    .map(clz -> annotationTableReader.readerTableInfo(clz, getDataSourceProperties().getDialect()))
+                    .sorted((t1, t2) -> {
+                        if (t1.isTable()) {
+                            return t2.isTable() ? 0 : 1;
+                        } else {
+                            return t2.isTable() ? -1 : 0;
+                        }
+                    })
+                    .forEach(entityRelation -> {
+                        dataBaseService.addEntityRelation(entityRelation, getDatabaseId());
+                        if (update) {
+                            dataBaseService.updateTable(entityRelation);
+                        } else {
+                            for (DataBaseChangeInfo changeInfo : dataBaseService.validateTable(entityRelation)) {
+                                logger.info(changeInfo.getMessage());
+                                logger.info(changeInfo.getSql());
+                            }
+                        }
+                    });
+        } else {
+            logger.info("数据源{}配置数据库更新类型为{}，忽略处理", databaseId, dataSourceProperties.getAutoDDl());
+        }
+        //在更新所有实体类信息
+        for (Class c : entityClass) {
+            EntityRelation entityRelation = dataBaseService.getTableInfo(c);
+            if (entityRelation == null) {
+                entityRelation = annotationTableReader.readerTableInfo(c, dataSourceProperties.getDialect());
+                dataBaseService.addEntityRelation(entityRelation, getDatabaseId());
+            }
+            Relation<Column> jdbc = dataSourceProperties.getDataBaseMetaData().getTable(entityRelation.getName());
+            if (jdbc == null) {
+                if (jdbc == null) {
+                    logger.warn("实体类【{}】对应的表【{}】在数据库【{}】中未创建，请及时更新数据库表结构"
+                            , c
+                            , entityRelation.getName()
+                            , getDatabaseId()
+                    );
+                }
+            } else {
+                entityRelation.bind(jdbc);
+            }
+        }
+        //在执行sql语句的映射和转换
         sqlSessionTemplate = new SqlSessionTemplate(new DefaultSqlSessionFactory(this));
         for (Class mapperInterface : mapperInterfaces) {
             if (mapperInterface.isAnnotationPresent(Mapper.class)) {
@@ -92,17 +147,7 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
                 new MyBatisMapperAnnotationBuilder(this, mapperInterface).parse();
             }
         }
-        switch (dataSourceProperties.getAutoDDl()) {
-            case MultiDataSourceProperties.DDL_VALIDATE:
-                new LiquibaseUtil(this).validate();
-                break;
-            case MultiDataSourceProperties.DDL_UPDATE:
-                new LiquibaseUtil(this).update();
-                break;
-            default:
-                logger.warn("数据源{}配置数据库更新类型为{}，忽略处理", databaseId, dataSourceProperties.getAutoDDl());
-                break;
-        }
+
     }
 
     /**
@@ -130,18 +175,6 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
      * 下面是跟liquibase相关的代码
      * =================================
      */
-
-    /**
-     * 创建数据库
-     * <p>
-     * TODO 其实可以直接根据connection创建数据库，但是数据库链接的事务是被spring管理着的。想办法绕过去。
-     *
-     * @return liquibase数据库对象
-     * @throws DatabaseException 数据库创建异常
-     */
-    public Database createDataBase() throws Exception {
-        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(dataSourceProperties.getselfManagedConnection()));
-    }
 
     /**
      * 获取数据库所有表名树状结构信息
@@ -187,65 +220,30 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
     private TreeNode readDataBaseTables() {
         TreeNode treeNode = new TreeNode("database", "未配置");
         treeNode.setParentId(databaseId);
-        DatabaseSnapshot databaseSnapshot = createDabaseSnapshort(null, liquibase.structure.core.Table.class);
-        if (databaseSnapshot != null) {
-            List<TreeNode> childTables = databaseSnapshot.get(liquibase.structure.core.Table.class)
-                    .stream()
-                    .filter(table -> !entityClass.stream()
-                            .map(SqlQuery::getTableInfo)
-                            .map(tableInfo -> ((TableInfo) tableInfo).table())
-                            .anyMatch(tableName -> tableName.equalsIgnoreCase(table.getName()))
-                    )
-                    .map(table -> {
-                        String comment = table.getRemarks();
-                        if (StringUtils.isEmpty(comment)) {
-                            comment = table.getName();
-                        }
-                        TreeNode tableTree = new TreeNode(table.getName(), comment);
-                        tableTree.setParentId(treeNode.getId());
-                        return tableTree;
-                    })
-                    .sorted()
-                    .collect(Collectors.toList());
-            treeNode.setChildren(childTables);
-        }
+        List<TreeNode> childTables = dataSourceProperties.getDataBaseMetaData().getTables(true)
+                .stream()
+                .filter(table -> !entityClass.stream()
+                        .map(SqlQuery::getTableInfo)
+                        .map(tableInfo -> ((TableInfo) tableInfo).table())
+                        .anyMatch(tableName -> tableName.equalsIgnoreCase(table.getName()))
+                )
+                .map(table -> {
+                    String comment = table.getRemark();
+                    if (StringUtils.isEmpty(comment)) {
+                        comment = table.getName();
+                    }
+                    TreeNode tableTree = new TreeNode(table.getName(), comment);
+                    tableTree.setParentId(treeNode.getId());
+                    return tableTree;
+                })
+                .sorted()
+                .collect(Collectors.toList());
+        treeNode.setChildren(childTables);
         return treeNode;
     }
 
-    public Map<String, liquibase.structure.core.Table> getTableMap(String tableName) {
-        Map<String, liquibase.structure.core.Table> tableMap = new HashMap<>();
-        DatabaseSnapshot databaseSnapshot = createDabaseSnapshort(tableName, Column.class, PrimaryKey.class);
-        if (databaseSnapshot != null) {
-
-            databaseSnapshot.get(liquibase.structure.core.Table.class).stream().forEach(table -> tableMap.put(table.getName().toUpperCase(), table));
-        }
-        return tableMap;
-    }
-
-    protected DatabaseSnapshot createDabaseSnapshort(String tableName, Class<? extends DatabaseObject>... dataBaseObject) {
-        Database database = null;
-        try {
-            database = createDataBase();
-            SnapshotControl snapshotControl = new SnapshotControl(database, dataBaseObject);
-            Catalog catalog = new Catalog(database.getDefaultCatalogName());
-            Schema schema = new Schema(catalog, database.getDefaultSchemaName());
-            if (!StringUtils.isEmpty(tableName)) {
-                return new JdbcDatabaseSnapshot(new DatabaseObject[]{catalog, schema, new liquibase.structure.core.Table(database.getDefaultCatalogName(), database.getDefaultSchemaName(), tableName)}, database, snapshotControl);
-            } else {
-                return new JdbcDatabaseSnapshot(new DatabaseObject[]{catalog, schema}, database, snapshotControl);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (database != null) {
-                try {
-                    database.close();
-                } catch (DatabaseException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return null;
+    public Map<String, Relation<Column>> getTableMap() {
+        return dataSourceProperties.getDataBaseMetaData().getTableMap();
     }
 
     public SqlSessionTemplate getSqlSessionTemplate() {
@@ -315,6 +313,10 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
 
     public List<Class> getEntityClass() {
         return new ArrayList<>(entityClass);
+    }
+
+    public DefaultDataBaseService getDataBaseService() {
+        return dataBaseService;
     }
 
 }

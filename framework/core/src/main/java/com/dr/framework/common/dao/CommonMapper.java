@@ -71,7 +71,7 @@ public interface CommonMapper {
      * @param entity
      * @return
      */
-    @Update({"<default>update ${table} ${set} where ${pk}=#{id}</default>", "<sqlserver>update A ${set} from ${table} where ${pk}=#{id}</sqlserver>"})
+    @Update({"<default>update ${table} ${set} where ${pk}=${id}</default>", "<sqlserver>update A ${set} from ${table} where ${pk}=${id}</sqlserver>"})
     <E> long updateById(E entity);
 
     /**
@@ -83,7 +83,7 @@ public interface CommonMapper {
     @Update({"<default>update", SqlQuery.TABLE, "${set}", SqlQuery.WHERE, "</default><sqlserver>update A", "${set}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"})
     <E> long updateByQuery(SqlQuery<E> sqlQuery);
 
-    @Update({"<default>update ${table} ${settest} where ${pk} =#{id}</default>", "<sqlserver>update A ${settest} from ${table} where ${pk} =#{id}</sqlserver>"})
+    @Update({"<default>update ${table} ${settest} where ${pk} =${id}</default>", "<sqlserver>update A ${settest} from ${table} where ${pk} =${id}</sqlserver>"})
     <E> long updateIgnoreNullById(E entity);
 
     @Update({"<default>update", SqlQuery.TABLE, "${settest}", SqlQuery.WHERE, "</default><sqlserver>update A ${settest}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"})
@@ -94,7 +94,7 @@ public interface CommonMapper {
      * 查
      * ==============================
      */
-    @Select("select ${columns} from  ${table} where ${pk} =#{id}")
+    @Select("select ${columns} from  ${table} where ${pk} =${id}")
     <E> E selectById(Class<E> entityClass, Serializable id);
 
     @Select({"select ", SqlQuery.COLUMNS, SqlQuery.FROM, SqlQuery.WHERE})
@@ -116,7 +116,7 @@ public interface CommonMapper {
     default <E> Page<E> selectPageByQuery(SqlQuery<E> sqlQuery, int start, int end) {
         long count = countByQuery(sqlQuery);
         List<E> data = selectLimitByQuery(sqlQuery, start, end);
-        Page<E> page = new Page(start, end - start, count);
+        Page<E> page = new Page<>(start, end - start, count);
         page.setData(data);
         return page;
     }
@@ -124,7 +124,7 @@ public interface CommonMapper {
     @Select("select ${columns} from ${table} where ${pk} ${in#coll}")
     <E> List<E> selectBatchIds(Class<E> entityClass, @Param("coll") Serializable... idList);
 
-    @Select("select count(${pk}) from ${table} where ${pk}=#{id}")
+    @Select("select count(${pk}) from ${table} where ${pk}=${id}")
     boolean exists(Class entityClass, @Param("id") Serializable id);
 
     @Select({"select count(${pk})", SqlQuery.FROM, SqlQuery.WHERE})
@@ -152,8 +152,11 @@ public interface CommonMapper {
      * @param id
      * @return
      */
-    @Delete({"<default>delete from ${table} where ${pk}= #{id}</default>",
-            "<sqlserver>delete A from ${table} where ${pk}= #{id}</sqlserver>"})
+    @Delete({
+            "<default>delete from ${table} where ${pk}= ${id}</default>"
+            , "<sqlserver>delete A from ${table} where ${pk}= ${id}</sqlserver>"
+            , "<mysql>delete A from ${table} where ${pk}= ${id}</mysql>"
+    })
     long deleteById(Class entityClass, Serializable... id);
 
     /**
@@ -162,10 +165,23 @@ public interface CommonMapper {
      * @param idList
      * @return
      */
-    @Delete({"<default>delete from ${table} where ${pk} ${in#coll}</default>",
-            "<sqlserver>delete A from ${table} where ${pk} ${in#coll}</sqlserver>"})
+    @Delete({
+            "<default>delete from ${table} where ${pk} ${in#coll}</default>"
+            , "<sqlserver>delete A from ${table} where ${pk} ${in#coll}</sqlserver>"
+            , "<mysql>delete A from ${table} where ${pk} ${in#coll}</mysql>"
+    })
     long deleteBatchIds(Class entityClass, @Param("coll") Serializable... idList);
 
-    @Delete({"<default>delete from ${table}", SqlQuery.WHERE, "</default><sqlserver>delete A from ${table}", SqlQuery.WHERE, "</sqlserver>"})
+    /**
+     * 每个数据库的删除语法不相同
+     *
+     * @param query
+     * @return
+     */
+    @Delete({
+            "<default>delete from ${table}", SqlQuery.WHERE, "</default>"
+            , "<sqlserver>delete A from ${table}", SqlQuery.WHERE, "</sqlserver>"
+            , "<mysql>delete A from ${table}", SqlQuery.WHERE, "</mysql>"
+    })
     long deleteByQuery(SqlQuery query);
 }

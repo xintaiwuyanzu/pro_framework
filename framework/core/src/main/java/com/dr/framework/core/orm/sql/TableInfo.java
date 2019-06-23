@@ -5,30 +5,20 @@ import java.util.List;
 /**
  * @author dr
  */
-public interface TableInfo extends Relation {
+public interface TableInfo {
 
     /**
      * 获取所属模块
      *
      * @return
      */
+    @Deprecated
     public String moudle();
-
-    /**
-     * 方法名称规范了
-     *
-     * @return
-     */
-    @Override
-    default String getName() {
-        return table();
-    }
 
     /**
      * 获取一张表的表名
      *
      * @return
-     * @see #getName()
      * @deprecated
      */
     @Deprecated
@@ -39,6 +29,7 @@ public interface TableInfo extends Relation {
      *
      * @return
      */
+    @Deprecated
     public Column pk();
 
     /**

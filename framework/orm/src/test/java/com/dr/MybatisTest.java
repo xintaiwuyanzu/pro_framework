@@ -1,10 +1,12 @@
 package com.dr;
 
 import com.dr.entity.TestEntity;
+import com.dr.entity.TestEntity1;
+import com.dr.entity.TestEntity1Info;
+import com.dr.entity.TestEntityInfo;
 import com.dr.framework.common.dao.CommonMapper;
 import com.dr.framework.common.page.Page;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -26,14 +29,44 @@ public class MybatisTest {
     @Test
     public void testfanxing() {
         Assert.assertNotNull(testMapper);
-        logger.info(ToStringBuilder.reflectionToString(testMapper));
+        logger.info(testMapper.toString());
+    }
+
+    @Test
+    public void testSubQuery() {
+        SqlQuery sqlQuery1 = SqlQuery.from(TestEntity.class, false)
+                .column(TestEntityInfo.ID)
+                .equal(TestEntityInfo.ID
+                        , SqlQuery.from(TestEntity1.class, false)
+                                .column(TestEntity1Info.NAME)
+                                .equal(TestEntity1Info.NAME, "aaaa")
+                                .equal(TestEntity1Info.ID, "bbbb")
+                                .equal(TestEntity1Info.BB, SqlQuery.from(TestEntity.class, false)
+                                        .column(TestEntityInfo.NAME)
+                                        .equal(TestEntityInfo.NAME, "aaaa")
+                                        .equal(TestEntityInfo.ID, "ccc")
+                                )
+                );
+        testMapper.countByQuery(sqlQuery1);
     }
 
     @Test
     public void testQuery() {
         Page<TestEntity> testEntityPage = testMapper.selectPageByQuery(SqlQuery.from(TestEntity.class, true), 10, 30);
-        logger.info(ToStringBuilder.reflectionToString(testEntityPage));
         logger.info(testEntityPage.getData().size() + "");
+    }
+
+    class TestEntity111 extends TestEntity {
+        int count;
+    }
+
+    @Test
+    public void testReturn() {
+        SqlQuery<TestEntity111> sqlQuery = SqlQuery.from(TestEntity.class)
+                .column(TestEntityInfo.ID.count("count"))
+                .setReturnClass(TestEntity111.class);
+        List<TestEntity111> testEntity111 = testMapper.selectByQuery(sqlQuery);
+        logger.warn("aaa:" + testEntity111);
     }
 
     @Test

@@ -13,6 +13,9 @@ import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
 
+/**
+ * @author dr
+ */
 public abstract class AbstractMapperProxy implements InvocationHandler, Serializable {
     protected Class<?> mapperInterface;
 
@@ -56,6 +59,13 @@ public abstract class AbstractMapperProxy implements InvocationHandler, Serializ
         return (method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC)) == Modifier.PUBLIC && method.getDeclaringClass().isInterface();
     }
 
+    /**
+     * 根据实体类class查找对应的mybatis对象
+     *
+     * @param method
+     * @param entityClass
+     * @return
+     */
     protected abstract MybatisConfigurationBean findConfigBean(Method method, Class entityClass);
 
     protected Class<?> findEntityClass(Method method, Object[] args) {

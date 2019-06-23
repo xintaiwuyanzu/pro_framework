@@ -1,6 +1,7 @@
 package com.dr;
 
 import com.dr.entity.TestEntity;
+import com.dr.entity.TestEntity1;
 import com.dr.entity.TestEntity1Info;
 import com.dr.entity.TestEntityInfo;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
@@ -29,6 +30,18 @@ public class SqlTest {
                 .equal(TestEntityInfo.ID)
                 .orderBy(TestEntityInfo.ID);
         System.out.println(sqlQuery);
-        System.out.println(args.getClass().isArray());
+
+        SqlQuery sqlQuery1 = SqlQuery.from(TestEntity.class)
+                .equal(TestEntityInfo.ID
+                        , SqlQuery.from(TestEntity1.class, false)
+                                .column(TestEntity1Info.NAME)
+                );
+        System.out.println(sqlQuery1);
+
+        SqlQuery sqlQuery2 = SqlQuery.from(TestEntity.class)
+                .set(TestEntityInfo.ID, TestEntityInfo.DATECOL);
+
+        System.out.println(sqlQuery2.get("$set"));
+
     }
 }

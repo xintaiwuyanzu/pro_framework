@@ -1,17 +1,12 @@
 package com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure;
 
-import com.dr.framework.core.orm.database.DataBase;
 import com.dr.framework.core.orm.database.DataBaseMetaData;
 import com.dr.framework.core.orm.database.Dialect;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 
 import javax.sql.DataSource;
 import java.io.Closeable;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,7 +19,7 @@ public class MultiDataSourceProperties extends DataSourceProperties {
     public static final String DDL_VALIDATE = "validate";
     public static final String DDL_NONE = "none";
     public static final String DDL_UPDATE = "update";
-    Logger logger = LoggerFactory.getLogger(MultiDataSourceProperties.class);
+
     /**
      * 建表策略
      */
@@ -41,66 +36,15 @@ public class MultiDataSourceProperties extends DataSourceProperties {
      * 是否包含被xa事物管理
      */
     private boolean xa = true;
-
     private DataSource selfManagedDatasource;
     private DataBaseMetaData dataBaseMetaData;
-    private Dialect dialect;
 
-    public Dialect getDialect() {
-        if (dialect == null) {
-            synchronized (MultiDataSourceProperties.class) {
-                if (dialect == null) {
-                    DataBaseMetaData dataBaseMetaData = getDataBaseMetaData();
-                    for (DataBase dataBase : DataBase.values()) {
-                        if (dataBase.match(dataBaseMetaData.getDatabaseProductName())) {
-                            Class<? extends Dialect> dialectClass = dataBase.getDialectClass(dataBaseMetaData);
-                            try {
-                                dialect = dialectClass.newInstance();
-                            } catch (Exception e) {
-                                logger.error("初始化数据库方言失败", e);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return dialect;
-    }
 
-    public DataBaseMetaData getDataBaseMetaData() {
-        if (dataBaseMetaData == null) {
-            synchronized (MultiDataSourceProperties.class) {
-                if (dataBaseMetaData == null) {
-                    Connection connection = null;
-                    try {
-                        connection = getselfManagedConnection();
-                        dataBaseMetaData = DataBaseMetaData.from(connection.getMetaData());
-                    } catch (Exception e) {
-                        logger.error("读取数据库基本信息失败", e);
-                    } finally {
-                        if (connection != null) {
-                            try {
-                                connection.close();
-                            } catch (SQLException e) {
-                                logger.error("关闭数据库链接失败", e);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return dataBaseMetaData;
-    }
-
-    public Connection getselfManagedConnection() throws Exception {
-        return getseleManagedDataSource().getConnection();
-    }
-
-    private synchronized DataSource getseleManagedDataSource() {
-        if (selfManagedDatasource == null) {
-            selfManagedDatasource = initializeDataSourceBuilder().build();
-        }
-        return selfManagedDatasource;
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        super.afterPropertiesSet();
+        selfManagedDatasource = initializeDataSourceBuilder().build();
+        dataBaseMetaData = new DataBaseMetaData(selfManagedDatasource, getName());
     }
 
     /**
@@ -162,5 +106,13 @@ public class MultiDataSourceProperties extends DataSourceProperties {
         if (selfManagedDatasource instanceof Closeable) {
             ((Closeable) selfManagedDatasource).close();
         }
+    }
+
+    public Dialect getDialect() {
+        return getDataBaseMetaData().getDialect();
+    }
+
+    public DataBaseMetaData getDataBaseMetaData() {
+        return dataBaseMetaData;
     }
 }

@@ -16,9 +16,9 @@
 package com.dr.framework.core.orm.support.mybatis.spring.mapper;
 
 import com.dr.framework.core.orm.annotations.Mapper;
+import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.TableInfo;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
-import com.dr.framework.core.orm.support.mybatis.TableInfoProperties;
 import com.dr.framework.core.orm.support.mybatis.spring.MybatisConfigurationBean;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.annotations.ResultMap;
@@ -57,9 +57,12 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @author dr
+ */
 public class MyBatisMapperAnnotationBuilder {
 
-    Logger logger = LoggerFactory.getLogger(MyBatisMapperAnnotationBuilder.class);
+    static final Logger logger = LoggerFactory.getLogger(MyBatisMapperAnnotationBuilder.class);
     private final Set<Class<? extends Annotation>> sqlAnnotationTypes = new HashSet();
     private final Set<Class<? extends Annotation>> sqlProviderAnnotationTypes = new HashSet();
 
@@ -352,6 +355,9 @@ public class MyBatisMapperAnnotationBuilder {
                     keyGenerator = configuration.isUseGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
                 } else {
                     keyGenerator = options.useGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
+
+                    EntityRelation entityRelation = configuration.getDataBaseService().getTableInfo(entityClass);
+
                     TableInfo tableInfo = SqlQuery.getTableInfo(entityClass);
                     keyProperty = options.keyProperty();
                     if ((StringUtils.isEmpty(keyProperty) || keyProperty.equalsIgnoreCase("id")) && options.useGeneratedKeys()) {
@@ -535,7 +541,8 @@ public class MyBatisMapperAnnotationBuilder {
         String sql = String.join(" ", strings);
         sql = configuration.getDataSourceProperties().getDialect().parseDialectSql(sql);
         if (entityClass != null) {
-            sql = PropertyParser.parse(sql, new TableInfoProperties(entityClass, method));
+            EntityRelation entityRelation = configuration.getDataBaseService().getTableInfo(entityClass);
+            sql = PropertyParser.parse(sql, new TableInfoProperties(entityRelation, method));
         }
         if (!sql.startsWith("<script>")) {
             sql = String.join("", "<script>", sql, "</script>");

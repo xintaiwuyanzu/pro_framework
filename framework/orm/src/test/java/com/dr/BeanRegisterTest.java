@@ -17,6 +17,7 @@ public class BeanRegisterTest {
     @Autowired
     TestService testService;
 
+
     @Test
     public void test() {
         System.out.println(dataSource.getClass().getName());

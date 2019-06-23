@@ -2,24 +2,24 @@ package com.dr.entity;
 
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.ColumnType;
-import com.dr.framework.core.orm.annotations.Id;
+import com.dr.framework.core.orm.annotations.Index;
 import com.dr.framework.core.orm.annotations.Table;
 
-@Table(name = "databasechangelog111", comment = "测试表", simple = "测试表", module = "test1")
-public class TestEntity1 {
+@Table(name = "databasechangelog111", comment = "测试表", simple = "测试表", module = "test")
+public class TestEntity1 extends TestEntity2<Boolean, String> {
 
-    @Column(name = "name2", comment = "姓名", simple = "用户名", order = 1)
+    @Index(asc = Index.ASCOrDESC.ASC)
+    @Column(name = "name3", comment = "姓名", simple = "用户名", order = 1)
     String name;
     @Column(name = "comment1", comment = "姓名", simple = "用户名", order = 1)
     String name3;
+    @Index("aaa")
     @Column(name = "name1", comment = "姓名", simple = "用户名", order = 2, length = 1001)
     String name1;
-    @Id
-    @Column(name = "id", comment = "姓名", simple = "用户名")
-    String id;
-    @Column
+    @Index("aaa")
+    @Column(length = 30)
     int intCol;
-    @Column
+    @Column(name = "doubleColaaa")
     double doubleCol;
     @Column
     long longCol;
@@ -50,14 +50,6 @@ public class TestEntity1 {
 
     public void setName1(String name1) {
         this.name1 = name1;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public int getIntCol() {

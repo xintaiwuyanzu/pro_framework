@@ -1,0 +1,10 @@
+path:
+  home: ./target
+  data: ./target/es
+  logs: ./target/logs
+node:
+  data: true
+  master: true
+  name: aaaa
+transport:
+  type: netty4

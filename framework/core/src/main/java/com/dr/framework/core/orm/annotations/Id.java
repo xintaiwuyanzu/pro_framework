@@ -7,8 +7,50 @@ import java.lang.annotation.Target;
 
 /**
  * 标识一个字段是主建
+ *
+ * @author dr
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Id {
+    /**
+     * 主键名称，与{@link #name()}同义
+     *
+     * @return
+     */
+    String value() default "";
+
+    /**
+     * 主键名称，
+     * 如果有联合主键，则设置多个主键名称相同即可
+     *
+     * @return
+     */
+    String name() default "";
+
+    /**
+     * 是否自动生成主键
+     *
+     * @return
+     */
+    boolean auto() default false;
+
+    /**
+     * 联合主键的时候用到了，用来排序使用
+     *
+     * @return
+     */
+    int order() default 0;
+
+    enum AutoGenerateType {
+        /**
+         * 如果列设置为自增，则使用列自增。
+         * 如果
+         */
+        AUTO,
+        /**
+         * 自动创建uuid
+         */
+        UUID,
+    }
 }

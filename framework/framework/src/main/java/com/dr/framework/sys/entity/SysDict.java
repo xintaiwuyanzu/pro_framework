@@ -3,16 +3,21 @@ package com.dr.framework.sys.entity;
 import com.dr.framework.common.entity.BaseStatusEntity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.ColumnType;
+import com.dr.framework.core.orm.annotations.Index;
 import com.dr.framework.core.orm.annotations.Table;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * @author dr
+ */
 @Table(name = "SYS_DICT", comment = "字典表", module = "SYS")
 public class SysDict extends BaseStatusEntity<Integer> {
 
     @Column(name = "type_info", nullable = false)
     private String type;
     @JsonProperty("key")
-    @Column(name = "key_info", nullable = false, unique = true)
+    @Index(unique = true)
+    @Column(name = "key_info", nullable = false)
     private String keyInfo;
     @Column(name = "value_info", type = ColumnType.CLOB)
     private String value;

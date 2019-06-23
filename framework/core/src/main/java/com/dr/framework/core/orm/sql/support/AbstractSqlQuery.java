@@ -39,10 +39,20 @@ abstract class AbstractSqlQuery {
         }
     }
 
+    /**
+     * 将对象转换成sql语句
+     *
+     * @param tableAlias 表别名对象
+     * @param sqlQuery
+     * @return
+     */
     abstract String sql(TableAlias tableAlias, SqlQuery sqlQuery);
 
-
     String formatSql(Column column, TableAlias tableAlias) {
+        return formatSql(column, tableAlias, true);
+    }
+
+    String formatSql(Column column, TableAlias tableAlias, boolean withAlias) {
         StringBuilder sb = new StringBuilder();
         boolean hasFunction = !StringUtils.isEmpty(column.getFunction());
         if (hasFunction) {
@@ -60,7 +70,7 @@ abstract class AbstractSqlQuery {
             }
             sb.append(column.getName());
         }
-        if (!StringUtils.isEmpty(column.getAlias())) {
+        if (withAlias && !StringUtils.isEmpty(column.getAlias())) {
             sb.append(" as ");
             sb.append(column.getAlias());
         }

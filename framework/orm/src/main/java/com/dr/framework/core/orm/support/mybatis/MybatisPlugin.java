@@ -20,6 +20,8 @@ import java.util.Properties;
 /**
  * 拦截ParameterHandler，动态设置sqlquery占位符
  * 拦截Executor 自动实现物理分页功能
+ *
+ * @author dr
  */
 @Intercepts({@Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class}),
         @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}),
@@ -30,6 +32,7 @@ public class MybatisPlugin implements Interceptor {
         Executor executor = (Executor) invocation.getTarget();
         Object[] args = invocation.getArgs();
         MappedStatement mappedStatement = (MappedStatement) args[0];
+
         Object parameter = args[1];
         //给sqlquery设置占位符
         parseSqlQuery(parameter);
@@ -102,15 +105,13 @@ public class MybatisPlugin implements Interceptor {
      * @throws IllegalAccessException
      */
     private void parseSqlQuery(Object parameterObject) {
-        if (parameterObject != null) {
-            if (parameterObject instanceof SqlQuery) {
-                ((SqlQuery) parameterObject).remove(SqlQuery.QUERY_PARAM);
-            } else if (parameterObject instanceof MapperMethod.ParamMap) {
-                for (Object key : ((MapperMethod.ParamMap) parameterObject).keySet()) {
-                    Object value = ((MapperMethod.ParamMap) parameterObject).get(key);
-                    if (value instanceof SqlQuery) {
-                        ((SqlQuery) value).put(SqlQuery.QUERY_PARAM, key);
-                    }
+        if (parameterObject instanceof SqlQuery) {
+            ((SqlQuery) parameterObject).remove(SqlQuery.QUERY_PARAM);
+        } else if (parameterObject instanceof MapperMethod.ParamMap) {
+            for (Object key : ((MapperMethod.ParamMap) parameterObject).keySet()) {
+                Object value = ((MapperMethod.ParamMap) parameterObject).get(key);
+                if (value instanceof SqlQuery) {
+                    ((SqlQuery) value).put(SqlQuery.QUERY_PARAM, key);
                 }
             }
         }

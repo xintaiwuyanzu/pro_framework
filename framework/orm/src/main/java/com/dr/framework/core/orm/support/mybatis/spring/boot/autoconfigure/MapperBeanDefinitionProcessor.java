@@ -73,7 +73,6 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
     private AnnotationAttributes annotationAttributes;
 
     List<String> mapperInterfaces;
-
     List<String> mybatisConfigNames = new ArrayList<>();
 
     public MapperBeanDefinitionProcessor(AnnotationAttributes annotationAttributes) {
@@ -84,7 +83,6 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
         //注册各个mapper接口
         mapperInterfaces = registerMappers(registry, annotationAttributes);
-
         AnnotationAttributes[] databases = annotationAttributes.getAnnotationArray("databases");
         if (databases.length == 0) {
             registerDefaultOrEmberDataSource(registry, DEFAULT_PREFIX, null);

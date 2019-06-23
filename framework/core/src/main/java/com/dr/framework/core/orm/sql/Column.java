@@ -3,6 +3,12 @@ package com.dr.framework.core.orm.sql;
 import org.apache.ibatis.type.JdbcType;
 import org.springframework.util.StringUtils;
 
+/**
+ * 表示数据库列，用来构建数据查询功能
+ *
+ * @author dr
+ * @see com.dr.framework.core.orm.sql.support.SqlQuery
+ */
 public class Column {
     public static Column function(Column column, String function, String alias) {
         Column column1 = new Column(column.table, column.name, column.alias, column.type);
@@ -83,7 +89,10 @@ public class Column {
     private String function;
     /**
      * 数据库类型
+     *
+     * @deprecated 这个属性没用了，计划删除掉
      */
+    @Deprecated
     private JdbcType type;
 
     public Column(String name) {
@@ -108,6 +117,76 @@ public class Column {
         this.type = type;
     }
 
+    public Column alias(String alias) {
+        if (StringUtils.isEmpty(alias)) {
+            return this;
+        } else {
+            Column column = new Column(table, name, alias, type);
+            column.function = function;
+            return column;
+        }
+    }
+
+    public Column function(String function, String alias) {
+        Column column1 = new Column(this.table, this.name, this.alias, this.type);
+        column1.function = function;
+        if (!StringUtils.isEmpty(alias)) {
+            column1.alias = alias;
+        }
+        return column1;
+    }
+
+    public Column function(String function) {
+        return function(function, null);
+    }
+
+    public Column distinct(String alias) {
+        return function("distinct", alias);
+    }
+
+    public Column distinct() {
+        return distinct("");
+    }
+
+    public Column count(String alias) {
+        return function("count", alias);
+    }
+
+    public Column count() {
+        return count("");
+    }
+
+    public Column sum(String alias) {
+        return function("sum", alias);
+    }
+
+    public Column sum() {
+        return sum("");
+    }
+
+    public Column avg(String alias) {
+        return function("avg", alias);
+    }
+
+    public Column avg() {
+        return avg("");
+    }
+
+    public Column max(String alias) {
+        return function("max", alias);
+    }
+
+    public Column max() {
+        return max("");
+    }
+
+    public Column min(String alias) {
+        return function("min", alias);
+    }
+
+    public Column min() {
+        return min("");
+    }
 
     public String getTable() {
         return table.trim();
@@ -129,17 +208,4 @@ public class Column {
         return type;
     }
 
-    public void setType(JdbcType type) {
-        this.type = type;
-    }
-
-    public Column alias(String alias) {
-        if (StringUtils.isEmpty(alias)) {
-            return this;
-        } else {
-            Column column = new Column(table, name, alias, type);
-            column.function = function;
-            return column;
-        }
-    }
 }

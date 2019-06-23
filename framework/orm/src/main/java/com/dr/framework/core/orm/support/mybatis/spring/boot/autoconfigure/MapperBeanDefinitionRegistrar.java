@@ -15,7 +15,12 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure.MapperBeanDefinitionProcessor.PREFIX_KEY;
 
@@ -46,15 +51,22 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
                 BeanDefinition beanDefinition = buildBeanDefinition(dataSourceProperties, true);
                 registerBeanDefintionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
             } else {
+                Set<String> includedModules = new HashSet<>();
                 for (int i = 0; i < databases.length; i++) {
                     AnnotationAttributes database = databases[i];
                     boolean primary = database.getBoolean("primary");
                     MultiDataSourceProperties dataSourceProperties = readDataSourceProties(database.getString(PREFIX_KEY), database.getString("name"));
+                    int setSize = includedModules.size();
+                    includedModules.addAll(dataSourceProperties.getIncludeModules());
+                    Assert.isTrue(setSize + dataSourceProperties.getIncludeModules().size() == includedModules.size()
+                            , String.format("不得在多个数据源【%s】重复声明包含模块：%s"
+                                    , dataSourceProperties.getName()
+                                    , dataSourceProperties.getIncludeModules().stream().collect(Collectors.joining(","))
+                            ));
                     BeanDefinition beanDefinition = buildBeanDefinition(dataSourceProperties, primary);
                     registerBeanDefintionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
                 }
             }
-
             BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(MapperBeanDefinitionProcessor.class)
                     .addConstructorArgValue(annotationAttributes)
                     .getBeanDefinition();
@@ -83,17 +95,16 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
         } else {
             prefix = prefix + "." + name;
         }
-        MultiDataSourceProperties properties = new MultiDataSourceProperties();
-        properties.setBeanClassLoader(classLoader);
-        properties.setName(beanName);
         try {
-            Binder binder = Binder.get(environment);
-            binder.bind(prefix, Bindable.ofInstance(properties));
-            // properties.afterPropertiesSet();
+            MultiDataSourceProperties multiDataSourceProperties = new MultiDataSourceProperties();
+            multiDataSourceProperties.setBeanClassLoader(classLoader);
+            multiDataSourceProperties.setName(beanName);
+            //multiDataSourceProperties.afterPropertiesSet();
+            return Binder.get(environment).bind(prefix, Bindable.ofInstance(multiDataSourceProperties)).get();
         } catch (Exception e) {
             logger.error("没找到指定的jdbc配置信息{},尝试使用内存数据库", prefix);
         }
-        return properties;
+        return null;
     }
 
     /**

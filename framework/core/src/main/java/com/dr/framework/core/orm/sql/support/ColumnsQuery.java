@@ -24,6 +24,11 @@ class ColumnsQuery extends AbstractSqlQuery {
         }
     }
 
+    int columnSize() {
+        return columns.size();
+    }
+
+
     @Override
     String sql(TableAlias tableAlias, SqlQuery sqlQuery) {
         StringBuilder builder = new StringBuilder();

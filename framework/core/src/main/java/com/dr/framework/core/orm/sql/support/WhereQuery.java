@@ -46,7 +46,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    public void orderBy(String alias, boolean desc) {
+    void orderBy(String alias, boolean desc) {
         if (!StringUtils.isEmpty(alias)) {
             orderBys.add(new AliasOrderBy(alias, desc));
         }
@@ -54,6 +54,10 @@ class WhereQuery extends AbstractSqlQuery {
 
     void concatSql(Column column, String prefix, String suffix) {
         whereSqls.concat(AND_, new ConcatSql(column, prefix, suffix));
+    }
+
+    void concatSqlWithQuery(Column column, String prefix, String suffix, SqlQuery query) {
+        whereSqls.concat(AND_, new ConcatTestSqlWithQuery(column, prefix, suffix, query));
     }
 
     void concatSqlWithData(Column column, String prefix, String suffix, Serializable... data) {
@@ -226,20 +230,39 @@ class WhereQuery extends AbstractSqlQuery {
         }
 
         StringBuilder queryParam(SqlQuery sqlQuery) {
-            StringBuilder stringBuilder = new StringBuilder("#{");
-            if (sqlQuery.containsKey((SqlQuery.QUERY_PARAM))) {
-                Object param = sqlQuery.get(SqlQuery.QUERY_PARAM);
-                if (!StringUtils.isEmpty(param)) {
-                    stringBuilder.append(param);
-                    stringBuilder.append(".");
+            return queryParam(sqlQuery, "#");
+        }
+
+        StringBuilder queryParam(SqlQuery sqlQuery, String placeHolder) {
+            if (sqlQuery.parent != null) {
+                StringBuilder sb = queryParam(sqlQuery.parent, placeHolder);
+                return sb.append(sqlQuery.mapKey).append('.');
+            } else {
+                StringBuilder stringBuilder = new StringBuilder(placeHolder)
+                        .append("{");
+                if (sqlQuery.containsKey((SqlQuery.QUERY_PARAM))) {
+                    Object param = sqlQuery.get(SqlQuery.QUERY_PARAM);
+                    if (!StringUtils.isEmpty(param)) {
+                        stringBuilder.append(param);
+                        stringBuilder.append(".");
+                    }
                 }
+                return stringBuilder;
             }
-            return stringBuilder;
         }
 
         StringBuilder columnKey(SqlQuery sqlQuery, String key) {
             return queryParam(sqlQuery).append(key).append("}");
         }
+
+        StringBuilder columnKey(SqlQuery sqlQuery, String key, String placeHolder) {
+            return queryParam(sqlQuery, placeHolder).append(key).append("}");
+        }
+
+        StringBuilder columnKey(SqlQuery sqlQuery, String key, String placeHolder, String suffix) {
+            return queryParam(sqlQuery, placeHolder).append(key).append(suffix).append("}");
+        }
+
 
         abstract boolean test(MetaObject metaobject);
 
@@ -253,11 +276,22 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
+    class NoParamSql extends TrueSql {
+
+        Column left;
+        Column right;
+
+        @Override
+        String getSql(TableAlias alias, SqlQuery sqlQuery) {
+            return null;
+        }
+    }
+
     class PureSql extends WhereSql {
         Column column;
         String sql;
 
-        public PureSql(Column column, String sql) {
+        PureSql(Column column, String sql) {
             this.column = column;
             this.sql = sql;
         }
@@ -285,7 +319,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
 
         @Override
-        public String getSql(TableAlias alias, SqlQuery sqlQuery) {
+        String getSql(TableAlias alias, SqlQuery sqlQuery) {
             String sql = "";
             if (sqlQuery.containsKey(SqlQuery.ENTITY_KEY)) {
                 sql = formatColumn(column, alias).append(preffix).append(columnKey(column, sqlQuery)).append(suffix).toString();
@@ -309,13 +343,54 @@ class WhereQuery extends AbstractSqlQuery {
         }
 
         @Override
-        public boolean test(MetaObject metaobject) {
+        boolean test(MetaObject metaobject) {
             Object object = metaobject.getValue(SqlQuery.ENTITY_KEY);
             if (object != null) {
                 return !StringUtils.isEmpty(metaobject.getValue(SqlQuery.ENTITY_KEY + "." + column.getAlias()));
             } else {
                 return false;
             }
+        }
+    }
+
+    class ConcatTestSqlWithQuery extends WhereSql {
+        Column column;
+        String preffix;
+        String suffix;
+        SqlQuery data;
+
+        ConcatTestSqlWithQuery(Column column, String preffix, String suffix, SqlQuery data) {
+            this.column = column;
+            this.preffix = preffix;
+            this.suffix = suffix;
+            this.data = data;
+        }
+
+        @Override
+        boolean test(MetaObject metaobject) {
+            boolean tested = data.columnSize() == 1;
+            if (!tested) {
+                SqlQuery.logger.warn("子查询语句返回列只能为一行");
+            }
+            return tested;
+        }
+
+        @Override
+        String getSql(TableAlias alias, SqlQuery sqlQuery) {
+            String key = getColumnKey();
+            data.parent = sqlQuery;
+            data.mapKey = key;
+            sqlQuery.put(key, data);
+            return formatColumn(column, alias)
+                    .append(preffix)
+                    .append("(select ")
+                    .append(data.get("$columns"))
+                    .append(' ')
+                    .append(data.get("$from"))
+                    .append(' ')
+                    .append(data.get("$whereno"))
+                    .append(")")
+                    .append(suffix).toString();
         }
     }
 
@@ -341,7 +416,10 @@ class WhereQuery extends AbstractSqlQuery {
         String getSql(TableAlias alias, SqlQuery sqlQuery) {
             String key = getColumnKey();
             sqlQuery.put(key, data);
-            return formatColumn(column, alias).append(preffix).append(columnKey(sqlQuery, key)).append(suffix).toString();
+            return formatColumn(column, alias)
+                    .append(preffix)
+                    .append(columnKey(sqlQuery, key))
+                    .append(suffix).toString();
         }
     }
 
@@ -350,7 +428,7 @@ class WhereQuery extends AbstractSqlQuery {
         Comparable start,
                 end;
 
-        public Between(Column column, Comparable start, Comparable end) {
+        Between(Column column, Comparable start, Comparable end) {
             this.column = column;
             this.start = start;
             this.end = end;
@@ -444,7 +522,7 @@ class WhereQuery extends AbstractSqlQuery {
     class ColumnOrderBy extends OrderBy {
         Column column;
 
-        public ColumnOrderBy(Column column, boolean desc) {
+        ColumnOrderBy(Column column, boolean desc) {
             super(desc);
             this.column = column;
         }
@@ -467,7 +545,7 @@ class WhereQuery extends AbstractSqlQuery {
     class AliasOrderBy extends OrderBy {
         String alias;
 
-        public AliasOrderBy(String alias, boolean desc) {
+        AliasOrderBy(String alias, boolean desc) {
             super(desc);
             this.alias = alias;
         }

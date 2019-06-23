@@ -8,6 +8,8 @@ import java.sql.Types;
 
 /**
  * 标识一张表字段
+ *
+ * @author dr
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -38,7 +40,7 @@ public @interface Column {
      *
      * @return
      */
-    int order() default Integer.MIN_VALUE;
+    int order() default 0;
 
     /**
      * 可否为空
@@ -46,13 +48,6 @@ public @interface Column {
      * @return
      */
     boolean nullable() default true;
-
-    /**
-     * 是否唯一
-     *
-     * @return
-     */
-    boolean unique() default false;
 
     /**
      * 是否可插入
@@ -76,10 +71,12 @@ public @interface Column {
     int length() default 255;
 
     /**
-     * 精度，数字类型时小数点前最大有几位
+     * 精度，数字类型时总共有几位
      *
      * @return
+     * @deprecated 可以使用 {@link #length} 替代，将来计划去掉此属性
      */
+    @Deprecated
     int precision() default 0;
 
     /**
@@ -105,7 +102,8 @@ public @interface Column {
     int jdbcType() default Types.NULL;
 
     /**
-     * 链接信息
+     * TODO 现在不处理外键信息
+     * 外键链接信息
      *
      * @return
      */

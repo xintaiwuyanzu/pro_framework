@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 连表查询数据
+ */
 class JoinColumns {
     Map<String, List<Column[]>> columnMap = new HashMap<>();
 

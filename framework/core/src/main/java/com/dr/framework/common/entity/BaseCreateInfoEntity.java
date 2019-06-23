@@ -3,12 +3,17 @@ package com.dr.framework.common.entity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.ColumnType;
 
+/**
+ * 基本信息类
+ *
+ * @author dr
+ */
 public class BaseCreateInfoEntity extends BaseEntity implements CreateInfoEntity {
-    @Column(comment = "创建日期", length = 20, type = ColumnType.DATE, order = 2)
+    @Column(comment = "创建日期", type = ColumnType.DATE, order = 2)
     private long createDate;
     @Column(comment = "创建人ID", simple = "创建人", length = 100, order = 3)
     private String createPerson;
-    @Column(comment = "更新日期", length = 20, type = ColumnType.DATE, order = 4)
+    @Column(comment = "更新日期", type = ColumnType.DATE, order = 4)
     private long updateDate;
     @Column(comment = "更新人ID", simple = "更新人", length = 100, order = 5)
     private String updatePerson;

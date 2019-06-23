@@ -4,7 +4,7 @@ import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Id;
 import com.dr.framework.core.orm.annotations.Table;
 import com.dr.support.codegen.db.SqlReservedWords;
-import liquibase.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -29,6 +29,9 @@ import java.util.*;
 import static com.dr.framework.core.orm.sql.support.SqlQuery.QUERY_CLASS_SUFFIX;
 import static com.dr.support.codegen.CodeGenProcessor.CHECK_WORDS_OPTION;
 
+/**
+ * @author dr
+ */
 @SupportedAnnotationTypes("com.dr.framework.core.orm.annotations.Table")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedOptions(CHECK_WORDS_OPTION)
@@ -86,9 +89,9 @@ public class CodeGenProcessor extends AbstractProcessor {
             if (StringUtils.isEmpty(comment)) {
                 comment = tableName;
             }
-            List<Map<String, String>> cols = new ArrayList<>();
-            readCols(typeElement, typeElement, checkWordKind, cols, colNames, tableName, comment, vc);
-            vc.put("cols", cols);
+            Map<String, Map<String, String>> colNameMap = new HashMap<>();
+            readCols(typeElement, typeElement, checkWordKind, colNameMap, colNames, tableName, comment, vc);
+            vc.put("cols", colNameMap.values());
             Writer writer = jfo.openWriter();
             getVelocityEngine().getTemplate("entityHelper.vm").merge(vc, writer);
             writer.close();
@@ -98,7 +101,7 @@ public class CodeGenProcessor extends AbstractProcessor {
         }
     }
 
-    private void readCols(Element implace, Element typeElement, Diagnostic.Kind checkWordKind, List<Map<String, String>> cols, List<String> colNames, String tableName, String comment, VelocityContext vc) {
+    private void readCols(Element implace, Element typeElement, Diagnostic.Kind checkWordKind, Map<String, Map<String, String>> cols, List<String> colNames, String tableName, String comment, VelocityContext vc) {
         if (typeElement instanceof TypeElement) {
             TypeMirror typeMirror = ((TypeElement) typeElement).getSuperclass();
             if (typeMirror != null) {
@@ -167,7 +170,16 @@ public class CodeGenProcessor extends AbstractProcessor {
                     if (element2.getAnnotation(Id.class) != null) {
                         vc.put("pk", element2.getSimpleName().toString());
                     }
-                    cols.add(map);
+                    if (cols.containsKey(map.get("key"))) {
+                        messager.printMessage(Diagnostic.Kind.ERROR,
+                                String.format("实体类【%s】存在重复的字段定义【%s】"
+                                        , typeElement
+                                        , element2.getSimpleName()
+                                )
+                        );
+                    } else {
+                        cols.put(map.get("key"), map);
+                    }
                 });
     }
 

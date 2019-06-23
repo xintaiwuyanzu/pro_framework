@@ -7,6 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * 标识一张表
+ *
+ * @author dr
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -18,4 +20,17 @@ public @interface Table {
     String simple() default "";
 
     String module() default "default";
+
+    /**
+     * @return true 表示表，false表示视图
+     */
+    boolean isTable() default true;
+
+    /**
+     * 当对应的表是视图的时候，需要手动声明创建语句
+     *
+     * @return
+     */
+    String createSql() default "";
+
 }
