@@ -190,6 +190,7 @@ public class DataBaseMetaData {
 
     private synchronized Map<String, Relation<Column>> forceLoadTables(String tableName) {
         try (Connection connection = openSelfManagedConnection()) {
+            tableName = dialect.convertObjectName(tableName);
             DatabaseMetaData databaseMetaData = connection.getMetaData();
             //查询表信息
             Map<String, Relation<Column>> concurrentMap = dialect.parseTableInfo(databaseMetaData.getTables(getCatalog(), getSchema(), dialect.convertObjectName(tableName), dialect.getTableTypes()))
