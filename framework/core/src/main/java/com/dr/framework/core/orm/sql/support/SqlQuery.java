@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +32,12 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     public static final String ENTITY_KEY = "ENTITY";
     static protected Logger logger = LoggerFactory.getLogger(SqlQuery.class);
     private static Map<Class, Class<? extends TableInfo>> sqlQueryMap = Collections.synchronizedMap(new HashMap<>());
+
+    @FunctionalInterface
+    public
+    interface SerializableFunction<T, R> extends Function<T, R> {
+
+    }
 
     /**
      * 根据model类获取该类的query帮助类

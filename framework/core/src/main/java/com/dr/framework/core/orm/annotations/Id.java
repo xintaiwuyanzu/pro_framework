@@ -16,7 +16,7 @@ public @interface Id {
     /**
      * 主键名称，与{@link #name()}同义
      *
-     * @return
+     * @return 返回主键名称
      */
     String value() default "";
 
@@ -24,21 +24,21 @@ public @interface Id {
      * 主键名称，
      * 如果有联合主键，则设置多个主键名称相同即可
      *
-     * @return
+     * @return 返回主键名称
      */
     String name() default "";
 
     /**
      * 是否自动生成主键
      *
-     * @return
+     * @return 返回字段是否自动生成主键
      */
     boolean auto() default false;
 
     /**
      * 联合主键的时候用到了，用来排序使用
      *
-     * @return
+     * @return 返回字段排序
      */
     int order() default 0;
 

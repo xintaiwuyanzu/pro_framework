@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -56,16 +57,16 @@ public class MybatisTest {
         logger.info(testEntityPage.getData().size() + "");
     }
 
-    class TestEntity111 extends TestEntity {
+    public static class TestEntity111 extends TestEntity {
         int count;
     }
 
     @Test
     public void testReturn() {
-        SqlQuery<TestEntity111> sqlQuery = SqlQuery.from(TestEntity.class)
+        SqlQuery<Map> sqlQuery = SqlQuery.from(TestEntity.class)
                 .column(TestEntityInfo.ID.count("count"))
-                .setReturnClass(TestEntity111.class);
-        List<TestEntity111> testEntity111 = testMapper.selectByQuery(sqlQuery);
+                .setReturnClass(Map.class);
+        List<Map> testEntity111 = testMapper.selectByQuery(sqlQuery);
         logger.warn("aaa:" + testEntity111);
     }
 

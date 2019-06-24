@@ -1,5 +1,6 @@
 package com.dr.framework.core.orm.sql;
 
+import com.dr.framework.core.orm.sql.support.SqlQuery;
 import org.apache.ibatis.type.JdbcType;
 import org.springframework.util.StringUtils;
 
@@ -94,6 +95,10 @@ public class Column {
      */
     @Deprecated
     private JdbcType type;
+
+    public Column(SqlQuery.SerializableFunction<Object, Object> sf) {
+        System.out.println(sf);
+    }
 
     public Column(String name) {
         this.name = name;

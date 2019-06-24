@@ -44,4 +44,8 @@ public class SqlTest {
         System.out.println(sqlQuery2.get("$set"));
 
     }
+
+    void aa() {
+
+    }
 }
