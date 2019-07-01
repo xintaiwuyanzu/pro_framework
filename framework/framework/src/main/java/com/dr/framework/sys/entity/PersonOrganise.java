@@ -1,11 +1,16 @@
 package com.dr.framework.sys.entity;
 
-import com.dr.framework.common.entity.BaseEntity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.util.Constants;
 
-@Table(name = "sys_person_organise", comment = "用户和机构的关联表", module = "sys")
-public class PersonOrganise extends BaseEntity {
+/**
+ * 人员机构关联表
+ *
+ * @author dr
+ */
+@Table(name = Constants.SYS_TABLE_PREFIX + "person_organise", comment = "用户和机构的关联表", module = Constants.SYS_MODULE_NAME)
+public class PersonOrganise {
     @Column(name = "person_id", comment = "用户id", length = 100)
     private String personId;
     @Column(name = "organise_id", comment = "机构id", length = 100)

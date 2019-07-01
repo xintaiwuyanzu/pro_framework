@@ -1,5 +1,8 @@
 package com.dr.framework.common.entity;
 
+/**
+ * @author dr
+ */
 public interface StatusEntity<T> extends OrderEntity {
     public final Integer STATUS_ENABLE = 1;
     public final Integer STATUS_DISABLE = 0;

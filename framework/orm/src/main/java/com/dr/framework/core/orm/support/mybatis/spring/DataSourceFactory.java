@@ -38,7 +38,7 @@ public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoad
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (properties.isXa()) {
+        if (properties.isUseXa()) {
             try {
                 XADataSource xaDataSource = createXaDataSource();
                 XADataSourceWrapper wrapper = beanFactory.getBean(XADataSourceWrapper.class);

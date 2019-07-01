@@ -71,7 +71,10 @@ public interface CommonMapper {
      * @param entity
      * @return
      */
-    @Update({"<default>update ${table} ${set} where ${pk}=${id}</default>", "<sqlserver>update A ${set} from ${table} where ${pk}=${id}</sqlserver>"})
+    @Update({
+            "<default>update ${table} ${set} where ${pk}=${id}</default>"
+            , "<sqlserver>update A ${set} from ${table} where ${pk}=${id}</sqlserver>"
+    })
     <E> long updateById(E entity);
 
     /**
@@ -80,13 +83,22 @@ public interface CommonMapper {
      * @param sqlQuery
      * @return
      */
-    @Update({"<default>update", SqlQuery.TABLE, "${set}", SqlQuery.WHERE, "</default><sqlserver>update A", "${set}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"})
+    @Update({
+            "<default>update", SqlQuery.TABLE, "${set}", SqlQuery.WHERE, "</default>"
+            , "<sqlserver>update A", "${set}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"
+    })
     <E> long updateByQuery(SqlQuery<E> sqlQuery);
 
-    @Update({"<default>update ${table} ${settest} where ${pk} =${id}</default>", "<sqlserver>update A ${settest} from ${table} where ${pk} =${id}</sqlserver>"})
+    @Update({
+            "<default>update ${table} ${settest} where ${pk} =${id}</default>"
+            , "<sqlserver>update A ${settest} from ${table} where ${pk} =${id}</sqlserver>"
+    })
     <E> long updateIgnoreNullById(E entity);
 
-    @Update({"<default>update", SqlQuery.TABLE, "${settest}", SqlQuery.WHERE, "</default><sqlserver>update A ${settest}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"})
+    @Update({
+            "<default>update", SqlQuery.TABLE, "${settest}", SqlQuery.WHERE, "</default>"
+            , "<sqlserver>update A ${settest}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"
+    })
     <E> long updateIgnoreNullByQuery(SqlQuery<E> sqlQuery);
 
     /**
@@ -127,8 +139,9 @@ public interface CommonMapper {
     @Select("select count(${pk}) from ${table} where ${pk}=${id}")
     boolean exists(Class entityClass, @Param("id") Serializable id);
 
-    @Select({"select count(${pk})", SqlQuery.FROM, SqlQuery.WHERE})
-    boolean existsByQuery(SqlQuery query);
+    default boolean existsByQuery(SqlQuery query) {
+        return countByQuery(query) > 0;
+    }
 
     /**
      * 查询所有的数据条数

@@ -4,9 +4,13 @@ import com.dr.framework.common.entity.BaseStatusEntity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.ColumnType;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.util.Constants;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@Table(name = "sys_user_login", comment = "登陆用户", module = "sys")
+/**
+ * @author dr
+ */
+@Table(name = Constants.SYS_TABLE_PREFIX + "user_login", comment = "登陆用户", module = Constants.SYS_MODULE_NAME)
 public class UserLogin extends BaseStatusEntity<Integer> {
     @Column(name = "person_id", comment = "用户id", length = 100, joins = @Column.Join(table = Person.class, column = "id"))
     private String personId;
@@ -17,6 +21,10 @@ public class UserLogin extends BaseStatusEntity<Integer> {
     private String password;
     @Column(name = "salt", comment = "加密盐", length = 100)
     private String salt;
+
+    @Column(name = "sys_id", comment = "所属子系统")
+    private String sysId;
+
     /**
      * 内部用户，外部用户等等
      */
@@ -186,5 +194,13 @@ public class UserLogin extends BaseStatusEntity<Integer> {
 
     public void setPwdAnswer3(String pwdAnswer3) {
         this.pwdAnswer3 = pwdAnswer3;
+    }
+
+    public String getSysId() {
+        return sysId;
+    }
+
+    public void setSysId(String sysId) {
+        this.sysId = sysId;
     }
 }

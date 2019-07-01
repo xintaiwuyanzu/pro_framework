@@ -355,17 +355,20 @@ public class MyBatisMapperAnnotationBuilder {
                     keyGenerator = configuration.isUseGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
                 } else {
                     keyGenerator = options.useGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
-
                     EntityRelation entityRelation = configuration.getDataBaseService().getTableInfo(entityClass);
 
-                    TableInfo tableInfo = SqlQuery.getTableInfo(entityClass);
+                    if (entityRelation.primaryKeyColumns().size() != 1 && options.useGeneratedKeys()) {
+                        logger.warn("方法{}对应的sql语句为{}，包含了主键自增", method, sqlSource);
+                        logger.warn("实体类{}主键数量为{}，忽略自动映射sql语句", entityClass, entityRelation.primaryKeyColumns().size());
+                        return;
+                    }
                     keyProperty = options.keyProperty();
                     if ((StringUtils.isEmpty(keyProperty) || keyProperty.equalsIgnoreCase("id")) && options.useGeneratedKeys()) {
-                        keyProperty = tableInfo.pk().getAlias();
+                        keyProperty = entityRelation.getPrimaryKeyAlias();
                     }
                     keyColumn = options.keyColumn();
                     if (StringUtils.isEmpty(keyColumn) && options.useGeneratedKeys()) {
-                        keyColumn = tableInfo.pk().getName();
+                        keyColumn = entityRelation.getPrimaryKeyAlias();
                     }
                 }
             } else {
@@ -542,7 +545,13 @@ public class MyBatisMapperAnnotationBuilder {
         sql = configuration.getDataSourceProperties().getDialect().parseDialectSql(sql);
         if (entityClass != null) {
             EntityRelation entityRelation = configuration.getDataBaseService().getTableInfo(entityClass);
-            sql = PropertyParser.parse(sql, new TableInfoProperties(entityRelation, method));
+            TableInfoProperties tableInfoProperties = new TableInfoProperties(entityRelation, method);
+            sql = PropertyParser.parse(sql, tableInfoProperties);
+            if (tableInfoProperties.pkUsed && entityRelation.primaryKeyColumns().size() != 1) {
+                logger.warn("方法{}对应的sql语句为{}，包含了主键引用", method, sql);
+                logger.warn("实体类{}主键数量为{}，忽略自动映射sql语句", entityClass, entityRelation.primaryKeyColumns().size());
+                return null;
+            }
         }
         if (!sql.startsWith("<script>")) {
             sql = String.join("", "<script>", sql, "</script>");

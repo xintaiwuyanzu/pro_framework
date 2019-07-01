@@ -35,6 +35,8 @@ class TableInfoProperties extends Properties {
     private boolean isInsert;
     private String tableAlias = "A";
     private String queryTemplate = "${%s}";
+    boolean pkUsed = false;
+    private boolean hasSqlQuery = false;
 
     TableInfoProperties(EntityRelation tableInfo, Method method) {
         this.tableInfo = tableInfo;
@@ -68,6 +70,7 @@ class TableInfoProperties extends Properties {
             }
             if (type == SqlQuery.class) {
                 sqlQueryParamKey = name;
+                hasSqlQuery = true;
             }
         }
         if (!StringUtils.isEmpty(sqlQueryParamKey)) {
@@ -130,6 +133,7 @@ class TableInfoProperties extends Properties {
                 case PK_KEY:
                     //TODO 处理没有主键和联合主键的情况
                     value = tableAlias + "." + tableInfo.primaryKeyColumns().stream().collect(Collectors.joining());
+                    pkUsed = true;
                     break;
                 case PK_KEY_ALIAS:
                     value = "#{" + tableInfo.getPrimaryKeyAlias() + "}";
@@ -141,7 +145,10 @@ class TableInfoProperties extends Properties {
                     value = " set " + join(true, "%3$s.%1$s = #{%2$s,jdbcType=%4$s}", ",");
                     break;
                 case SET_TEST_KEY:
-                    value = String.format("<set><if test=\"$set!=null\">${$setQ},</if>%s</set>"
+                    value = String.format(
+                            hasSqlQuery ?
+                                    "<set><if test=\"$set!=null\">${$setQ},</if>%s</set>"
+                                    : "<set>%s</set>"
                             , join(true
                                     , column ->
                                             isDate(column.getType()) ?

@@ -4,8 +4,10 @@ import org.springframework.util.StringUtils;
 
 /**
  * 用来封装返回数据的
+ *
+ * @author dr
  */
-public class ResultEntity {
+public class ResultEntity<T> {
     /**
      * 200	请求成功
      * 400	缺少请求参数
@@ -16,39 +18,39 @@ public class ResultEntity {
     private String code;
     private String message;
     private boolean success;
-    private Object data;
+    private T data;
 
     public static ResultEntity success() {
         return new ResultEntity(true, null, null);
     }
 
-    public static ResultEntity success(Object data) {
-        return new ResultEntity(true, null, data);
+    public static <T> ResultEntity success(T data) {
+        return new ResultEntity<T>(true, null, data);
     }
 
 
-    public static ResultEntity success(String message, Object data) {
-        return new ResultEntity(true, message, data);
+    public static <T> ResultEntity success(String message, T data) {
+        return new ResultEntity<T>(true, message, data);
     }
 
     public static ResultEntity error(String msg) {
         return new ResultEntity(false, msg, null);
     }
 
-    public static ResultEntity error(Object data) {
-        return new ResultEntity(false, null, data);
+    public static <T> ResultEntity error(T data) {
+        return new ResultEntity<T>(false, null, data);
     }
 
-    public static ResultEntity error(String message, Object data) {
-        return new ResultEntity(false, message, data);
+    public static <T> ResultEntity error(String message, T data) {
+        return new ResultEntity<T>(false, message, data);
     }
 
-    public static ResultEntity error(String message, String code, Object data) {
-        return new ResultEntity(false, message, code, data);
+    public static <T> ResultEntity error(String message, String code, T data) {
+        return new ResultEntity<T>(false, message, code, data);
     }
 
 
-    public ResultEntity(boolean success, String message, Object data) {
+    public ResultEntity(boolean success, String message, T data) {
         this.success = success;
         if (success) {
             this.code = "200";
@@ -67,7 +69,7 @@ public class ResultEntity {
         this.data = data;
     }
 
-    public ResultEntity(boolean success, String message, String code, Object data) {
+    public ResultEntity(boolean success, String message, String code, T data) {
         this.code = code;
         this.message = message;
         this.success = success;
@@ -98,11 +100,11 @@ public class ResultEntity {
         this.success = success;
     }
 
-    public Object getData() {
+    public T getData() {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(T data) {
         this.data = data;
     }
 

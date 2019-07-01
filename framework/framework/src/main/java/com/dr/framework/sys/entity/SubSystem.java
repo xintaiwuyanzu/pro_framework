@@ -3,8 +3,14 @@ package com.dr.framework.sys.entity;
 import com.dr.framework.common.entity.BaseStatusEntity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.util.Constants;
 
-@Table(name = "sys_sub_system", module = "sys", comment = "子系统基本信息")
+/**
+ * 多系统
+ *
+ * @author dr
+ */
+@Table(name = Constants.SYS_TABLE_PREFIX + "sub_system", module = Constants.SYS_MODULE_NAME, comment = "子系统基本信息")
 public class SubSystem extends BaseStatusEntity<String> {
     /**
      * 默认系统id

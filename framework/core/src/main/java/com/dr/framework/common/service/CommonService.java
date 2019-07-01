@@ -136,7 +136,7 @@ public class CommonService {
      * 根据id查询表中的单条数据
      */
     @Transactional(readOnly = true, rollbackFor = Exception.class)
-    public Object findById(Class entityClass, String id) {
+    public <E> E findById(Class<E> entityClass, String id) {
         return commonMapper.selectById(entityClass, id);
     }
 

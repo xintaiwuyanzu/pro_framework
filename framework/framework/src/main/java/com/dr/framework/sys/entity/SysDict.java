@@ -5,12 +5,13 @@ import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.ColumnType;
 import com.dr.framework.core.orm.annotations.Index;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.util.Constants;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author dr
  */
-@Table(name = "SYS_DICT", comment = "字典表", module = "SYS")
+@Table(name = Constants.SYS_TABLE_PREFIX + "DICT", comment = "字典表", module = Constants.SYS_MODULE_NAME)
 public class SysDict extends BaseStatusEntity<Integer> {
 
     @Column(name = "type_info", nullable = false)

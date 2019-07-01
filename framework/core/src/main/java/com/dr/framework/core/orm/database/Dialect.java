@@ -186,7 +186,7 @@ public abstract class Dialect {
                 String columnName = resultSet.getString("COLUMN_NAME");
                 int columnIndex = resultSet.getInt("ORDINAL_POSITION");
                 String asc = resultSet.getString("ASC_OR_DESC");
-                TrueOrFalse trueOrFalse = "D".equalsIgnoreCase(asc) ? TrueOrFalse.TRUE : TrueOrFalse.FALSE;
+                TrueOrFalse trueOrFalse = "D".equalsIgnoreCase(asc) ? TrueOrFalse.FALSE : TrueOrFalse.TRUE;
               /*  if (indexType == DatabaseMetaData.tableIndexClustered) {
                     //聚簇索引一般是数据库主键，索引直接指向了一条数据的根节点
                     //这里直接认为聚簇索引就是主键了

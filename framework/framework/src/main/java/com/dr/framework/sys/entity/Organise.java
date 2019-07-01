@@ -4,9 +4,16 @@ import com.dr.framework.common.entity.BaseTreeEntity;
 import com.dr.framework.common.entity.SourceRefEntity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.util.Constants;
 
-@Table(name = "sys_organise", comment = "组织机构", module = "sys")
+/**
+ * 组织机构
+ *
+ * @author dr
+ */
+@Table(name = Constants.SYS_TABLE_PREFIX + "organise", comment = "组织机构", module = Constants.SYS_MODULE_NAME)
 public class Organise extends BaseTreeEntity<String> implements SourceRefEntity {
+    public static final String DEFAULT_ROOT_ID = "root";
     @Column(name = "organise_name", comment = "机构名称", length = 100)
     private String organiseName;
     @Column(name = "organise_old_name", comment = "原机构名称", length = 100)

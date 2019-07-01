@@ -35,7 +35,7 @@ public class MultiDataSourceProperties extends DataSourceProperties {
     /**
      * 是否包含被xa事物管理
      */
-    private boolean xa = true;
+    private boolean useXa = true;
     private DataSource selfManagedDatasource;
     private DataBaseMetaData dataBaseMetaData;
 
@@ -91,12 +91,12 @@ public class MultiDataSourceProperties extends DataSourceProperties {
         this.excludeModules = excludeModules;
     }
 
-    public boolean isXa() {
-        return xa;
+    public boolean isUseXa() {
+        return useXa;
     }
 
-    public void setXa(boolean xa) {
-        this.xa = xa;
+    public void setUseXa(boolean useXa) {
+        this.useXa = useXa;
     }
 
     public void close() throws Exception {

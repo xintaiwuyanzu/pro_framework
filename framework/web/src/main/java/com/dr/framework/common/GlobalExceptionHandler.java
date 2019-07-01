@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * 定义全局异常处理
+ *
+ * @author dr
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -18,7 +20,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public ResultEntity handleEmployeeNotFoundException(HttpServletRequest request, Exception ex) {
+    public ResultEntity<String> handleEmployeeNotFoundException(HttpServletRequest request, Exception ex) {
         logger.warn("服务器错误", ex);
         if (judgeIsMoblie(request)) {
             return ResultEntity.error("服务器链接超时。");

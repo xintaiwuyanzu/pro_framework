@@ -3,16 +3,36 @@ package com.dr.framework.sys.entity;
 import com.dr.framework.common.entity.BaseStatusEntity;
 import com.dr.framework.common.entity.SourceRefEntity;
 import com.dr.framework.core.orm.annotations.Column;
+import com.dr.framework.core.orm.annotations.ColumnType;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.util.Constants;
 
-@Table(name = "sys_person", comment = "用户", module = "sys")
+/**
+ * 系统用户表
+ *
+ * @author dr
+ */
+@Table(name = Constants.SYS_TABLE_PREFIX + "person", comment = "用户", module = Constants.SYS_MODULE_NAME)
 public class Person extends BaseStatusEntity<String> implements SourceRefEntity {
     @Column(name = "user_name", comment = "用户姓名", length = 500)
     private String userName;
     @Column(name = "nick_name", comment = "用户别名", length = 500)
     private String nickName;
+    @Column(name = "remark", comment = "备注", length = 200)
+    private String remark;
     @Column(name = "user_code", comment = "用户编号", length = 200)
     private String userCode;
+    @Column(name = "id_no", comment = "身份证号", length = 20)
+    private String idNo;
+    /**
+     * 出生日期
+     * 格式YYYYMMDD
+     * 可以从身份证中提取出来，
+     * 范围查询的时候用到了
+     */
+    @Column(comment = "出生日期", length = 10)
+    private long birthday;
+
     /**
      * 多个可以使用
      *
@@ -31,11 +51,17 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
     private String mobile;
     @Column(name = "phone", comment = "电话", length = 200)
     private String phone;
+    /**
+     * 可以从身份证中提取出来
+     * 1是男性
+     * 0是女性
+     * -1是未知
+     */
     @Column(name = "sex", comment = "性别")
     private int sex;
     @Column(name = "nation", comment = "民族", length = 10)
     private String nation;
-
+    @Column(comment = "微信账号", length = 200)
     private String weiChatId;
     @Column(name = "qq", comment = "qq账号", length = 200)
     private String qq;
@@ -58,6 +84,18 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
 
     @Column(name = "source_ref", comment = "数据来源", length = 100)
     private String sourceRef;
+
+    @Column(name = "sys_id", comment = "所属子系统")
+    private String sysId;
+
+    @Column(comment = "启用日期", type = ColumnType.DATE)
+    private long enableDate;
+    @Column(comment = "启用人ID", simple = "创建人", length = 100)
+    private String enablePerson;
+    @Column(comment = "禁用日期", type = ColumnType.DATE)
+    private long disableDate;
+    @Column(comment = "禁用人ID", simple = "更新人", length = 100)
+    private String disablePerson;
 
     @Override
     public String getSourceRef() {
@@ -179,5 +217,69 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getSysId() {
+        return sysId;
+    }
+
+    public void setSysId(String sysId) {
+        this.sysId = sysId;
+    }
+
+    public long getEnableDate() {
+        return enableDate;
+    }
+
+    public void setEnableDate(long enableDate) {
+        this.enableDate = enableDate;
+    }
+
+    public String getEnablePerson() {
+        return enablePerson;
+    }
+
+    public void setEnablePerson(String enablePerson) {
+        this.enablePerson = enablePerson;
+    }
+
+    public long getDisableDate() {
+        return disableDate;
+    }
+
+    public void setDisableDate(long disableDate) {
+        this.disableDate = disableDate;
+    }
+
+    public String getDisablePerson() {
+        return disablePerson;
+    }
+
+    public void setDisablePerson(String disablePerson) {
+        this.disablePerson = disablePerson;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public String getIdNo() {
+        return idNo;
+    }
+
+    public void setIdNo(String idNo) {
+        this.idNo = idNo;
+    }
+
+    public long getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(long birthday) {
+        this.birthday = birthday;
     }
 }

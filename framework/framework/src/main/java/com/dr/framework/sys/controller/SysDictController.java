@@ -2,6 +2,8 @@ package com.dr.framework.sys.controller;
 
 import com.dr.framework.common.controller.BaseController;
 import com.dr.framework.common.entity.ResultEntity;
+import com.dr.framework.common.entity.ResultListEntity;
+import com.dr.framework.common.entity.TreeNode;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.sys.entity.SysDict;
 import com.dr.framework.sys.entity.SysDictInfo;
@@ -13,6 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * 系统字典
+ *
+ * @author dr
+ */
 @RestController
 @RequestMapping("/api/sysDict")
 public class SysDictController extends BaseController<SysDict> {
@@ -55,7 +62,7 @@ public class SysDictController extends BaseController<SysDict> {
      * @return
      */
     @RequestMapping("/dict")
-    public ResultEntity dict(String type) {
-        return ResultEntity.success(sysDictService.dict(type));
+    public ResultListEntity<TreeNode> dict(String type) {
+        return ResultListEntity.success(sysDictService.dict(type));
     }
 }

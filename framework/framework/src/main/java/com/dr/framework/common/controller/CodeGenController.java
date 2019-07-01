@@ -1,13 +1,12 @@
 package com.dr.framework.common.controller;
 
 import com.dr.framework.common.entity.ResultEntity;
+import com.dr.framework.common.entity.ResultListEntity;
 import com.dr.framework.common.entity.TreeNode;
 import com.dr.framework.common.query.GenSourceQuery;
 import com.dr.framework.core.orm.jdbc.Column;
 import com.dr.framework.core.orm.jdbc.Relation;
 import com.dr.framework.core.orm.support.mybatis.spring.MybatisConfigurationBean;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -15,6 +14,7 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/api/codeGen")
-@Api(tags = "代码生成模块")
 public class CodeGenController {
     @Autowired
     List<MybatisConfigurationBean> mybatisConfigurationBeans;
@@ -41,13 +40,12 @@ public class CodeGenController {
      * @param withDabatase
      * @return
      */
-    @ApiOperation(value = "查询所有数据源的数据库树状结构信息")
     @PostMapping("/tableTree")
-    public ResultEntity tableTree(boolean withDabatase) {
+    public ResultListEntity<TreeNode> tableTree(boolean withDabatase) {
         List<TreeNode> treeNodes = mybatisConfigurationBeans.stream()
                 .map(mybatisConfigurationBean -> mybatisConfigurationBean.tableTree(withDabatase))
                 .collect(Collectors.toList());
-        return ResultEntity.success(treeNodes);
+        return ResultListEntity.success(treeNodes);
     }
 
     /**
@@ -57,14 +55,14 @@ public class CodeGenController {
      * @param tableName
      * @return
      */
-    @RequestMapping("/columns")
-    public ResultEntity columns(String dataSource, String tableName) {
+    @GetMapping("/columns")
+    public ResultListEntity<Column> columns(String dataSource, String tableName) {
         Optional<MybatisConfigurationBean> optional = mybatisConfigurationBeans.stream().
                 filter(mybatisConfigurationBean1 -> mybatisConfigurationBean1.getDatabaseId().equalsIgnoreCase(dataSource))
                 .findFirst();
         if (optional.isPresent()) {
             Relation<Column> table = optional.get().getTableMap().get(tableName.toUpperCase());
-            return ResultEntity.success(
+            return ResultListEntity.success(
                     table.getColumns()
                             .stream()
                             .map(column -> {
@@ -77,7 +75,7 @@ public class CodeGenController {
                                 return attrs;
                             }).collect(Collectors.toList()));
         } else {
-            return ResultEntity.error("未找到指定的数据源:" + dataSource);
+            return ResultListEntity.error("未找到指定的数据源:" + dataSource);
         }
     }
 

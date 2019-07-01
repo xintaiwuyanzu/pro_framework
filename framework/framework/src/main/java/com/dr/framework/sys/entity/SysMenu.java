@@ -3,11 +3,14 @@ package com.dr.framework.sys.entity;
 import com.dr.framework.common.entity.BaseTreeEntity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.util.Constants;
 
 /**
  * 系统菜单
+ *
+ * @author dr
  */
-@Table(name = "sys_menu", comment = "系统菜单", module = "sys")
+@Table(name = Constants.SYS_TABLE_PREFIX + "menu", comment = "系统菜单", module = Constants.SYS_MODULE_NAME)
 public class SysMenu extends BaseTreeEntity<String> {
     @Column(comment = "图标")
     private String icon;

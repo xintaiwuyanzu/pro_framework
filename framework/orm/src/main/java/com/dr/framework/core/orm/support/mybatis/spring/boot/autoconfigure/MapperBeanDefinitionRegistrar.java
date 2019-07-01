@@ -43,11 +43,13 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
             AnnotationAttributes[] databases = annotationAttributes.getAnnotationArray("databases");
             if (databases.length == 0) {
                 MultiDataSourceProperties dataSourceProperties = readDataSourceProties(MapperBeanDefinitionProcessor.DEFAULT_PREFIX, null);
+                dataSourceProperties.setUseXa(false);
                 BeanDefinition beanDefinition = buildBeanDefinition(dataSourceProperties, true);
                 registerBeanDefintionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
             } else if (databases.length == 1) {
                 AnnotationAttributes annotationAttributes1 = databases[0];
                 MultiDataSourceProperties dataSourceProperties = readDataSourceProties(annotationAttributes1.getString("prefix"), annotationAttributes1.getString("name"));
+                dataSourceProperties.setUseXa(false);
                 BeanDefinition beanDefinition = buildBeanDefinition(dataSourceProperties, true);
                 registerBeanDefintionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
             } else {

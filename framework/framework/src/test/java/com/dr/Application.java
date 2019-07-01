@@ -1,20 +1,27 @@
 package com.dr;
 
 import com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure.EnableAutoMapper;
+import com.dr.framework.core.web.resolver.CurrentParamResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
-@SpringBootApplication
-@EnableAutoMapper(databases = {@EnableAutoMapper.DataBase(name = "one"), @EnableAutoMapper.DataBase(name = "two")})
+import java.util.List;
+
+@SpringBootApplication(exclude = SessionAutoConfiguration.class)
+@EnableAutoMapper
 public class Application extends WebMvcConfigurationSupport {
+    @Autowired
+    CurrentParamResolver currentParamResolver;
+
     @Override
-    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("swagger-ui.html")
-                .addResourceLocations("classpath:/META-INF/resources/");
-        registry.addResourceHandler("/webjars/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/");
+    protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+        super.addArgumentResolvers(argumentResolvers);
+        argumentResolvers.add(currentParamResolver);
+
     }
 
     public static void main(String[] args) {

@@ -5,4 +5,6 @@ package com.dr.framework.util;
  */
 public final class Constants {
     public static final String PACKAGE_NAME = "com.dr.framework";
+    public static final String SYS_MODULE_NAME = "sys";
+    public static final String SYS_TABLE_PREFIX = "SYS_";
 }
