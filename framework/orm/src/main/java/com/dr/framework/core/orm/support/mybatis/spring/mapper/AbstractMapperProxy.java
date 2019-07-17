@@ -3,7 +3,7 @@ package com.dr.framework.core.orm.support.mybatis.spring.mapper;
 import com.dr.framework.core.orm.annotations.Table;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.orm.support.mybatis.spring.MybatisConfigurationBean;
-import com.dr.framework.core.orm.support.mybatis.spring.mapper.method.MapperMethod;
+import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.lang.UsesJava7;
 import org.apache.ibatis.reflection.ExceptionUtil;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -38,7 +38,7 @@ public abstract class AbstractMapperProxy implements InvocationHandler, Serializ
         MybatisConfigurationBean mybatisConfigurationBean = findConfigBean(method, entityClass);
         Assert.notNull(mybatisConfigurationBean, "没有找到指定的config类，请检查配置是否正确：" + mapperInterface.getName());
         MapperMethod mapperMethod = cachedMapperMethod(method, entityClass, mybatisConfigurationBean);
-        return mapperMethod.execute(mybatisConfigurationBean.getSqlSessionTemplate(), args, entityClass);
+        return mapperMethod.execute(mybatisConfigurationBean.getSqlSessionTemplate(), args);
     }
 
     protected abstract MapperMethod cachedMapperMethod(Method method, Class entityClass, MybatisConfigurationBean mybatisConfigurationBean);

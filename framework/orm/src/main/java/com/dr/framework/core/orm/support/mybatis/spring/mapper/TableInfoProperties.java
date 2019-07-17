@@ -1,16 +1,10 @@
 package com.dr.framework.core.orm.support.mybatis.spring.mapper;
 
-import com.dr.framework.core.orm.module.EntityRelation;
-import com.dr.framework.core.orm.sql.support.SqlQuery;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
+import com.dr.framework.core.orm.jdbc.Column;
+import com.dr.framework.core.orm.jdbc.Relation;
 import org.apache.ibatis.type.JdbcType;
 import org.springframework.util.StringUtils;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.sql.Types;
 import java.util.Properties;
 import java.util.function.Function;
@@ -20,7 +14,7 @@ import java.util.stream.Stream;
 /**
  * @author dr
  */
-class TableInfoProperties extends Properties {
+public class TableInfoProperties extends Properties {
     private static final String TABLE_KEY = "table";
     private static final String VALUES_KEY = "values";
     private static final String VALUES_TEST_KEY = "valuestest";
@@ -31,57 +25,21 @@ class TableInfoProperties extends Properties {
     private static final String SET_TEST_KEY = "settest";
     private static final String IN_KEY = "in";
     private static final String QUERY = "query";
-    private EntityRelation tableInfo;
+    private Relation tableInfo;
     private boolean isInsert;
     private String tableAlias = "A";
     private String queryTemplate = "${%s}";
-    boolean pkUsed = false;
-    private boolean hasSqlQuery = false;
+    private boolean hasSqlQuery;
 
-    TableInfoProperties(EntityRelation tableInfo, Method method) {
+    public TableInfoProperties(Relation tableInfo, boolean isInsert, boolean hasSqlQuery, String paramsKey) {
         this.tableInfo = tableInfo;
-        init(method);
-    }
-
-    private void init(Method method) {
-        isInsert = method.isAnnotationPresent(Insert.class);
-
-        boolean hasParamAnnotation = false;
-        int paramCount = 0;
-        String sqlQueryParamKey = null;
-        Class<?>[] paramTypes = method.getParameterTypes();
-        Annotation[][] paramAnnotations = method.getParameterAnnotations();
-        for (int paramIndex = 0; paramIndex < paramAnnotations.length; paramIndex++) {
-            Class type = paramTypes[paramIndex];
-            if (RowBounds.class.isAssignableFrom(type) || ResultHandler.class.isAssignableFrom(type)) {
-                continue;
-            }
-            paramCount++;
-            String name = null;
-            for (Annotation annotation : paramAnnotations[paramIndex]) {
-                if (annotation instanceof Param) {
-                    hasParamAnnotation = true;
-                    name = ((Param) annotation).value();
-                    break;
-                }
-            }
-            if (name == null) {
-                name = "param" + paramCount;
-            }
-            if (type == SqlQuery.class) {
-                sqlQueryParamKey = name;
-                hasSqlQuery = true;
-            }
-        }
-        if (!StringUtils.isEmpty(sqlQueryParamKey)) {
-            boolean can = (paramCount == 1 && hasParamAnnotation) || paramCount > 1;
-            if (can) {
-                tableAlias = String.format("${%s.$alias%s}", sqlQueryParamKey, tableInfo.getName());
-                queryTemplate = "${" + sqlQueryParamKey + ".%s}";
-            }
+        this.isInsert = isInsert;
+        this.hasSqlQuery = hasSqlQuery;
+        if (!StringUtils.isEmpty(paramsKey)) {
+            queryTemplate = "${" + paramsKey + "%s}";
+            tableAlias = String.format("${%s.$alias%s}", paramsKey, tableInfo.getName());
         }
     }
-
 
     @Override
     public synchronized boolean containsKey(Object key) {
@@ -133,7 +91,6 @@ class TableInfoProperties extends Properties {
                 case PK_KEY:
                     //TODO 处理没有主键和联合主键的情况
                     value = tableAlias + "." + tableInfo.primaryKeyColumns().stream().collect(Collectors.joining());
-                    pkUsed = true;
                     break;
                 case PK_KEY_ALIAS:
                     value = "#{" + tableInfo.getPrimaryKeyAlias() + "}";
@@ -186,7 +143,7 @@ class TableInfoProperties extends Properties {
      * @param delimiter
      * @return
      */
-    private String join(boolean filterId, Function<EntityRelation.FieldColumn, String> templateFunction, CharSequence delimiter) {
+    private String join(boolean filterId, Function<Column, String> templateFunction, CharSequence delimiter) {
         return columnStream(filterId)
                 .map(column ->
                         String.format(templateFunction.apply(column)
@@ -212,8 +169,8 @@ class TableInfoProperties extends Properties {
                 .collect(Collectors.joining(delimiter));
     }
 
-    private Stream<EntityRelation.FieldColumn> columnStream(boolean filterId) {
-        Stream<EntityRelation.FieldColumn> stream = tableInfo.getColumns().stream();
+    private Stream<Column> columnStream(boolean filterId) {
+        Stream<Column> stream = tableInfo.getColumns().stream();
         if (filterId) {
             stream = stream.filter(column -> !tableInfo.primaryKeyColumns().contains(column.getName()));
         }

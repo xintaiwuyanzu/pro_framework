@@ -1,6 +1,5 @@
 package com.dr.framework.core.orm.sql;
 
-import com.dr.framework.core.orm.sql.support.SqlQuery;
 import org.apache.ibatis.type.JdbcType;
 import org.springframework.util.StringUtils;
 
@@ -12,7 +11,7 @@ import org.springframework.util.StringUtils;
  */
 public class Column {
     public static Column function(Column column, String function, String alias) {
-        Column column1 = new Column(column.table, column.name, column.alias, column.type);
+        Column column1 = new Column(column.getTable(), column.getName(), column.getAlias(), column.getJdbcType());
         column1.function = function;
         if (!StringUtils.isEmpty(alias)) {
             column1.alias = alias;
@@ -94,20 +93,7 @@ public class Column {
      * @deprecated 这个属性没用了，计划删除掉
      */
     @Deprecated
-    private JdbcType type;
-
-    public Column(SqlQuery.SerializableFunction<Object, Object> sf) {
-        System.out.println(sf);
-    }
-
-    public Column(String name) {
-        this.name = name;
-    }
-
-    public Column(String name, String alias) {
-        this.name = name;
-        this.alias = alias;
-    }
+    private JdbcType jdbcType;
 
     public Column(String table, String name, String alias) {
         this.table = table;
@@ -119,21 +105,21 @@ public class Column {
         this.table = table;
         this.name = name;
         this.alias = alias;
-        this.type = type;
+        this.jdbcType = type;
     }
 
     public Column alias(String alias) {
         if (StringUtils.isEmpty(alias)) {
             return this;
         } else {
-            Column column = new Column(table, name, alias, type);
+            Column column = new Column(getTable(), getName(), alias, getJdbcType());
             column.function = function;
             return column;
         }
     }
 
     public Column function(String function, String alias) {
-        Column column1 = new Column(this.table, this.name, this.alias, this.type);
+        Column column1 = new Column(this.table, this.name, this.alias, getJdbcType());
         column1.function = function;
         if (!StringUtils.isEmpty(alias)) {
             column1.alias = alias;
@@ -205,12 +191,15 @@ public class Column {
         return alias;
     }
 
+    protected void setAlias(String alias) {
+        this.alias = alias;
+    }
+
     public String getFunction() {
         return function;
     }
 
-    public JdbcType getType() {
-        return type;
+    public JdbcType getJdbcType() {
+        return jdbcType;
     }
-
 }

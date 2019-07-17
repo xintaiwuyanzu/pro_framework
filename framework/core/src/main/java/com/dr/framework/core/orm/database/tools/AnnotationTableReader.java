@@ -112,7 +112,12 @@ public class AnnotationTableReader {
 
     private void parseColumn(Field field, Relation table, Dialect dialect, LinkedList<ClassTypeHolder> linkedList, List<ColumnSortHolder> columnSortHolders, List<PrimaryKeyHolder> primaryKeyHolders, List<IndexColumnHolder> indexColumnHolders) {
         Column column = field.getAnnotation(Column.class);
-        EntityRelation.FieldColumn fieldColumn = new EntityRelation.FieldColumn(field);
+
+        String cName = column.name();
+        if (!StringUtils.hasLength(cName)) {
+            cName = field.getName();
+        }
+        EntityRelation.FieldColumn fieldColumn = new EntityRelation.FieldColumn(table.getName(), cName, field);
         Class fieldDeclareClass = field.getDeclaringClass();
         ClassTypeHolder classTypeHolder = linkedList.stream()
                 .filter(c -> c.entityClass.equals(fieldDeclareClass))
@@ -121,11 +126,6 @@ public class AnnotationTableReader {
         ColumnSortHolder columnSortHolder = new ColumnSortHolder(fieldColumn, linkedList.indexOf(classTypeHolder), column.order(), classTypeHolder.declareFields.indexOf(field));
         columnSortHolders.add(columnSortHolder);
 
-        String cName = column.name();
-        if (!StringUtils.hasLength(cName)) {
-            cName = field.getName();
-        }
-        fieldColumn.setName(cName);
         fieldColumn.setRemark(column.comment());
         fieldColumn.setSize(column.length());
         if (column.scale() > 0) {

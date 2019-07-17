@@ -13,12 +13,12 @@ public interface LoginService {
     /**
      * 默认登录方式，对应人员编码{@link Person#userCode}
      */
-    static String LOGIN_TYPE_DEFAULT = "default";
-    static String LOGIN_TYPE_IDNO = "idno";
-    static String LOGIN_TYPE_PHONE = "phone";
-    static String LOGIN_TYPE_EMAIL = "email";
-    static String LOGIN_TYPE_QQ = "qq";
-    static String LOGIN_TYPE_WX = "wx";
+    String LOGIN_TYPE_DEFAULT = "default";
+    String LOGIN_TYPE_IDNO = "idno";
+    String LOGIN_TYPE_PHONE = "phone";
+    String LOGIN_TYPE_EMAIL = "email";
+    String LOGIN_TYPE_QQ = "qq";
+    String LOGIN_TYPE_WX = "wx";
 
     /**
      * 根据用户创建登录信息
@@ -70,8 +70,8 @@ public interface LoginService {
      * @param loginId     登录账号
      * @param password    登录密码
      * @param loginType   登录类型
-     * @param loginSource 登录ip
      * @param sysId       登录系统
+     * @param loginSource 登录ip
      * @return
      */
     Person login(String loginId, String password, String loginType, String sysId, String loginSource);

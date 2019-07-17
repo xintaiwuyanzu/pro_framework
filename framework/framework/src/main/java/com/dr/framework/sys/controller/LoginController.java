@@ -1,7 +1,6 @@
 package com.dr.framework.sys.controller;
 
 import com.dr.framework.common.entity.ResultEntity;
-import com.dr.framework.core.web.annotations.Current;
 import com.dr.framework.sys.entity.Person;
 import com.dr.framework.sys.entity.SubSystem;
 import com.dr.framework.sys.service.LoginService;
@@ -32,7 +31,6 @@ public class LoginController {
             , @RequestParam String password
             , @RequestParam(defaultValue = LoginService.LOGIN_TYPE_DEFAULT) String loginType
             , @RequestParam(defaultValue = SubSystem.DEFAULT_SYSTEM_ID) String sysId
-            , @Current Person person1
             , HttpServletRequest request
             , HttpServletResponse response) {
         String remoteIp = getIpAddr(request);
@@ -54,10 +52,13 @@ public class LoginController {
             if (StringUtils.isEmpty(token)) {
                 token = request.getHeader(TOKEN_HEADER_KEY);
                 if (StringUtils.isEmpty(token)) {
-                    for (Cookie cookie : request.getCookies()) {
-                        if (cookie.getName().equals(TOKEN_HEADER_KEY)) {
-                            token = cookie.getValue();
-                            break;
+                    Cookie[] cookies = request.getCookies();
+                    if (cookies != null) {
+                        for (Cookie cookie : cookies) {
+                            if (cookie.getName().equals(TOKEN_HEADER_KEY)) {
+                                token = cookie.getValue();
+                                break;
+                            }
                         }
                     }
                 }

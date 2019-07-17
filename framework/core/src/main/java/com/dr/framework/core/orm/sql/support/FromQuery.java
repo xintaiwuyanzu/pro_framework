@@ -1,10 +1,14 @@
 package com.dr.framework.core.orm.sql.support;
 
+import com.dr.framework.core.orm.jdbc.Relation;
+import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.Column;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 class FromQuery extends AbstractSqlQuery {
     JoinColumns join = new JoinColumns();
@@ -65,6 +69,23 @@ class FromQuery extends AbstractSqlQuery {
         }
     }
 
+    private Map<Class, String> classStringMap = new HashMap<>(4);
+
+
+    public void aliasClass(Class ec, String alias) {
+        if (!StringUtils.isEmpty(alias)) {
+            classStringMap.put(ec, alias);
+        }
+    }
+
+    public void bindRelation(Relation<? extends Column> relation) {
+        if (relation instanceof EntityRelation) {
+            String alias = classStringMap.get(((EntityRelation) relation).getEntityClass());
+            alias(relation.getName(), alias);
+        }
+        table = relation.getName();
+    }
+
     @Override
     String sql(TableAlias tableAlias, SqlQuery sqlQuery) {
         StringBuilder builder = new StringBuilder();
@@ -88,4 +109,5 @@ class FromQuery extends AbstractSqlQuery {
         sqlClause(builder, " LEFT OUTER JOIN ", leftOuterJoin.parts(tableAlias), "", "", " LEFT OUTER JOIN ");
         sqlClause(builder, " RIGHT OUTER JOIN ", rightOuterJoin.parts(tableAlias), "", "", " RIGHT OUTER JOIN ");
     }
+
 }

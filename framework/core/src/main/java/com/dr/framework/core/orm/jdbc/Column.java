@@ -5,7 +5,7 @@ package com.dr.framework.core.orm.jdbc;
  *
  * @author dr
  */
-public class Column {
+public class Column extends com.dr.framework.core.orm.sql.Column {
     private String name;
     private String tableName;
     private Relation relation;
@@ -18,6 +18,12 @@ public class Column {
     private String defaultValue;
     private TrueOrFalse nullAble;
     private TrueOrFalse autoIncrement;
+
+    public Column(String table, String name, String alias) {
+        super(table, name, alias);
+        setTableName(table);
+        setName(name);
+    }
 
     public int getType() {
         return type;
@@ -91,6 +97,7 @@ public class Column {
         this.autoIncrement = autoIncrement;
     }
 
+    @Override
     public String getName() {
         return name;
     }

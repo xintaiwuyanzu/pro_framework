@@ -1,14 +1,17 @@
 package com.dr.framework.core.orm.support.mybatis.spring.mapper;
 
 import com.dr.framework.core.orm.support.mybatis.spring.MybatisConfigurationBean;
-import com.dr.framework.core.orm.support.mybatis.spring.mapper.method.MapperMethod;
+import org.apache.ibatis.binding.MapperMethod;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 单数据源的mapperproxy
+ *
+ * @author dr
  */
 public class SingleMapperProxy extends AbstractMapperProxy {
     private transient MybatisConfigurationBean configurationBean;
@@ -17,7 +20,7 @@ public class SingleMapperProxy extends AbstractMapperProxy {
     public SingleMapperProxy(MybatisConfigurationBean configurationBean, Class<?> mapperInterface) {
         super(mapperInterface);
         this.configurationBean = configurationBean;
-        methodCache = new ConcurrentHashMap(mapperInterface.getDeclaredMethods().length);
+        methodCache = Collections.synchronizedMap(new HashMap<>(mapperInterface.getDeclaredMethods().length));
     }
 
     @Override

@@ -2,9 +2,11 @@ package com.dr.framework.core.orm.support.mybatis.spring.mapper;
 
 import com.dr.framework.core.orm.annotations.Mapper;
 import com.dr.framework.core.orm.support.mybatis.spring.MybatisConfigurationBean;
-import com.dr.framework.core.orm.support.mybatis.spring.mapper.method.MapperMethod;
+import org.apache.ibatis.binding.MapperMethod;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,7 +24,7 @@ public class MultiMapperProxy extends AbstractMapperProxy {
     public MultiMapperProxy(MybatisConfigurationBean primaryBean, Map<String, MybatisConfigurationBean> mybatisConfigurationBeanMap, Class<?> mapperInterface) {
         super(mapperInterface);
         this.mybatisConfigurationBeanMap = mybatisConfigurationBeanMap;
-        methodCache = new ConcurrentHashMap<>(mybatisConfigurationBeanMap.size());
+        methodCache = Collections.synchronizedMap(new HashMap<>(mybatisConfigurationBeanMap.size()));
         this.primaryBean = primaryBean;
     }
 

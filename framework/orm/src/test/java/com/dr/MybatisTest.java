@@ -6,6 +6,9 @@ import com.dr.entity.TestEntity1Info;
 import com.dr.entity.TestEntityInfo;
 import com.dr.framework.common.dao.CommonMapper;
 import com.dr.framework.common.page.Page;
+import com.dr.framework.common.service.DataBaseService;
+import com.dr.framework.core.orm.jdbc.Column;
+import com.dr.framework.core.orm.jdbc.Relation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,16 +19,44 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = "spring.liquibase.enabled=false", classes = TestApplication.class)
+@SpringBootTest(classes = TestApplication.class)
 public class MybatisTest {
     Logger logger = LoggerFactory.getLogger(MybatisTest.class);
     @Autowired
     CommonMapper testMapper;
+    @Autowired
+    DataBaseService dataBaseService;
+
+
+    @Test
+    public void testRelation() {
+        Relation<Column> columnRelation = new Relation<>(true);
+        columnRelation.setName("hahaha");
+        columnRelation.setModule("test");
+
+        Column column = new Column("hahaha", "iiii", "i");
+        column.setType(Types.VARCHAR);
+        column.setSize(100);
+
+        columnRelation.addColumn(column);
+        columnRelation.addPrimaryKey("qqq", column.getName(), 0);
+        dataBaseService.updateTable(columnRelation);
+
+        testMapper.countByQuery(SqlQuery.from(columnRelation));
+
+        SqlQuery sqlQuery = SqlQuery.from(columnRelation);
+        sqlQuery.put("i", UUID.randomUUID().toString());
+        //testMapper.insert(sqlQuery);
+        sqlQuery.put("i", UUID.randomUUID().toString());
+        testMapper.insertByQuery(sqlQuery);
+    }
+
 
     @Test
     public void testfanxing() {
@@ -53,8 +84,8 @@ public class MybatisTest {
 
     @Test
     public void testQuery() {
-        Page<TestEntity> testEntityPage = testMapper.selectPageByQuery(SqlQuery.from(TestEntity.class, true), 10, 30);
-        logger.info(testEntityPage.getData().size() + "");
+        Page<TestEntity> testEntityPage = testMapper.selectPageByQuery(SqlQuery.from(TestEntity.class, true), 0, 10);
+        logger.info(testEntityPage.getSize() + "");
     }
 
     public static class TestEntity111 extends TestEntity {
@@ -82,7 +113,7 @@ public class MybatisTest {
         testEntity.setName("name");
         testEntity.setName1("name1");
         testEntity.setId(UUID.randomUUID().toString());
-        testMapper.insert(testEntity);
+        testMapper.insertIgnoreNull(testEntity);
         TestEntity testEntity1 = testMapper.selectById(TestEntity.class, testEntity.getId());
         System.out.println(testEntity1.getBlobCol());
         testMapper.selectBatchIds(TestEntity.class, "7c06a865-170a-447b-a567-34776cb4086c", "8a3e6a21-7626-4991-b828-514121ac0250", "bafd0e72-e884-4295-a493-40bed6d8611e", "ed0b1580-33b0-42cd-8989-2a601c8307d7");

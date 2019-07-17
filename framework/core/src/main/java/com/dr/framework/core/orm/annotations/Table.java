@@ -1,5 +1,7 @@
 package com.dr.framework.core.orm.annotations;
 
+import com.dr.framework.core.orm.module.Module;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -19,7 +21,7 @@ public @interface Table {
 
     String simple() default "";
 
-    String module() default "default";
+    String module() default Module.DEFAULT_MODULE;
 
     /**
      * @return true 表示表，false表示视图

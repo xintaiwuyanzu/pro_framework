@@ -1,8 +1,11 @@
 package com.dr.framework.core.orm.sql.support;
 
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.core.orm.jdbc.Relation;
+import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.Column;
 import com.dr.framework.core.orm.sql.TableInfo;
+import org.apache.ibatis.reflection.SystemMetaObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -10,7 +13,6 @@ import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -22,22 +24,22 @@ import java.util.stream.Collectors;
  * @author dr
  */
 public final class SqlQuery<E> extends HashMap<String, Object> {
-    public static final String COLUMNS = "${query#$columns}";
-    public static final String FROM = "${query#$from}";
-    public static final String TABLE = "${query#$table}";
-    public static final String WHERE = "${query#$where}";
-    public static final String WHERE_NO_ORERY_BY = "${query#$whereNO}";
+    public static final String COLUMNS = "!!{query#$columns}";
+    public static final String FROM = "!!{query#$from}";
+    public static final String TABLE = "!!{query#$table}";
+    public static final String WHERE = "!!{query#$where}";
+    public static final String WHERE_NO_ORERY_BY = "!!{query#$whereNO}";
     public static final String QUERY_CLASS_SUFFIX = "Info";
     public static final String QUERY_PARAM = "$QP";
-    public static final String ENTITY_KEY = "ENTITY";
+    protected static final String ENTITY_KEY = "ENTITY";
+
+    private static final String ENTITY_CLASS_KEY = "ENTITY_CLASS";
+    private static final String RETURN_CLASS_KEY = "RETURN_CLASS";
+    private static final String MAP_KEY_KEY = "$MAP_KEY";
+    private static final String PARENT_KEY = "$PARENT_KEY";
+
     static protected Logger logger = LoggerFactory.getLogger(SqlQuery.class);
     private static Map<Class, Class<? extends TableInfo>> sqlQueryMap = Collections.synchronizedMap(new HashMap<>());
-
-    @FunctionalInterface
-    public
-    interface SerializableFunction<T, R> extends Function<T, R> {
-
-    }
 
     /**
      * 根据model类获取该类的query帮助类
@@ -86,7 +88,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     public static <R> SqlQuery<R> from(R entity, String alias, boolean selectAllColumns) {
         SqlQuery sqlQuery = from(entity.getClass(), alias, selectAllColumns);
         if (entity != null) {
-            sqlQuery.put(ENTITY_KEY, entity);
+            sqlQuery.put(ENTITY_KEY, SystemMetaObject.forObject(entity));
         }
         return sqlQuery;
     }
@@ -103,6 +105,31 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
         return from(entityClass, null, selectAllColumns);
     }
 
+    public static <R> SqlQuery<R> from(Relation relation) {
+        return from(relation, null, true);
+    }
+
+    public static <R> SqlQuery<R> from(Relation relation, String alias) {
+        return from(relation, alias, true);
+    }
+
+    public static <R> SqlQuery<R> from(Relation relation, boolean selectAllColumns) {
+        return from(relation, null, selectAllColumns);
+    }
+
+    public static <R> SqlQuery<R> from(Relation relation, String alias, boolean selectAllColumns) {
+        SqlQuery query = new SqlQuery();
+        if (relation instanceof EntityRelation) {
+            Class c = ((EntityRelation) relation).getEntityClass();
+            query.setReturnClass(c).put(ENTITY_CLASS_KEY, c);
+        }
+        query.fromQuery.from(relation.getName(), alias);
+        query.columnsQuery.setIncludeAll(selectAllColumns);
+        query.columnsQuery.bindRelation(relation);
+        query.put("$relation", relation);
+        return query;
+    }
+
     public static <R> SqlQuery<R> from(Class<R> entityClass, String alias, boolean selectAllColumns) {
         SqlQuery query = new SqlQuery();
         Class ec = entityClass;
@@ -116,16 +143,10 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
                 ec = ec.getSuperclass();
             }
         }
-        Assert.notNull(ec, "未能查询到要操作的表：" + entityClass);
-        query.returnClass = entityClass;
-        query.entityClass = ec;
-        TableInfo tableInfo = getTableInfo(entityClass);
-        Assert.notNull(tableInfo, "未找到【" + entityClass.getName() + "】描述信息，请检查是否已生成代码！");
-        query.from(tableInfo.table(), alias);
-        if (selectAllColumns) {
-            List<Column> columns = tableInfo.columns();
-            query.column(columns.toArray(new Column[columns.size()]));
-        }
+        Assert.notNull(ec, "未能查询到要操作的表：" + entityClass + "，没有实现@Table注解！");
+        query.setReturnClass(ec).put(ENTITY_CLASS_KEY, ec);
+        query.fromQuery.aliasClass(ec, alias);
+        query.columnsQuery.setIncludeAll(selectAllColumns);
         return query;
     }
 
@@ -138,12 +159,14 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     private FromQuery fromQuery = new FromQuery();
     private ColumnsQuery columnsQuery = new ColumnsQuery();
     private SetQuery setQuery = new SetQuery();
-    private Class returnClass;
-    private Class entityClass;
 
-    //建立一个查询链，用来处理嵌套子查询的情况
-    protected SqlQuery parent;
-    protected String mapKey;
+    public SqlQuery() {
+        super(32);
+        put("$whereQuery", whereQuery);
+        put("$fromQuery", fromQuery);
+        put("$columnsQuery", columnsQuery);
+        put("$setQuery", setQuery);
+    }
 
     @Override
     public boolean containsKey(Object key) {
@@ -164,6 +187,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     public boolean hasWhere() {
         return whereQuery.hasWhere(fromQuery.tableAlias, this);
     }
+
 
     @Override
     public Object get(Object key) {
@@ -306,11 +330,6 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
      * from相关
      * =======================
      */
-    private SqlQuery<E> from(String table, String alias) {
-        fromQuery.from(table, alias);
-        return this;
-    }
-
     public SqlQuery<E> join(Column left, Column right) {
         fromQuery.join(left, right);
         return this;
@@ -362,6 +381,13 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
 
     private SqlQuery<E> concatWithData(Column column, String prefix, String suffix, Serializable... data) {
         whereQuery.concatSqlWithData(column, prefix, suffix, data);
+        return this;
+    }
+
+    private SqlQuery<E> concatWithSubQuery(Column column, String prefix, String suffix, SqlQuery query) {
+        List<SqlQuery> sqlQueries = (List<SqlQuery>) computeIfAbsent("$children", k -> new ArrayList<>());
+        sqlQueries.add(query);
+        whereQuery.concatSqlWithQuery(column, prefix, suffix, query);
         return this;
     }
 
@@ -456,8 +482,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     }
 
     public SqlQuery<E> equal(Column column, SqlQuery query) {
-        whereQuery.concatSqlWithQuery(column, "=", "", query);
-        return this;
+        return concatWithSubQuery(column, "=", "", query);
     }
 
     public SqlQuery<E> equalIfNotNull(Column... columns) {
@@ -473,8 +498,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     }
 
     public SqlQuery<E> notEqual(Column column, SqlQuery query) {
-        whereQuery.concatSqlWithQuery(column, "!=", "", query);
-        return this;
+        return concatWithSubQuery(column, "!=", "", query);
     }
 
     public SqlQuery<E> notEqualIfNotNull(Column... columns) {
@@ -486,8 +510,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     }
 
     public SqlQuery<E> lessThan(Column column, SqlQuery query) {
-        whereQuery.concatSqlWithQuery(column, "<", "", query);
-        return this;
+        return concatWithSubQuery(column, "<", "", query);
     }
 
     public SqlQuery<E> lessThan(Column column, Serializable data) {
@@ -519,8 +542,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     }
 
     public SqlQuery<E> greaterThan(Column column, SqlQuery query) {
-        whereQuery.concatSqlWithQuery(column, ">", "", query);
-        return this;
+        return concatWithSubQuery(column, ">", "", query);
     }
 
     public SqlQuery<E> greaterThanIfNotNull(Column... columns) {
@@ -541,8 +563,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
 
 
     public SqlQuery<E> in(Column column, SqlQuery query) {
-        whereQuery.concatSqlWithQuery(column, "in", "", query);
-        return this;
+        return concatWithSubQuery(column, "in", "", query);
     }
 
     /**
@@ -559,6 +580,14 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
         return this;
     }
 
+    /**
+     * TODO 可以通过简单的方式实现，但是要考虑多次查询的情况
+     * {@link WhereQuery#collectionSql(Column, String, String, Collection)}
+     *
+     * @param column
+     * @param datas
+     * @return
+     */
     public SqlQuery<E> in(Column column, List<? extends Serializable> datas) {
         if (datas != null && datas.size() > 0) {
             whereQuery.pureSql(column, "in (" + datas.stream().map(serializable -> String.format("'%s'", serializable)).collect(Collectors.joining(",")) + ")");
@@ -581,8 +610,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     }
 
     public SqlQuery<E> notIn(Column column, SqlQuery query) {
-        whereQuery.concatSqlWithQuery(column, "not in", "", query);
-        return this;
+        return concatWithSubQuery(column, "not in", "", query);
     }
 
     public SqlQuery<E> notIn(Column column, List<? extends Serializable> datas) {
@@ -643,20 +671,49 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     }
 
     public Class getEntityClass() {
-        return entityClass;
+        return (Class) get(ENTITY_CLASS_KEY);
     }
 
     public Class<E> getReturnClass() {
-        return returnClass;
+        return (Class) get(RETURN_CLASS_KEY);
     }
 
     public <R> SqlQuery<R> setReturnClass(Class<R> returnClass) {
-        this.returnClass = returnClass;
+        put(RETURN_CLASS_KEY, returnClass);
         return (SqlQuery<R>) this;
     }
 
+    SqlQuery getParent() {
+        return (SqlQuery) get(PARENT_KEY);
+    }
 
-    protected int columnSize() {
+    public void bindRelation(Relation<? extends Column> relation) {
+        put("$relation", relation);
+        columnsQuery.bindRelation(relation);
+        fromQuery.bindRelation(relation);
+    }
+
+    public Relation getRelation() {
+        return (Relation) get("$relation");
+    }
+
+
+    String getMapKey() {
+        return (String) get(MAP_KEY_KEY);
+    }
+
+
+    void setParent(SqlQuery parent, String key) {
+        put(PARENT_KEY, parent);
+        put(MAP_KEY_KEY, key);
+    }
+
+    public List<SqlQuery> children() {
+        return (List<SqlQuery>) get("$children");
+    }
+
+    int columnSize() {
         return columnsQuery.columnSize();
     }
+
 }

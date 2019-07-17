@@ -6,10 +6,7 @@ import org.apache.ibatis.reflection.SystemMetaObject;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -74,6 +71,12 @@ class WhereQuery extends AbstractSqlQuery {
 
     void concatTestSql(Column column, String prefix, String suffix) {
         whereSqls.concat(AND_, new ConcatTestSql(column, prefix, suffix));
+    }
+
+    void collectionSql(Column column, String prefix, String suffix, Collection<? extends Serializable> collection) {
+        if (collection != null && !collection.isEmpty()) {
+            whereSqls.concat(AND_, new CollectionSql(column, prefix, suffix, collection));
+        }
     }
 
     void pureSql(Column column, String sql) {
@@ -234,9 +237,9 @@ class WhereQuery extends AbstractSqlQuery {
         }
 
         StringBuilder queryParam(SqlQuery sqlQuery, String placeHolder) {
-            if (sqlQuery.parent != null) {
-                StringBuilder sb = queryParam(sqlQuery.parent, placeHolder);
-                return sb.append(sqlQuery.mapKey).append('.');
+            if (sqlQuery.getParent() != null) {
+                StringBuilder sb = queryParam(sqlQuery.getParent(), placeHolder);
+                return sb.append(sqlQuery.getMapKey()).append('.');
             } else {
                 StringBuilder stringBuilder = new StringBuilder(placeHolder)
                         .append("{");
@@ -275,6 +278,41 @@ class WhereQuery extends AbstractSqlQuery {
             return true;
         }
     }
+
+    class CollectionSql extends TrueSql {
+        Column column;
+        String prefix;
+        String suffix;
+        Collection<? extends Serializable> collection;
+
+        public CollectionSql(Column column, String prefix, String suffix, Collection<? extends Serializable> collection) {
+            this.column = column;
+            this.prefix = prefix;
+            this.suffix = suffix;
+            this.collection = collection;
+        }
+
+        @Override
+        String getSql(TableAlias alias, SqlQuery sqlQuery) {
+            String sql = "";
+            if (sqlQuery.containsKey(SqlQuery.ENTITY_KEY)) {
+                StringBuilder sb = formatColumn(column, alias)
+                        .append(prefix);
+                sb.append(collection.
+                        stream()
+                        .map(c -> {
+                            //TODO 这里应该有问题
+                            return ((Serializable) c).toString();
+                        })
+                        .collect(Collectors.joining(","))
+                );
+                sql = sb.append(suffix)
+                        .toString();
+            }
+            return sql;
+        }
+    }
+
 
     class NoParamSql extends TrueSql {
 
@@ -378,8 +416,7 @@ class WhereQuery extends AbstractSqlQuery {
         @Override
         String getSql(TableAlias alias, SqlQuery sqlQuery) {
             String key = getColumnKey();
-            data.parent = sqlQuery;
-            data.mapKey = key;
+            data.setParent(sqlQuery, key);
             sqlQuery.put(key, data);
             return formatColumn(column, alias)
                     .append(preffix)

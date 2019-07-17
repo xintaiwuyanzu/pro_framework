@@ -15,6 +15,9 @@ import java.util.Map;
  */
 public class Module {
     Logger logger = LoggerFactory.getLogger(Module.class);
+    public static final String DEFAULT_MODULE = "default";
+
+
     /**
      * 数据名称
      */

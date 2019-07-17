@@ -107,6 +107,10 @@ public class Relation<C extends Column> {
         return primaryKeys == null ? null : primaryKeys.name;
     }
 
+    public String getPrimaryKeyAlias() {
+        return primaryKeyColumns().stream().collect(Collectors.joining());
+    }
+
     public List<String> primaryKeyColumns() {
         return primaryKeys == null ?
                 Collections.EMPTY_LIST :

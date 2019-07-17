@@ -15,6 +15,7 @@ import java.util.List;
  * @author dr
  */
 public class PersonQuery {
+    private String id;
     private String personName;
     private String nickName;
     private String email;
@@ -48,6 +49,7 @@ public class PersonQuery {
     public SqlQuery<Person> toQuery() {
         SqlQuery<Person> query = SqlQuery.from(Person.class)
                 .equal(PersonInfo.SYSID, sysId);
+        query.equal(PersonInfo.ID, id);
         if (!StringUtils.isEmpty(personName)) {
             query.like(PersonInfo.USERNAME, personName);
         }
@@ -133,6 +135,11 @@ public class PersonQuery {
 
         public Builder(String sysd) {
             query.sysId = sysd;
+        }
+
+        public Builder idEqual(String id) {
+            query.id = id;
+            return this;
         }
 
         public Builder nameLike(String name) {
@@ -296,6 +303,14 @@ public class PersonQuery {
         public PersonQuery build() {
             return query;
         }
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getPersonName() {

@@ -12,9 +12,9 @@ import com.dr.framework.core.orm.jdbc.Relation;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.TableInfo;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
+import com.dr.framework.core.orm.support.mybatis.MulitiDataSourceLangDriver;
 import com.dr.framework.core.orm.support.mybatis.MybatisPlugin;
 import com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure.MultiDataSourceProperties;
-import com.dr.framework.core.orm.support.mybatis.spring.mapper.MyBatisMapperAnnotationBuilder;
 import com.dr.framework.core.orm.support.mybatis.spring.sqlsession.SqlSessionTemplate;
 import com.dr.framework.core.orm.support.mybatis.spring.transaction.SpringManagedTransactionFactory;
 import org.apache.ibatis.binding.MapperRegistry;
@@ -63,6 +63,7 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
         super(environment);
         addInterceptor(new MybatisPlugin());
         setLogImpl(Slf4jImpl.class);
+        getLanguageRegistry().setDefaultDriverClass(MulitiDataSourceLangDriver.class);
     }
 
     @Override
@@ -132,22 +133,26 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
         for (Class mapperInterface : mapperInterfaces) {
             if (mapperInterface.isAnnotationPresent(Mapper.class)) {
                 Mapper mapper = (Mapper) mapperInterface.getAnnotation(Mapper.class);
-                String[] module = mapper.module();
-                if (module.length > 0) {
-                    for (String mo : module) {
-                        if (containModules(mo)) {
-                            new MyBatisMapperAnnotationBuilder(this, mapperInterface).parse();
-                            break;
-                        }
-                    }
-                } else {
-                    new MyBatisMapperAnnotationBuilder(this, mapperInterface).parse();
+                boolean contain = containsModules(mapper.module());
+                if (!contain) {
+                    break;
                 }
-            } else {
-                new MyBatisMapperAnnotationBuilder(this, mapperInterface).parse();
             }
+            super.addMapper(mapperInterface);
         }
+    }
 
+    private boolean containsModules(String[] module) {
+        if (module.length == 0) {
+            return true;
+        } else {
+            for (String mo : module) {
+                if (containModules(mo)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     /**

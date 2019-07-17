@@ -38,6 +38,7 @@ public class EntityRelation extends Relation<EntityRelation.FieldColumn> {
         }
     }
 
+    @Override
     public String getPrimaryKeyAlias() {
         return primaryKeyColumns()
                 .stream()
@@ -57,8 +58,11 @@ public class EntityRelation extends Relation<EntityRelation.FieldColumn> {
     public static class FieldColumn extends Column {
         private Field field;
 
-        public FieldColumn(Field field) {
-            this.field = field;
+        public FieldColumn(String table, String name, Field field) {
+            super(table, name, null);
+            String alias = field == null ? "" : field.getName();
+            setAlias(alias);
+            setField(field);
         }
 
         public Field getField() {
@@ -77,11 +81,5 @@ public class EntityRelation extends Relation<EntityRelation.FieldColumn> {
             setTypeName(c.getTypeName());
             setDefaultValue(c.getDefaultValue());
         }
-
-        public String getAlias() {
-            return field == null ? "" : field.getName();
-        }
     }
-
-
 }

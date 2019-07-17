@@ -77,6 +77,11 @@ public class H2Dialect extends Dialect {
     }
 
     @Override
+    public String convertObjectName(String source) {
+        return source.toUpperCase();
+    }
+
+    @Override
     protected String getRenameColumnSql(Column newColumn, String renameColumnName) {
         return String.format(" %s alter column %s rename to  %s "
                 , getAlterTableString(newColumn.getTableName())

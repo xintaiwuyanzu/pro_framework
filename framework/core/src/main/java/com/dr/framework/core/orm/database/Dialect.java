@@ -142,9 +142,10 @@ public abstract class Dialect {
                 }
             }
             while (resultSet != null && resultSet.next()) {
-                Column column = new Column();
-                column.setTableName(resultSet.getString("TABLE_NAME"));
-                column.setName(resultSet.getString("COLUMN_NAME"));
+                Column column = new Column(
+                        resultSet.getString("TABLE_NAME")
+                        , resultSet.getString("COLUMN_NAME")
+                        , resultSet.getString("COLUMN_NAME"));
                 column.setType(resultSet.getInt("DATA_TYPE"));
                 column.setTypeName(resultSet.getString("TYPE_NAME"));
                 column.setRemark(resultSet.getString("REMARKS"));

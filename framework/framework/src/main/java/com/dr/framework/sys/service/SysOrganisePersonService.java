@@ -112,7 +112,7 @@ public interface SysOrganisePersonService {
     }
 
     default List<Person> getOrganiseDefaultPersons(String organiseId) {
-        return getPersonList(new PersonQuery.Builder().build());
+        return getPersonList(new PersonQuery.Builder().defaultOrganiseIdEqual(organiseId).build());
     }
 
     /**
