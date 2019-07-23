@@ -26,6 +26,17 @@ public class LoginController {
     @Autowired
     LoginService loginService;
 
+    /**
+     * 登录校验
+     *
+     * @param username
+     * @param password
+     * @param loginType
+     * @param sysId
+     * @param request
+     * @param response
+     * @return
+     */
     @RequestMapping("/validate")
     public ResultEntity<String> validate(@RequestParam String username
             , @RequestParam String password
@@ -40,6 +51,12 @@ public class LoginController {
         return ResultEntity.success(token);
     }
 
+    /**
+     * 获取当前登陆人详细信息
+     *
+     * @param request
+     * @return
+     */
     @RequestMapping("/info")
     public ResultEntity<Person> personInfo(HttpServletRequest request) {
         Object person = request.getAttribute(CURRENT_PERSON_KEY);

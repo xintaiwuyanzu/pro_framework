@@ -58,6 +58,11 @@ public class DefaultSysOrganisePersonService implements SysOrganisePersonService
         return commonMapper.selectByQuery(organiseQuery.toQuery());
     }
 
+    @Override
+    public long getOrganiseCount(OrganiseQuery organiseQuery) {
+        return commonMapper.countByQuery(organiseQuery.toQuery());
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Page<Organise> getOrganisePage(OrganiseQuery organiseQuery, int start, int end) {
@@ -74,6 +79,11 @@ public class DefaultSysOrganisePersonService implements SysOrganisePersonService
     @Override
     public Page<Person> getPersonPage(PersonQuery query, int start, int end) {
         return commonMapper.selectPageByQuery(query.toQuery(), start, end);
+    }
+
+    @Override
+    public long getPersonCount(PersonQuery query) {
+        return commonMapper.countByQuery(query.toQuery());
     }
 
     @Transactional(rollbackFor = Exception.class)

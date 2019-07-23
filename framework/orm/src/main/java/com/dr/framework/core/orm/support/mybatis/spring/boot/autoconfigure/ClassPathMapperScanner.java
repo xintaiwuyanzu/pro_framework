@@ -8,6 +8,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ class ClassPathMapperScanner extends ClassPathBeanDefinitionScanner {
         String mapperInterface = beanDefinition.getBeanClassName();
         beanDefinition.setBeanClass(MapperFactoryBean.class);
         beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(mapperInterface);
+        Assert.isTrue(!interfaces.contains(mapperInterface), "重复扫描包：" + mapperInterface + "，请检查包扫描范围！");
         interfaces.add(mapperInterface);
     }
 

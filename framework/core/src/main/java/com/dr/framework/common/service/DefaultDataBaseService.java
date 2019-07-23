@@ -69,7 +69,11 @@ public class DefaultDataBaseService implements DataBaseService {
 
     @Override
     public boolean tableExist(@Nonnull String tableName, @Nonnull String moduleName) {
-        return getTableInfo(tableName, moduleName) != null;
+        try {
+            return getTableInfo(tableName, moduleName) != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Nullable

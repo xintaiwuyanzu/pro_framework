@@ -7,6 +7,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 人员查询工具类
@@ -129,6 +130,13 @@ public class PersonQuery {
     public static class Builder {
         private PersonQuery query = new PersonQuery();
 
+        private List<String> newList(String... strings) {
+            return Arrays.asList(strings)
+                    .stream()
+                    .filter(s -> !StringUtils.isEmpty(s))
+                    .collect(Collectors.toList());
+        }
+
         public Builder() {
             this(SubSystem.DEFAULT_SYSTEM_ID);
         }
@@ -173,41 +181,45 @@ public class PersonQuery {
         }
 
         public Builder nationEqual(String... nation) {
-            if (nation.length > 0) {
+            List<String> strings = newList(nation);
+            if (!strings.isEmpty()) {
                 if (query.nation == null) {
                     query.nation = new ArrayList<>();
                 }
-                query.nation.addAll(Arrays.asList(nation));
+                query.nation.addAll(strings);
             }
             return this;
         }
 
         public Builder loginIdEqual(String... loginId) {
-            if (loginId.length > 0) {
+            List<String> strings = newList(loginId);
+            if (!strings.isEmpty()) {
                 if (query.loginId == null) {
                     query.loginId = new ArrayList<>();
                 }
-                query.loginId.addAll(Arrays.asList(loginId));
+                query.loginId.addAll(strings);
             }
             return this;
         }
 
         public Builder organiseIdEqual(String... organiseId) {
-            if (organiseId.length > 0) {
+            List<String> strings = newList(organiseId);
+            if (!strings.isEmpty()) {
                 if (query.organiseId == null) {
                     query.organiseId = new ArrayList<>();
                 }
-                query.organiseId.addAll(Arrays.asList(organiseId));
+                query.organiseId.addAll(strings);
             }
             return this;
         }
 
         public Builder defaultOrganiseIdEqual(String... defaultOrganiseId) {
-            if (defaultOrganiseId.length > 0) {
+            List<String> strings = newList(defaultOrganiseId);
+            if (!strings.isEmpty()) {
                 if (query.defaultOrganiseId == null) {
                     query.defaultOrganiseId = new ArrayList<>();
                 }
-                query.defaultOrganiseId.addAll(Arrays.asList(defaultOrganiseId));
+                query.defaultOrganiseId.addAll(strings);
             }
             return this;
         }
@@ -229,41 +241,45 @@ public class PersonQuery {
         }
 
         public Builder typeEqual(String... type) {
-            if (type.length > 0) {
+            List<String> strings = newList(type);
+            if (!strings.isEmpty()) {
                 if (query.personType == null) {
                     query.personType = new ArrayList<>();
                 }
-                query.personType.addAll(Arrays.asList(type));
+                query.personType.addAll(strings);
             }
             return this;
         }
 
         public Builder typeNotEqual(String... type) {
-            if (type.length > 0) {
+            List<String> strings = newList(type);
+            if (!strings.isEmpty()) {
                 if (query.personTypeNotIn == null) {
                     query.personTypeNotIn = new ArrayList<>();
                 }
-                query.personTypeNotIn.addAll(Arrays.asList(type));
+                query.personTypeNotIn.addAll(strings);
             }
             return this;
         }
 
         public Builder statusEqual(String... status) {
-            if (status.length > 0) {
+            List<String> strings = newList(status);
+            if (!strings.isEmpty()) {
                 if (query.status == null) {
                     query.status = new ArrayList<>();
                 }
-                query.status.addAll(Arrays.asList(status));
+                query.status.addAll(strings);
             }
             return this;
         }
 
         public Builder statusNotEqual(String... status) {
-            if (status.length > 0) {
+            List<String> strings = newList(status);
+            if (!strings.isEmpty()) {
                 if (query.statusNotIn == null) {
                     query.statusNotIn = new ArrayList<>();
                 }
-                query.statusNotIn.addAll(Arrays.asList(status));
+                query.statusNotIn.addAll(strings);
             }
             return this;
         }
@@ -275,11 +291,12 @@ public class PersonQuery {
          * @return
          */
         public Builder sourceRefEqual(String... refIds) {
-            if (refIds.length > 0) {
+            List<String> strings = newList(refIds);
+            if (!strings.isEmpty()) {
                 if (query.sourceRef == null) {
                     query.sourceRef = new ArrayList<>();
                 }
-                query.sourceRef.addAll(Arrays.asList(refIds));
+                query.sourceRef.addAll(strings);
             }
             return this;
         }
@@ -291,11 +308,12 @@ public class PersonQuery {
          * @return
          */
         public Builder sourceRefNotEqual(String... refIds) {
-            if (refIds.length > 0) {
+            List<String> strings = newList(refIds);
+            if (!strings.isEmpty()) {
                 if (query.sourceRefNotIn == null) {
                     query.sourceRefNotIn = new ArrayList<>();
                 }
-                query.sourceRefNotIn.addAll(Arrays.asList(refIds));
+                query.sourceRefNotIn.addAll(strings);
             }
             return this;
         }

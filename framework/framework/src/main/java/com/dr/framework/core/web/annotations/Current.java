@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 能够获取当前相关信息的类
+ * <p>
  * 当前登录人员相关注解依赖
  * 目前只支持
  * 当前登陆人员{@link com.dr.framework.sys.entity.Person }

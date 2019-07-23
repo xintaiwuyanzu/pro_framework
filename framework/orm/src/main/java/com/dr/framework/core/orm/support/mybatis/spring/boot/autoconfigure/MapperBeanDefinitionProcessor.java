@@ -168,13 +168,14 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
      * @param attributes
      */
     private List<String> registerMappers(BeanDefinitionRegistry registry, AnnotationAttributes attributes) {
-        List<String> applicationPackages = AutoConfigurationPackages.get(this.beanFactory);
-        applicationPackages.addAll(readPackgeList(attributes));
-
+        List<String> pkgs = readPackgeList(attributes);
+        if (pkgs.isEmpty()) {
+            pkgs = AutoConfigurationPackages.get(this.beanFactory);
+        }
         ClassPathMapperScanner classPathMapperScanner = new ClassPathMapperScanner(registry);
         setScanner(classPathMapperScanner, attributes);
 
-        classPathMapperScanner.scan(applicationPackages.toArray(new String[applicationPackages.size()]));
+        classPathMapperScanner.scan(pkgs.toArray(new String[pkgs.size()]));
         return classPathMapperScanner.getInterfaces();
     }
 

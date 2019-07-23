@@ -34,6 +34,14 @@ public interface SysOrganisePersonService {
     List<Organise> getOrganiseList(OrganiseQuery organiseQuery);
 
     /**
+     * 获取机构数量
+     *
+     * @param organiseQuery
+     * @return
+     */
+    long getOrganiseCount(OrganiseQuery organiseQuery);
+
+    /**
      * 根据
      *
      * @param organiseQuery
@@ -97,6 +105,14 @@ public interface SysOrganisePersonService {
      * @return
      */
     Page<Person> getPersonPage(PersonQuery query, int start, int end);
+
+    /**
+     * 查询人员数量
+     *
+     * @param query
+     * @return
+     */
+    long getPersonCount(PersonQuery query);
 
     /**
      * 查询指定的一条人员数据

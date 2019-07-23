@@ -7,6 +7,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 组织机构查询类，
@@ -218,6 +219,13 @@ public class OrganiseQuery {
             query.setSysId(sysId);
         }
 
+        private List<String> newList(String... strings) {
+            return Arrays.asList(strings)
+                    .stream()
+                    .filter(s -> !StringUtils.isEmpty(s))
+                    .collect(Collectors.toList());
+        }
+
         /**
          * 主键等于
          *
@@ -252,11 +260,12 @@ public class OrganiseQuery {
          * @return
          */
         public Builder typeEqual(String... types) {
-            if (types.length > 0) {
+            List<String> strings = newList(types);
+            if (!strings.isEmpty()) {
                 if (query.organiseType == null) {
                     query.organiseType = new ArrayList<>();
                 }
-                query.organiseType.addAll(Arrays.asList(types));
+                query.organiseType.addAll(strings);
             }
             return this;
         }
@@ -268,11 +277,12 @@ public class OrganiseQuery {
          * @return
          */
         public Builder typeNotEqual(String... types) {
-            if (types.length > 0) {
+            List<String> strings = newList(types);
+            if (!strings.isEmpty()) {
                 if (query.organiseTypeNotIn == null) {
                     query.organiseTypeNotIn = new ArrayList<>();
                 }
-                query.organiseTypeNotIn.addAll(Arrays.asList(types));
+                query.organiseTypeNotIn.addAll(strings);
             }
             return this;
         }
@@ -284,11 +294,12 @@ public class OrganiseQuery {
          * @return
          */
         public Builder defaultPersonIdEqual(String... personIds) {
-            if (personIds.length > 0) {
+            List<String> strings = newList(personIds);
+            if (!strings.isEmpty()) {
                 if (query.directPersonIds == null) {
                     query.directPersonIds = new ArrayList<>();
                 }
-                query.directPersonIds.addAll(Arrays.asList(personIds));
+                query.directPersonIds.addAll(strings);
             }
             return this;
         }
@@ -301,11 +312,12 @@ public class OrganiseQuery {
          * @return
          */
         public Builder personIdEqual(String... personIds) {
-            if (personIds.length > 0) {
+            List<String> strings = newList(personIds);
+            if (!strings.isEmpty()) {
                 if (query.personIds == null) {
                     query.personIds = new ArrayList<>();
                 }
-                query.personIds.addAll(Arrays.asList(personIds));
+                query.personIds.addAll(strings);
             }
             return this;
         }
@@ -317,15 +329,15 @@ public class OrganiseQuery {
          * @return
          */
         public Builder parentIdEqual(String... parentIds) {
-            if (parentIds.length > 0) {
+            List<String> strings = newList(parentIds);
+            if (!strings.isEmpty()) {
                 if (query.parentIds == null) {
                     query.parentIds = new ArrayList<>();
                 }
-                query.parentIds.addAll(Arrays.asList(parentIds));
+                query.parentIds.addAll(strings);
             }
             return this;
         }
-
 
         /**
          * 父id不等于
@@ -334,11 +346,12 @@ public class OrganiseQuery {
          * @return
          */
         public Builder parentIdNotEqual(String... parentIds) {
-            if (parentIds.length > 0) {
+            List<String> strings = newList(parentIds);
+            if (!strings.isEmpty()) {
                 if (query.parentIdNotIn == null) {
                     query.parentIdNotIn = new ArrayList<>();
                 }
-                query.parentIdNotIn.addAll(Arrays.asList(parentIds));
+                query.parentIdNotIn.addAll(strings);
             }
             return this;
         }
@@ -350,11 +363,12 @@ public class OrganiseQuery {
          * @return
          */
         public Builder statusEqual(String... status) {
-            if (status.length > 0) {
+            List<String> strings = newList(status);
+            if (!strings.isEmpty()) {
                 if (query.status == null) {
                     query.status = new ArrayList<>();
                 }
-                query.status.addAll(Arrays.asList(status));
+                query.status.addAll(strings);
             }
             return this;
         }
@@ -366,11 +380,12 @@ public class OrganiseQuery {
          * @return
          */
         public Builder statusNotEqual(String... status) {
-            if (status.length > 0) {
+            List<String> strings = newList(status);
+            if (!strings.isEmpty()) {
                 if (query.statusNotIn == null) {
                     query.statusNotIn = new ArrayList<>();
                 }
-                query.statusNotIn.addAll(Arrays.asList(status));
+                query.statusNotIn.addAll(strings);
             }
             return this;
         }
@@ -382,11 +397,12 @@ public class OrganiseQuery {
          * @return
          */
         public Builder createPersonEqual(String... createPerson) {
-            if (createPerson.length > 0) {
+            List<String> strings = newList(createPerson);
+            if (!strings.isEmpty()) {
                 if (query.createPersons == null) {
                     query.createPersons = new ArrayList<>();
                 }
-                query.createPersons.addAll(Arrays.asList(createPerson));
+                query.createPersons.addAll(strings);
             }
             return this;
         }
@@ -411,11 +427,12 @@ public class OrganiseQuery {
          * @return
          */
         public Builder sourceRefEqual(String... refIds) {
-            if (refIds.length > 0) {
+            List<String> strings = newList(refIds);
+            if (!strings.isEmpty()) {
                 if (query.sourceRef == null) {
                     query.sourceRef = new ArrayList<>();
                 }
-                query.sourceRef.addAll(Arrays.asList(refIds));
+                query.sourceRef.addAll(strings);
             }
             return this;
         }
@@ -427,11 +444,12 @@ public class OrganiseQuery {
          * @return
          */
         public Builder sourceRefNotEqual(String... refIds) {
-            if (refIds.length > 0) {
+            List<String> strings = newList(refIds);
+            if (!strings.isEmpty()) {
                 if (query.sourceRefNotIn == null) {
                     query.sourceRefNotIn = new ArrayList<>();
                 }
-                query.sourceRefNotIn.addAll(Arrays.asList(refIds));
+                query.sourceRefNotIn.addAll(strings);
             }
             return this;
         }
