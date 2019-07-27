@@ -85,10 +85,12 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
         mapperInterfaces = registerMappers(registry, annotationAttributes);
         AnnotationAttributes[] databases = annotationAttributes.getAnnotationArray("databases");
         if (databases.length == 0) {
-            registerDefaultOrEmberDataSource(registry, DEFAULT_PREFIX, null);
+            MultiDataSourceProperties dataSourceProperties = readDataSourceProties(DEFAULT_PREFIX, null);
+            registerMybatisConfigs(registry, dataSourceProperties, annotationAttributes);
         } else if (databases.length == 1) {
             AnnotationAttributes annotationAttributes = databases[0];
-            registerDefaultOrEmberDataSource(registry, annotationAttributes.getString("prefix"), annotationAttributes.getString("name"));
+            MultiDataSourceProperties dataSourceProperties = readDataSourceProties(annotationAttributes.getString("prefix"), annotationAttributes.getString("name"));
+            registerMybatisConfigs(registry, dataSourceProperties, annotationAttributes);
         } else {
             for (int i = 0; i < databases.length; i++) {
                 AnnotationAttributes database = databases[i];
@@ -103,19 +105,6 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
             BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
             beanDefinition.getPropertyValues().add("mapperInterfaces", mapperInterfaces);
         }
-    }
-
-
-    /**
-     * 注册默认的jdbc  bean 或者内置的内存数据库
-     *
-     * @param registry
-     * @param prefix
-     * @param name
-     */
-    private void registerDefaultOrEmberDataSource(BeanDefinitionRegistry registry, String prefix, String name) {
-        MultiDataSourceProperties dataSourceProperties = readDataSourceProties(prefix, name);
-        registerMybatisConfigs(registry, dataSourceProperties, null);
     }
 
 
@@ -142,7 +131,7 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
         boolean primary = true;
         ClassPathEntityScanner classPathEntityScanner = new ClassPathEntityScanner(registry, dataSourceProperties);
         setScanner(classPathEntityScanner, databaseAttributes);
-        if (databaseAttributes != null) {
+        if (databaseAttributes != null && databaseAttributes.containsKey("primary")) {
             primary = databaseAttributes.getBoolean("primary");
         }
         List<String> pkgs = readPackgeList(databaseAttributes);
