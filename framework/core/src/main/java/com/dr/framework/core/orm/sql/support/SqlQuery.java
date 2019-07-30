@@ -88,7 +88,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     public static <R> SqlQuery<R> from(R entity, String alias, boolean selectAllColumns) {
         SqlQuery sqlQuery = from(entity.getClass(), alias, selectAllColumns);
         if (entity != null) {
-            sqlQuery.put(ENTITY_KEY, SystemMetaObject.forObject(entity));
+            sqlQuery.put(ENTITY_KEY, entity);
         }
         return sqlQuery;
     }
