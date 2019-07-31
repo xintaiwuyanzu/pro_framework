@@ -19,7 +19,7 @@ abstract class AbstractSqlQuery {
 
     static final List<String> concats = Arrays.asList(AND, AND_NEW, OR, OR_NEW);
 
-    protected void sqlClause(StringBuilder builder, String keyword, List<String> parts, String open, String close, String conjunction) {
+    void sqlClause(StringBuilder builder, String keyword, List<String> parts, String open, String close, String conjunction) {
         if (parts != null && !parts.isEmpty()) {
             builder.append(keyword);
             builder.append(" ");
@@ -48,11 +48,11 @@ abstract class AbstractSqlQuery {
      */
     abstract String sql(TableAlias tableAlias, SqlQuery sqlQuery);
 
-    String formatSql(Column column, TableAlias tableAlias) {
+    static String formatSql(Column column, TableAlias tableAlias) {
         return formatSql(column, tableAlias, true);
     }
 
-    String formatSql(Column column, TableAlias tableAlias, boolean withAlias) {
+    static String formatSql(Column column, TableAlias tableAlias, boolean withAlias) {
         StringBuilder sb = new StringBuilder();
         boolean hasFunction = !StringUtils.isEmpty(column.getFunction());
         if (hasFunction) {

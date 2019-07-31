@@ -222,14 +222,7 @@ class WhereQuery extends AbstractSqlQuery {
 
     abstract class WhereSql {
         StringBuilder formatColumn(Column column, TableAlias tableAlias) {
-            StringBuilder builder = new StringBuilder();
-            if (!StringUtils.isEmpty(column.getTable())) {
-                builder.append(tableAlias.alias(column.getTable()));
-                builder.append(".");
-            }
-            builder.append(column.getName());
-            builder.append(" ");
-            return builder;
+            return new StringBuilder(AbstractSqlQuery.formatSql(column, tableAlias, false));
         }
 
         StringBuilder queryParam(SqlQuery sqlQuery) {
