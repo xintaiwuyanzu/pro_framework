@@ -334,7 +334,7 @@ class WhereQuery extends AbstractSqlQuery {
 
         @Override
         String getSql(TableAlias alias, SqlQuery sqlQuery) {
-            return formatColumn(column, alias).append(sql).toString();
+            return formatColumn(column, alias).append(' ').append(sql).toString();
         }
     }
 
