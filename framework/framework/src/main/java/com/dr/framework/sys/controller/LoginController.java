@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author dr
  */
 @RestController
-@RequestMapping("/api/login")
+@RequestMapping("${common.api-path:/api}/login")
 public class LoginController {
     public static final String TOKEN_HEADER_KEY = "$token";
     public static final String CURRENT_PERSON_KEY = "$currentPerson";

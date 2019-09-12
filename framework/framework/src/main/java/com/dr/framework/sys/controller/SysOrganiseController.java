@@ -16,7 +16,7 @@ import java.util.List;
  * @author dr
  */
 @RestController
-@RequestMapping("/api/organise")
+@RequestMapping("${common.api-path:/api}/organise")
 public class SysOrganiseController extends BaseController<Organise> {
 
     @RequestMapping("/organiseTree")

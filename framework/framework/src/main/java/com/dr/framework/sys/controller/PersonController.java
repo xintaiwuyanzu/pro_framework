@@ -11,16 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/person")
+@RequestMapping("${common.api-path:/api}/person")
 public class PersonController extends BaseController<Person> {
     @Override
     protected void onBeforePageQuery(HttpServletRequest request, SqlQuery<Person> sqlQuery, Person entity) {
         super.onBeforePageQuery(request, sqlQuery, entity);
-        if ( !StringUtils.isEmpty(entity.getUserName())){
-            sqlQuery.equal(PersonInfo.USERNAME,entity.getUserName());
+        if (!StringUtils.isEmpty(entity.getUserName())) {
+            sqlQuery.equal(PersonInfo.USERNAME, entity.getUserName());
         }
-        if ( !StringUtils.isEmpty(entity.getUserCode())){
-            sqlQuery.equal(PersonInfo.USERCODE,entity.getUserCode());
+        if (!StringUtils.isEmpty(entity.getUserCode())) {
+            sqlQuery.equal(PersonInfo.USERCODE, entity.getUserCode());
         }
         sqlQuery.orderBy(PersonInfo.ID);
     }

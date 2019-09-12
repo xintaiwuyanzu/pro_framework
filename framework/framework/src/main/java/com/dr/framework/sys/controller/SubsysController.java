@@ -11,6 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
  * @author dr
  */
 @RestController
-@RequestMapping("/api/subsys")
+@RequestMapping("${common.api-path:/api}/subsys")
 public class SubsysController extends BaseController<SubSystem> {
 }

@@ -1,5 +1,8 @@
 package com.dr.framework.core.security;
 
+import com.dr.framework.core.security.bo.Permission;
+import com.dr.framework.core.security.bo.Role;
+
 import java.util.Arrays;
 import java.util.List;
 

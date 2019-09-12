@@ -24,7 +24,7 @@ import java.util.List;
  * @author dr
  */
 @RestController
-@RequestMapping("/api/sysmenu")
+@RequestMapping("${common.api-path:/api}/sysmenu")
 public class SysMenuController extends BaseController<SysMenu> implements InitDataService.DataInit {
 
     @RequestMapping("/menutree")

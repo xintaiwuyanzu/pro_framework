@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author dr
  */
 @RestController
-@RequestMapping("/api/sysDict")
+@RequestMapping("${common.api-path:/api}/sysDict")
 public class SysDictController extends BaseController<SysDict> {
     @Autowired
     SysDictService sysDictService;

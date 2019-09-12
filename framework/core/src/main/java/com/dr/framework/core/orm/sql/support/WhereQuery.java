@@ -412,14 +412,15 @@ class WhereQuery extends AbstractSqlQuery {
             data.setParent(sqlQuery, key);
             sqlQuery.put(key, data);
             return formatColumn(column, alias)
+                    .append(' ')
                     .append(preffix)
-                    .append("(select ")
+                    .append(" (select ")
                     .append(data.get("$columns"))
                     .append(' ')
                     .append(data.get("$from"))
                     .append(' ')
                     .append(data.get("$whereno"))
-                    .append(")")
+                    .append(") ")
                     .append(suffix).toString();
         }
     }
