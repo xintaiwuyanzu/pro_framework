@@ -145,6 +145,8 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
         }
         Assert.notNull(ec, "未能查询到要操作的表：" + entityClass + "，没有实现@Table注解！");
         query.setReturnClass(ec).put(ENTITY_CLASS_KEY, ec);
+        Table table = (Table) ec.getAnnotation(Table.class);
+        query.fromQuery.from(table.name(), alias);
         query.fromQuery.aliasClass(ec, alias);
         query.columnsQuery.setIncludeAll(selectAllColumns);
         return query;
@@ -342,6 +344,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
 
     /**
      * select a.*,b.* from a left join b on a.left=b.right
+     *
      * @param left
      * @param right
      * @return
