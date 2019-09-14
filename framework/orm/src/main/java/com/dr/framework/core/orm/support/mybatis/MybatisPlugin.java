@@ -1,5 +1,6 @@
 package com.dr.framework.core.orm.support.mybatis;
 
+import com.dr.framework.common.page.Page;
 import com.dr.framework.core.orm.annotations.Table;
 import com.dr.framework.core.orm.jdbc.Relation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
@@ -139,7 +140,13 @@ public class MybatisPlugin implements Interceptor {
         if (!isDefaultRowBounds(rowBounds)) {
             MybatisConfigurationBean configurationBean = (MybatisConfigurationBean) ms.getConfiguration();
             com.dr.framework.core.orm.database.Dialect dialect = configurationBean.getDataSourceProperties().getDialect();
-            parsedSql = dialect.parseToPageSql(parsedSql, rowBounds.getOffset(), rowBounds.getLimit());
+
+            //拦截分页查询，设置最大分页，防止太大内存泄漏
+            int limit = rowBounds.getLimit();
+            if (limit > Page.getMaxPageSize()) {
+                limit = Page.getMaxPageSize();
+            }
+            parsedSql = dialect.parseToPageSql(parsedSql, rowBounds.getOffset(), limit);
             rowBounds = RowBounds.DEFAULT;
         }
         boundSql = new BoundSqlWrapper(ms.getConfiguration(), parsedSql, boundSql, params);

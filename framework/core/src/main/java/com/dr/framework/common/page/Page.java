@@ -12,6 +12,20 @@ public class Page<T> {
      * 默认分页大小
      */
     public static final long DEFAULT_PAGE_SIZE = 15;
+
+    /**
+     * 默认最大分页数量 为10w
+     */
+    private static volatile int DEFAULT_MAX_PAGE_SIZE = 100000;
+
+    public static void setMaxPageSize(int size) {
+        DEFAULT_MAX_PAGE_SIZE = size;
+    }
+
+    public static int getMaxPageSize() {
+        return DEFAULT_MAX_PAGE_SIZE;
+    }
+
     /**
      * 起始页，每页分页大小，总共几页
      */
