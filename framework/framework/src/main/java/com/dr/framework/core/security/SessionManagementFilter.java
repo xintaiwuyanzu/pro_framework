@@ -1,5 +1,6 @@
 package com.dr.framework.core.security;
 
+import com.dr.framework.core.security.bo.ClientInfo;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;

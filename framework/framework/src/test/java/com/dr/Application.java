@@ -1,8 +1,6 @@
 package com.dr;
 
 import com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure.EnableAutoMapper;
-import com.dr.framework.sys.query.OrganiseQuery;
-import com.dr.framework.sys.query.PersonQuery;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;

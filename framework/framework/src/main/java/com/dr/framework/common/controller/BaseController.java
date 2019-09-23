@@ -8,7 +8,7 @@ import com.dr.framework.common.service.CommonService;
 import com.dr.framework.core.orm.sql.TableInfo;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.sys.controller.LoginController;
-import com.dr.framework.sys.entity.Person;
+import com.dr.framework.core.organise.entity.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

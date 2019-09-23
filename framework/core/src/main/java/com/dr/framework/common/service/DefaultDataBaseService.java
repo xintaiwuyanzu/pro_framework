@@ -3,7 +3,6 @@ package com.dr.framework.common.service;
 import com.dr.framework.core.orm.database.DataBaseMetaData;
 import com.dr.framework.core.orm.database.Dialect;
 import com.dr.framework.core.orm.database.tools.DataBaseChangeInfo;
-import com.dr.framework.core.orm.jdbc.Column;
 import com.dr.framework.core.orm.jdbc.Relation;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.module.Module;
@@ -87,6 +86,16 @@ public class DefaultDataBaseService implements DataBaseService {
     public EntityRelation getTableInfo(Class entityCLass) {
         for (Module module : moduleMap.values()) {
             EntityRelation entityRelation = module.getTable(entityCLass);
+            if (entityRelation != null) {
+                return entityRelation;
+            }
+        }
+        return null;
+    }
+
+    public EntityRelation getTableInfo(String className) {
+        for (Module module : moduleMap.values()) {
+            EntityRelation entityRelation = module.getTableByClassName(className);
             if (entityRelation != null) {
                 return entityRelation;
             }

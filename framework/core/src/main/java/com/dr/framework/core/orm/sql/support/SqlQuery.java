@@ -591,6 +591,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
 
     /**
      * TODO 可以通过简单的方式实现，但是要考虑多次查询的情况
+     * TODO 要过滤大量in条件的情况
      * {@link WhereQuery#collectionSql(Column, String, String, Collection)}
      *
      * @param column

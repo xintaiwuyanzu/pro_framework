@@ -80,7 +80,15 @@ public class Module {
                 return entityRelation;
             }
         }
+        return null;
+    }
 
+    public EntityRelation getTableByClassName(String className) {
+        for (EntityRelation entityRelation : entityTables.values()) {
+            if (entityRelation.getEntityClass().getName().equals(className)) {
+                return entityRelation;
+            }
+        }
         return null;
     }
 }

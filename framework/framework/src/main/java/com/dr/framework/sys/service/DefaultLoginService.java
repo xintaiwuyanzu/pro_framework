@@ -2,11 +2,13 @@ package com.dr.framework.sys.service;
 
 import com.dr.framework.common.dao.CommonMapper;
 import com.dr.framework.common.entity.StatusEntity;
+import com.dr.framework.common.service.DefaultDataBaseService;
+import com.dr.framework.core.organise.service.LoginService;
+import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
-import com.dr.framework.sys.entity.Person;
-import com.dr.framework.sys.entity.SubSystem;
-import com.dr.framework.sys.entity.UserLogin;
-import com.dr.framework.sys.entity.UserLoginInfo;
+import com.dr.framework.core.organise.entity.Person;
+import com.dr.framework.core.organise.entity.UserLogin;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,17 +24,25 @@ import java.util.UUID;
  * @author dr
  */
 @Service
-public class DefaultLoginService implements LoginService {
+public class DefaultLoginService implements LoginService, InitializingBean {
 
     @Autowired
     CommonMapper commonMapper;
+    @Autowired
+    DefaultDataBaseService defaultDataBaseService;
 
+    EntityRelation userLoginRelation;
+
+    /**
+     * TODO 记录操作日志
+     *
+     * @param person
+     * @param password
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void bindLogin(Person person, String password) {
         Assert.isTrue(commonMapper.exists(Person.class, person.getId()), "未查询到指定的人员！");
-        Assert.isTrue(!StringUtils.isEmpty(person.getSysId()), "子系统编码不能为空！");
-        Assert.isTrue(commonMapper.exists(SubSystem.class, person.getSysId()), "未找到指定的子系统！");
         String salt = genSalt();
         password = encryptPassword(password, salt);
         if (!StringUtils.isEmpty(person.getUserCode())) {
@@ -61,8 +71,9 @@ public class DefaultLoginService implements LoginService {
         //先检查是否有指定的用户
         UserLogin userLogin = commonMapper.selectOneByQuery(
                 SqlQuery.from(UserLogin.class)
-                        .equal(UserLoginInfo.PERSONID, person.getId())
-                        .equal(UserLoginInfo.USERTYPE, loginType)
+                        .equal(userLoginRelation.getColumn("person_id"), person.getId())
+                        .equal(userLoginRelation.getColumn("user_type"), loginType)
+                        .equal(userLoginRelation.getColumn("outUser"), person.isOutUser())
         );
         if (userLogin == null) {
             userLogin = new UserLogin();
@@ -76,7 +87,6 @@ public class DefaultLoginService implements LoginService {
             userLogin.setSalt(salt);
             userLogin.setUpdateDate(System.currentTimeMillis());
             userLogin.setUpdatePerson(person.getUpdatePerson());
-            userLogin.setSysId(person.getSysId());
             userLogin.setStatus(StatusEntity.STATUS_ENABLE);
             userLogin.setLastChangePwdDate(System.currentTimeMillis());
             commonMapper.insert(userLogin);
@@ -87,7 +97,6 @@ public class DefaultLoginService implements LoginService {
             userLogin.setLastChangePwdDate(System.currentTimeMillis());
             userLogin.setUpdateDate(System.currentTimeMillis());
             userLogin.setUpdatePerson(person.getUpdatePerson());
-            userLogin.setSysId(person.getSysId());
             userLogin.setStatus(StatusEntity.STATUS_ENABLE);
             commonMapper.updateIgnoreNullById(userLogin);
         }
@@ -101,16 +110,15 @@ public class DefaultLoginService implements LoginService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addLogin(String sysId, String personId, String loginType, String loginId, String password) {
+    public void addLogin(String personId, String loginType, String loginId, String password) {
         Assert.isTrue(!StringUtils.isEmpty(personId), "人员Id不能为空！");
         Person person = commonMapper.selectById(Person.class, personId);
         Assert.isTrue(person != null, "未查询到指定的人员！");
-        Assert.isTrue(!StringUtils.isEmpty(sysId), "子系统编码不能为空！");
-        Assert.isTrue(commonMapper.exists(SubSystem.class, sysId), "未找到指定的子系统！");
         Assert.isTrue(!commonMapper.existsByQuery(
                 SqlQuery.from(UserLogin.class)
-                        .equal(UserLoginInfo.PERSONID, personId)
-                        .equal(UserLoginInfo.USERTYPE, loginType)
+                        .equal(userLoginRelation.getColumn("person_id"), person.getId())
+                        .equal(userLoginRelation.getColumn("user_type"), loginType)
+                        .equal(userLoginRelation.getColumn("outUser"), person.isOutUser())
         ), "已存在指定类型的登录账户");
         String salt = genSalt();
         password = encryptPassword(password, salt);
@@ -132,14 +140,14 @@ public class DefaultLoginService implements LoginService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Person login(String loginId, String password, String loginType, String sysId, String loginSource) {
+    public Person login(String loginId, String password, String loginType, String loginSource, boolean outUser) {
         Assert.isTrue(!StringUtils.isEmpty(loginId), "登录账户不能为空！");
         Assert.isTrue(!StringUtils.isEmpty(loginType), "登录类型不能为空！");
         UserLogin userLogin = commonMapper.selectOneByQuery(
                 SqlQuery.from(UserLogin.class)
-                        .equal(UserLoginInfo.LOGINID, loginId)
-                        .equal(UserLoginInfo.SYSID, sysId)
-                        .equal(UserLoginInfo.USERTYPE, loginType)
+                        .equal(userLoginRelation.getColumn("login_id"), loginId)
+                        .equal(userLoginRelation.getColumn("user_type"), loginType)
+                        .equal(userLoginRelation.getColumn("outUser"), outUser)
         );
         Assert.notNull(userLogin, "未查到指定的登录账户！");
         password = encryptPassword(password, userLogin.getSalt());
@@ -150,7 +158,6 @@ public class DefaultLoginService implements LoginService {
         }
         userLogin.setLastLoginDate(System.currentTimeMillis());
         commonMapper.updateIgnoreNullById(userLogin);
-
         return commonMapper.selectById(Person.class, userLogin.getPersonId());
     }
 
@@ -179,7 +186,10 @@ public class DefaultLoginService implements LoginService {
         Assert.isTrue(!StringUtils.isEmpty(newPassword), "新密码不能为空！");
         String salt = genSalt();
         newPassword = encryptPassword(newPassword, salt);
-        List<UserLogin> userLogins = commonMapper.selectByQuery(SqlQuery.from(UserLogin.class).equal(UserLoginInfo.PERSONID, personId));
+        List<UserLogin> userLogins = commonMapper.selectByQuery(
+                SqlQuery.from(UserLogin.class)
+                        .equal(userLoginRelation.getColumn("person_id"), personId)
+        );
         for (UserLogin userLogin : userLogins) {
             userLogin.setPassword(newPassword);
             userLogin.setSalt(salt);
@@ -192,7 +202,10 @@ public class DefaultLoginService implements LoginService {
     @Transactional(rollbackFor = Exception.class)
     public void freezeLogin(String personId) {
         Assert.isTrue(!StringUtils.isEmpty(personId), "人员id不能为空！");
-        List<UserLogin> userLogins = commonMapper.selectByQuery(SqlQuery.from(UserLogin.class).equal(UserLoginInfo.PERSONID, personId));
+        List<UserLogin> userLogins = commonMapper.selectByQuery(
+                SqlQuery.from(UserLogin.class)
+                        .equal(userLoginRelation.getColumn("person_id"), personId)
+        );
         for (UserLogin userLogin : userLogins) {
             userLogin.setStatus(StatusEntity.STATUS_DISABLE);
             commonMapper.updateIgnoreNullById(userLogin);
@@ -203,10 +216,19 @@ public class DefaultLoginService implements LoginService {
     @Transactional(rollbackFor = Exception.class)
     public void unFreezeLogin(String personId) {
         Assert.isTrue(!StringUtils.isEmpty(personId), "人员id不能为空！");
-        List<UserLogin> userLogins = commonMapper.selectByQuery(SqlQuery.from(UserLogin.class).equal(UserLoginInfo.PERSONID, personId));
+        List<UserLogin> userLogins = commonMapper.selectByQuery(
+                SqlQuery.from(UserLogin.class)
+                        .equal(userLoginRelation.getColumn("person_id"), personId)
+
+        );
         for (UserLogin userLogin : userLogins) {
             userLogin.setStatus(StatusEntity.STATUS_ENABLE);
             commonMapper.updateIgnoreNullById(userLogin);
         }
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        userLoginRelation = defaultDataBaseService.getTableInfo(UserLogin.class);
     }
 }

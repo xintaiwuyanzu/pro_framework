@@ -1,9 +1,8 @@
 package com.dr.framework.sys.controller;
 
 import com.dr.framework.common.entity.ResultEntity;
-import com.dr.framework.sys.entity.Person;
-import com.dr.framework.sys.entity.SubSystem;
-import com.dr.framework.sys.service.LoginService;
+import com.dr.framework.core.organise.entity.Person;
+import com.dr.framework.core.organise.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +31,6 @@ public class LoginController {
      * @param username
      * @param password
      * @param loginType
-     * @param sysId
      * @param request
      * @param response
      * @return
@@ -41,11 +39,10 @@ public class LoginController {
     public ResultEntity<String> validate(@RequestParam String username
             , @RequestParam String password
             , @RequestParam(defaultValue = LoginService.LOGIN_TYPE_DEFAULT) String loginType
-            , @RequestParam(defaultValue = SubSystem.DEFAULT_SYSTEM_ID) String sysId
             , HttpServletRequest request
             , HttpServletResponse response) {
         String remoteIp = getIpAddr(request);
-        String token = loginService.auth(username, password, loginType, sysId, remoteIp);
+        String token = loginService.auth(username, password, loginType, remoteIp);
         response.addHeader(TOKEN_HEADER_KEY, token);
         response.addCookie(new Cookie(TOKEN_HEADER_KEY, token));
         return ResultEntity.success(token);

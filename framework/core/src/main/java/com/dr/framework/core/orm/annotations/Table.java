@@ -35,4 +35,11 @@ public @interface Table {
      */
     String createSql() default "";
 
+    /**
+     * 是否生成info工具类，代码生成使用
+     *
+     * @return
+     */
+    boolean genInfo() default true;
+
 }
