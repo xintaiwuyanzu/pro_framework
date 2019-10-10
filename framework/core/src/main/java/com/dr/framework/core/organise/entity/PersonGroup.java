@@ -1,6 +1,7 @@
 package com.dr.framework.core.organise.entity;
 
 import com.dr.framework.common.entity.BaseCreateInfoEntity;
+import com.dr.framework.common.entity.BaseStatusEntity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;
 import com.dr.framework.core.util.Constants;
@@ -10,17 +11,15 @@ import com.dr.framework.core.util.Constants;
  *
  * @author dr
  */
-@Table(name = Constants.SYS_TABLE_PREFIX + "person_group_r"
+@Table(name = Constants.SYS_TABLE_PREFIX + "person_group"
         , comment = "人员组关联表"
         , module = Constants.SYS_MODULE_NAME
         , genInfo = false)
-public class PersonGroup extends BaseCreateInfoEntity {
+public class PersonGroup extends BaseStatusEntity<String> {
     @Column(name = "group_name", comment = "组名称", length = 500)
     private String name;
     @Column(name = "group_detail", comment = "组详情", length = 2000)
     private String detail;
-    @Column(name = "group_order", comment = "组排序", length = 10)
-    private int order;
     @Column(name = "group_type", comment = "组类型", length = 50)
     private String type;
     @Column(name = "group_ref_id", comment = "组外键", length = 50)
@@ -40,14 +39,6 @@ public class PersonGroup extends BaseCreateInfoEntity {
 
     public void setDetail(String detail) {
         this.detail = detail;
-    }
-
-    public int getOrder() {
-        return order;
-    }
-
-    public void setOrder(int order) {
-        this.order = order;
     }
 
     public String getType() {

@@ -6,7 +6,7 @@ import com.dr.framework.core.util.Constants;
 /**
  * @author dr
  */
-@Table(name = Constants.SYS_TABLE_PREFIX + "permission"
+@Table(name = Constants.SYS_TABLE_PREFIX + "role_group"
         , comment = "角色组"
         , module = Constants.SYS_MODULE_NAME
         , genInfo = false)

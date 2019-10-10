@@ -323,7 +323,7 @@ public class PersonQuery {
         this.defaultOrganiseId = defaultOrganiseId;
     }
 
-    public long getBirthDayStart() {
+    public Long getBirthDayStart() {
         return birthDayStart;
     }
 
@@ -331,7 +331,7 @@ public class PersonQuery {
         this.birthDayStart = birthDayStart;
     }
 
-    public long getBirthDayEnd() {
+    public Long getBirthDayEnd() {
         return birthDayEnd;
     }
 

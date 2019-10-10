@@ -1,11 +1,9 @@
-package com.dr.framework.core.security;
+package com.dr.framework.core.security.service;
 
-import com.dr.framework.core.security.bo.ClientInfo;
 import com.dr.framework.core.security.entity.Permission;
 import com.dr.framework.core.security.entity.Role;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author dr
@@ -13,16 +11,13 @@ import java.util.List;
 public interface SecurityManager {
     String SECURITY_MANAGER_CONTEXT_KEY = "SECURITY_MANAGER_CONTEXT";
 
-    default ClientInfo currentClientInfo() {
-        return SecurityHolder.get();
-    }
-
     /**
      * 获取当前已登陆的所有的客户端的信息
      *
      * @return
      */
-    List<ClientInfo> getAllClientInfos();
+    //TODO
+    //List<ClientInfo> getAllClientInfos();
 
     /**
      * 根据用户id获取所有的登陆客户端信息
@@ -30,27 +25,28 @@ public interface SecurityManager {
      * @param userId
      * @return
      */
-    List<ClientInfo> getClientInfoByUserId(String userId);
+    //TODO
+    //List<ClientInfo> getClientInfoByUserId(String userId);
 
     /**
      * 登出指定的客户端
      *
      * @param client
      */
-    void invalidate(ClientInfo client);
+    //void invalidate(ClientInfo client);
 
     /**
      * 登出该账号在其他浏览器的登陆信息
      *
      * @param client
      */
-    default void invalidateOthers(ClientInfo client) {
+    /*default void invalidateOthers(ClientInfo client) {
         for (ClientInfo clientInfo : getClientInfoByUserId(client.getUserId())) {
             if (!client.equals(clientInfo)) {
                 invalidate(clientInfo);
             }
         }
-    }
+    }*/
 
     /**
      * 是否有角色

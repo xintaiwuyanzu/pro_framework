@@ -4,7 +4,7 @@ import com.dr.framework.common.controller.BaseController;
 import com.dr.framework.common.entity.ResultEntity;
 import com.dr.framework.common.service.CommonService;
 import com.dr.framework.core.organise.entity.Organise;
-import com.dr.framework.core.organise.service.SysOrganisePersonService;
+import com.dr.framework.core.organise.service.OrganisePersonService;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequestMapping("${common.api-path:/api}/organise")
 public class SysOrganiseController extends BaseController<Organise> {
     @Autowired
-    SysOrganisePersonService sysOrganisePersonService;
+    OrganisePersonService organisePersonService;
 
     @RequestMapping("/organiseTree")
     public ResultEntity organiseTree(boolean all, @RequestParam(defaultValue = "default") String sysId) {

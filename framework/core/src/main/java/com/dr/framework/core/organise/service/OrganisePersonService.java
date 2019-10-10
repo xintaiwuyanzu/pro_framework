@@ -3,6 +3,7 @@ package com.dr.framework.core.organise.service;
 import com.dr.framework.common.page.Page;
 import com.dr.framework.core.organise.entity.Organise;
 import com.dr.framework.core.organise.entity.Person;
+import com.dr.framework.core.organise.entity.PersonGroup;
 import com.dr.framework.core.organise.query.OrganiseQuery;
 import com.dr.framework.core.organise.query.PersonQuery;
 import org.springframework.util.Assert;
@@ -16,7 +17,7 @@ import java.util.List;
  *
  * @author dr
  */
-public interface SysOrganisePersonService {
+public interface OrganisePersonService {
     /**
      * 根据机构id获取一直到根的父机构数据
      *
@@ -148,12 +149,77 @@ public interface SysOrganisePersonService {
      */
     void addOrganise(Organise organise);
 
-    //TODO 删除和修改机构
-    //TODO 删除和修改人员
+    default void addPerson(Person person) {
+        addPerson(person, Organise.DEFAULT_ROOT_ID, false, null);
+    }
+
     default void addPerson(Person person, String organiseId) {
         addPerson(person, organiseId, false, null);
     }
 
+    /**
+     * 添加人员
+     *
+     * @param person        人员基本信息
+     * @param organiseId    需要绑定到哪个机构下面
+     * @param registerLogin 是否注册登录账户
+     * @param password      注册账户时的密码
+     */
     void addPerson(Person person, String organiseId, boolean registerLogin, String password);
 
+
+    /**========================
+     *以下是用户组相关的代码
+     ===========================*/
+    /**
+     * 添加用户组
+     *
+     * @param group
+     */
+    void addGroup(PersonGroup group, String... personIds);
+
+    /**
+     * @param name
+     * @param types
+     * @return
+     */
+    List<PersonGroup> getGroups(String name, String... types);
+
+    /**
+     * 获取分组分页
+     *
+     * @param name
+     * @param types
+     * @return
+     */
+    Page<PersonGroup> getGroupPage(String name, int start, int end, String... types);
+
+    /**
+     * 添加用户到指定的用户组
+     *
+     * @param groupId
+     * @param personIds
+     */
+    void addPersonToGroup(String groupId, String... personIds);
+
+    /**
+     * 获取指定用户组所有的用户
+     *
+     * @param groupId
+     * @return
+     */
+    List<Person> groupPerson(String groupId);
+
+    /**
+     * 获取指定用户组用户分页
+     *
+     * @param groupId
+     * @param start
+     * @param end
+     * @return
+     */
+    Page<Person> groupPersonPage(String groupId, int start, int end);
+
+    //TODO 删除和修改机构
+    //TODO 删除和修改人员
 }

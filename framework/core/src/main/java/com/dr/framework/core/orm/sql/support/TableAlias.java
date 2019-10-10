@@ -1,5 +1,6 @@
 package com.dr.framework.core.orm.sql.support;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
@@ -21,9 +22,7 @@ class TableAlias {
     }
 
     private String buildAlia(String table) {
-        if (!alias.containsKey(table)) {
-            return null;
-        }
+        Assert.isTrue(alias.containsKey(table), "sql语句中没有表【" + table + "】，请检查查询条件是否正确！");
         if (autoGenAlias.containsKey(table)) {
             return autoGenAlias.get(table);
         }

@@ -4,7 +4,7 @@ import com.dr.framework.common.controller.BaseController;
 import com.dr.framework.common.entity.ResultEntity;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.organise.query.PersonQuery;
-import com.dr.framework.core.organise.service.SysOrganisePersonService;
+import com.dr.framework.core.organise.service.OrganisePersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("${common.api-path:/api}/person")
 public class PersonController extends BaseController<Person> {
     @Autowired
-    SysOrganisePersonService sysOrganisePersonService;
+    OrganisePersonService organisePersonService;
 
     /**
      * 分页查询语句
@@ -39,14 +39,14 @@ public class PersonController extends BaseController<Person> {
                 .build();
         if (page) {
             return ResultEntity.success(
-                    sysOrganisePersonService.getPersonPage(
+                    organisePersonService.getPersonPage(
                             personQuery
                             , pageSize * pageIndex
                             , (pageIndex + 1) * pageSize)
             );
         } else {
             return ResultEntity.success(
-                    sysOrganisePersonService.getPersonList(personQuery)
+                    organisePersonService.getPersonList(personQuery)
             );
         }
     }

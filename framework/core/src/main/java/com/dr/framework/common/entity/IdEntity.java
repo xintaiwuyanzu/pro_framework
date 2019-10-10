@@ -1,9 +1,25 @@
 package com.dr.framework.common.entity;
 
+/**
+ * 带有主键的实体类
+ *
+ * @author dr
+ */
 public interface IdEntity {
-    public String MULTI_STR_SPLIT_CHAR = ";";
+    String MULTI_STR_SPLIT_CHAR = ";";
+    String ID_COLUMN_NAME = "id";
 
-    public String getId();
+    /**
+     * 获取id的值
+     *
+     * @return
+     */
+    String getId();
 
-    public void setId(String id);
+    /**
+     * 设置主键
+     *
+     * @param id
+     */
+    void setId(String id);
 }

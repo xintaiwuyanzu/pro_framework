@@ -475,7 +475,7 @@ public class OrganiseQuery {
         this.createPersons = createPersons;
     }
 
-    public long getCreateDateStart() {
+    public Long getCreateDateStart() {
         return createDateStart;
     }
 
@@ -483,7 +483,7 @@ public class OrganiseQuery {
         this.createDateStart = createDateStart;
     }
 
-    public long getCreateDateEnd() {
+    public Long getCreateDateEnd() {
         return createDateEnd;
     }
 
