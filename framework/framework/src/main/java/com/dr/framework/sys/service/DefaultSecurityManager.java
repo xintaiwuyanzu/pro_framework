@@ -590,4 +590,9 @@ public class DefaultSecurityManager
             }
         }
     }
+
+    @Override
+    public int order() {
+        return 1;
+    }
 }

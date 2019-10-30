@@ -30,7 +30,7 @@ public interface LoginService {
      * 身份证{@link Person#idNo}
      * 电话{@link Person#phone}
      * 邮箱{@link Person#email}
-     * QQ{@link Person#qq}111
+     * QQ{@link Person#qq}
      * WX{@link Person#weiChatId}
      * <p>
      * 自定义登录方式请使用
