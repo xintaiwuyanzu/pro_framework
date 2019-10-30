@@ -1,17 +1,11 @@
 package com.dr.framework.core.orm.database.dialect;
 
-import com.dr.framework.core.orm.database.Dialect;
-import com.dr.framework.core.orm.jdbc.Relation;
-import org.springframework.util.StringUtils;
-
 import java.sql.*;
-import java.util.Locale;
 
 /**
  * @author dr
  */
-public class Oracle8iDialect extends Dialect {
-    public static final String NAME = "oracle";
+public class Oracle8iDialect extends OracleDialect {
 
     public Oracle8iDialect() {
         //字符串
@@ -71,33 +65,4 @@ public class Oracle8iDialect extends Dialect {
         return builder.toString();
     }
 
-    @Override
-    public String convertObjectName(String source) {
-        return StringUtils.hasLength(source) ? source.toUpperCase(Locale.ROOT).trim() : source;
-    }
-
-    @Override
-    public boolean supportCommentOn() {
-        return true;
-    }
-
-    @Override
-    protected String getAddColumnString() {
-        return "add";
-    }
-
-    @Override
-    protected String getName() {
-        return NAME;
-    }
-
-    @Override
-    protected String getModifyColumnString() {
-        return "modify";
-    }
-
-    @Override
-    protected String getDropPrimaryKeySql(Relation jdbcTable) {
-        return String.format("%s drop primary key drop index", getAlterTableString(jdbcTable.getName()));
-    }
 }

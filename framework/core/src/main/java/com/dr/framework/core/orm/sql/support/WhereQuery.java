@@ -353,7 +353,11 @@ class WhereQuery extends AbstractSqlQuery {
         String getSql(TableAlias alias, SqlQuery sqlQuery) {
             String sql = "";
             if (sqlQuery.containsKey(SqlQuery.ENTITY_KEY)) {
-                sql = formatColumn(column, alias).append(preffix).append(columnKey(column, sqlQuery)).append(suffix).toString();
+                sql = formatColumn(column, alias)
+                        .append(' ')
+                        .append(preffix)
+                        .append(columnKey(column, sqlQuery))
+                        .append(suffix).toString();
             }
             return sql;
         }
@@ -414,7 +418,7 @@ class WhereQuery extends AbstractSqlQuery {
             return formatColumn(column, alias)
                     .append(' ')
                     .append(preffix)
-                    .append(" (select ")
+                    .append("(select ")
                     .append(data.get("$columns"))
                     .append(' ')
                     .append(data.get("$from"))
@@ -448,6 +452,7 @@ class WhereQuery extends AbstractSqlQuery {
             String key = getColumnKey();
             sqlQuery.put(key, data);
             return formatColumn(column, alias)
+                    .append(' ')
                     .append(preffix)
                     .append(columnKey(sqlQuery, key))
                     .append(suffix).toString();

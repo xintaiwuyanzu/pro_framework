@@ -224,6 +224,20 @@ public class DefaultLoginService implements LoginService, InitializingBean {
         changeLoginStatus(personId, STATUS_ENABLE);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long removeLogin(String loginId) {
+        Assert.isTrue(!StringUtils.isEmpty(loginId), "登录账号不能为空");
+        return commonMapper.deleteByQuery(SqlQuery.from(userLoginRelation).equal(userLoginRelation.getColumn("login_id"), loginId));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long removePersonLogin(String personId) {
+        Assert.isTrue(!StringUtils.isEmpty(personId), "人员Id不能为空！");
+        return commonMapper.deleteByQuery(SqlQuery.from(userLoginRelation).equal(userLoginRelation.getColumn("person_id"), personId));
+    }
+
     /**
      * 更新登录状态
      *

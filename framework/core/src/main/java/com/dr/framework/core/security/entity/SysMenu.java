@@ -1,4 +1,4 @@
-package com.dr.framework.core.menu.entity;
+package com.dr.framework.core.security.entity;
 
 import com.dr.framework.common.entity.BaseTreeEntity;
 import com.dr.framework.core.orm.annotations.Column;
@@ -7,6 +7,10 @@ import com.dr.framework.core.util.Constants;
 
 /**
  * 系统菜单
+ * 菜单本身属于权限的具体实现，所以放在权限包中
+ * 具体的增删改查以及相关的判断通过
+ * <p>
+ * {@link com.dr.framework.core.security.service.SecurityManager}实现
  *
  * @author dr
  */

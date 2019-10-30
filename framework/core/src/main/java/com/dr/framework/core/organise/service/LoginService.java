@@ -97,4 +97,20 @@ public interface LoginService {
 
     void unFreezeLogin(String personId);
 
+    /**
+     * 删除指定的登录账户
+     *
+     * @param loginId
+     * @return
+     */
+    long removeLogin(String loginId);
+
+    /**
+     * 删除指定人员所有的登录账户
+     *
+     * @param personId
+     * @return
+     */
+    long removePersonLogin(String personId);
+
 }

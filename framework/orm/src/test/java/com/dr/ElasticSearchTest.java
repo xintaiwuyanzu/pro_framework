@@ -24,7 +24,7 @@ public class ElasticSearchTest {
         Path path = Paths.get(resource1.toURI());
         Settings setting = Settings.builder().loadFromPath(path).build();
         Environment environment = new Environment(setting, path);
-        node = new Node(environment);
+        //node = new Node(environment);
         client = node.client();
     }
 

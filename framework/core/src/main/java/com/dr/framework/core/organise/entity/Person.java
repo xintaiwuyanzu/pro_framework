@@ -102,6 +102,8 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
     private long disableDate;
     @Column(comment = "禁用人ID", simple = "更新人", length = 100)
     private String disablePerson;
+    @Column(comment = "人员职务", length = 200)
+    private String duty;
     /*
      =========
         这里扩展一下机构相关的属性，供查询展示使用
@@ -310,5 +312,13 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
 
     public String getDefaultOrganiseName() {
         return defaultOrganiseName;
+    }
+
+    public String getDuty() {
+        return duty;
+    }
+
+    public void setDuty(String duty) {
+        this.duty = duty;
     }
 }

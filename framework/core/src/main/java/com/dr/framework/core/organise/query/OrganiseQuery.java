@@ -1,5 +1,6 @@
 package com.dr.framework.core.organise.query;
 
+import com.dr.framework.common.query.IdQuery;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -13,15 +14,11 @@ import java.util.stream.Collectors;
  *
  * @author dr
  */
-public class OrganiseQuery {
+public class OrganiseQuery extends IdQuery {
     /**
      * 所属系统
      */
     private String sysId;
-    /**
-     * 主键
-     */
-    private List<String> ids;
     /**
      * 机构名称
      */
@@ -90,17 +87,13 @@ public class OrganiseQuery {
      * 创建日期结束
      */
     private Long createDateEnd;
+    /**
+     * 机构分组
+     */
+    private String groupId;
 
 
     private OrganiseQuery() {
-    }
-
-    public List<String> getIds() {
-        return ids;
-    }
-
-    public void setIds(List<String> ids) {
-        this.ids = ids;
     }
 
     public String getSysId() {
@@ -143,7 +136,15 @@ public class OrganiseQuery {
         this.typeNotLike = typeNotLike;
     }
 
-    public static class Builder {
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
+    public static class Builder extends IdQuery.Builder<OrganiseQuery, Builder> {
         private OrganiseQuery query = new OrganiseQuery();
 
         public Builder() {
@@ -161,18 +162,20 @@ public class OrganiseQuery {
                     .collect(Collectors.toList());
         }
 
+        @Override
+        public OrganiseQuery getQuery() {
+            return query;
+        }
+
         /**
-         * 主键等于
+         * 分组id
          *
-         * @param ids
+         * @param id
          * @return
          */
-        public Builder idEqual(String... ids) {
-            if (ids.length > 0) {
-                if (query.ids == null) {
-                    query.ids = new ArrayList<>();
-                }
-                query.ids.addAll(Arrays.asList(ids));
+        public Builder groupIdEqual(String id) {
+            if (!StringUtils.isEmpty(id)) {
+                query.setGroupId(id);
             }
             return this;
         }
@@ -411,10 +414,6 @@ public class OrganiseQuery {
             return this;
         }
 
-
-        public OrganiseQuery build() {
-            return query;
-        }
     }
 
 

@@ -220,6 +220,35 @@ public interface OrganisePersonService {
      */
     Page<Person> groupPersonPage(String groupId, int start, int end);
 
-    //TODO 删除和修改机构
-    //TODO 删除和修改人员
+    /**
+     * 修改机构
+     *
+     * @param organise
+     * @return 影响数据条数
+     */
+    long updateOrganise(Organise organise);
+
+    /**
+     * 删除机构
+     *
+     * @param organiseId 机构id
+     * @return 影响数据条数
+     */
+    long deleteOrganise(String organiseId);
+
+    /**
+     * 更新人员
+     *
+     * @param person
+     * @return 影响数据条数
+     */
+    long updatePerson(Person person);
+
+    /**
+     * 删除人员
+     *
+     * @param personId 人员id
+     * @return 影响数据条数
+     */
+    long deletePerson(String personId);
 }

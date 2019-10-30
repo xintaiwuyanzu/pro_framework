@@ -29,7 +29,7 @@ public class CommonService {
     SecurityManager securityManager;
 
     @Transactional(rollbackFor = Exception.class)
-    public <T extends IdEntity> void insert(T entity) {
+    public <T extends IdEntity> long insert(T entity) {
         if (StringUtils.isEmpty(entity.getId())) {
             entity.setId(UUID.randomUUID().toString());
         }
@@ -37,7 +37,7 @@ public class CommonService {
         if (entity instanceof BaseCreateInfoEntity) {
             bindCreateInfo((BaseCreateInfoEntity) entity);
         }
-        commonMapper.insert(entity);
+        return commonMapper.insert(entity);
     }
 
     public static void bindCreateInfo(BaseCreateInfoEntity entity) {
@@ -70,8 +70,7 @@ public class CommonService {
     public <T extends IdEntity> void insertIfNotExist(T... entitys) {
         for (T entity : entitys) {
             if (StringUtils.isEmpty(entity.getId())) {
-                entity.setId(UUID.randomUUID().toString());
-                commonMapper.insert(entity);
+                insert(entity);
             } else {
                 if (!exists(entity)) {
                     insert(entity);
@@ -81,7 +80,7 @@ public class CommonService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public <T extends IdEntity> void update(T entity) {
+    public <T extends IdEntity> long update(T entity) {
         //保存创建人相关信息
         if (entity instanceof BaseCreateInfoEntity) {
             BaseCreateInfoEntity createInfoEntity = (BaseCreateInfoEntity) entity;
@@ -93,7 +92,7 @@ public class CommonService {
                 }
             }
         }
-        commonMapper.updateById(entity);
+        return commonMapper.updateById(entity);
     }
 
     /**

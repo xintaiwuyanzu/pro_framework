@@ -1,9 +1,11 @@
 package com.dr.framework.core.organise.query;
 
+import com.dr.framework.common.query.IdQuery;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,8 +15,7 @@ import java.util.stream.Collectors;
  *
  * @author dr
  */
-public class PersonQuery {
-    private String id;
+public class PersonQuery extends IdQuery {
     private String personName;
     private String nickName;
     private String email;
@@ -40,13 +41,11 @@ public class PersonQuery {
     private List<String> sourceRef;
     private List<String> sourceRefNotIn;
     private String sysId;
+    private String userCode;
+    private String duty;
 
 
-    private PersonQuery() {
-    }
-
-
-    public static class Builder {
+    public static class Builder extends IdQuery.Builder<PersonQuery, Builder> {
         private PersonQuery query = new PersonQuery();
 
         private List<String> newList(String... strings) {
@@ -57,13 +56,18 @@ public class PersonQuery {
         }
 
 
-        public Builder idEqual(String id) {
-            query.id = id;
+        public Builder nameLike(String name) {
+            query.personName = name;
             return this;
         }
 
-        public Builder nameLike(String name) {
-            query.personName = name;
+        public Builder userCodeLike(String userCode) {
+            query.userCode = userCode;
+            return this;
+        }
+
+        public Builder dutyLike(String duty) {
+            query.duty = duty;
             return this;
         }
 
@@ -113,6 +117,17 @@ public class PersonQuery {
             }
             return this;
         }
+
+        public Builder organiseIdEqual(Collection<String> orgIds) {
+            if (orgIds != null && !orgIds.isEmpty()) {
+                if (query.organiseId == null) {
+                    query.organiseId = new ArrayList<>();
+                }
+                query.organiseId.addAll(orgIds);
+            }
+            return this;
+        }
+
 
         public Builder organiseIdEqual(String... organiseId) {
             List<String> strings = newList(organiseId);
@@ -230,17 +245,29 @@ public class PersonQuery {
             return this;
         }
 
-        public PersonQuery build() {
+        @Override
+        public PersonQuery getQuery() {
             return query;
         }
     }
 
-    public String getId() {
-        return id;
+    private PersonQuery() {
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getUserCode() {
+        return userCode;
+    }
+
+    public void setUserCode(String userCode) {
+        this.userCode = userCode;
+    }
+
+    public String getDuty() {
+        return duty;
+    }
+
+    public void setDuty(String duty) {
+        this.duty = duty;
     }
 
     public String getPersonName() {

@@ -16,7 +16,7 @@ import com.dr.framework.core.organise.service.OrganisePersonService;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.SecurityHolder;
-import com.dr.framework.core.system.entity.SubSystem;
+import com.dr.framework.core.security.entity.SubSystem;
 import com.dr.framework.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,9 @@ import static com.dr.framework.core.organise.entity.Organise.DEFAULT_ROOT_ID;
  * @author dr
  */
 @Service
-public class DefaultOrganisePersonService implements OrganisePersonService, InitDataService.DataInit, InitializingBean {
+public class DefaultOrganisePersonService
+        extends RelationHelper
+        implements OrganisePersonService, InitDataService.DataInit, InitializingBean {
     Logger logger = LoggerFactory.getLogger(OrganisePersonService.class);
     @Autowired
     CommonMapper commonMapper;
@@ -153,10 +155,18 @@ public class DefaultOrganisePersonService implements OrganisePersonService, Init
                                 .equal(organiseRelation.getColumn("group_id"), organise.getGroupId())
                 ), "已存在指定的机构编码：" + organise.getOrganiseCode());
         CommonService.bindCreateInfo(organise);
-        if (StringUtils.isEmpty(organise.getParentId())) {
+        if (StringUtils.isEmpty(organise.getParentId()) && !DEFAULT_ROOT_ID.equalsIgnoreCase(organise.getId())) {
             organise.setParentId(DEFAULT_ROOT_ID);
         }
+        if (StringUtils.isEmpty(organise.getStatus())) {
+            organise.setStatus(StatusEntity.STATUS_ENABLE_STR);
+        }
         commonMapper.insert(organise);
+        addOrganiseRelation(organise);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    protected void addOrganiseRelation(Organise organise) {
         //向关联表插入数据
         if (!DEFAULT_ROOT_ID.equals(organise.getId())) {
             List<Organise> parents = getParentOrganiseList(organise.getParentId());
@@ -178,6 +188,7 @@ public class DefaultOrganisePersonService implements OrganisePersonService, Init
             commonMapper.insert(organiseOrganise);
         }
     }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -207,28 +218,32 @@ public class DefaultOrganisePersonService implements OrganisePersonService, Init
         if (currentOrganise != null && StringUtils.isEmpty(person.getCreateOrganiseId())) {
             person.setCreateOrganiseId(currentOrganise.getId());
         }
+        addPersonOrganise(person.getId(), organiseId);
+        commonMapper.insert(person);
+        if (registerLogin) {
+            loginService.bindLogin(person, password);
+        }
+    }
 
+    @Transactional(rollbackFor = Exception.class)
+    protected void addPersonOrganise(String personId, String organiseId) {
         if (!organiseId.equals(DEFAULT_ROOT_ID)) {
             List<Organise> organises = getParentOrganiseList(organiseId);
             Assert.isTrue(organises.size() > 0, "未查询到指定的机构信息！");
             //保存人员机构关联树信息
             for (Organise organise : organises) {
                 PersonOrganise personOrganise = new PersonOrganise();
-                personOrganise.setPersonId(person.getId());
+                personOrganise.setPersonId(personId);
                 personOrganise.setOrganiseId(organise.getId());
                 personOrganise.setDefault(organise.getId().equalsIgnoreCase(organiseId));
                 commonMapper.insert(personOrganise);
             }
         }
         PersonOrganise personOrganise = new PersonOrganise();
-        personOrganise.setPersonId(person.getId());
+        personOrganise.setPersonId(personId);
         personOrganise.setOrganiseId(DEFAULT_ROOT_ID);
         personOrganise.setDefault(DEFAULT_ROOT_ID.equalsIgnoreCase(organiseId));
         commonMapper.insert(personOrganise);
-        commonMapper.insert(person);
-        if (registerLogin) {
-            loginService.bindLogin(person, password);
-        }
     }
 
     @Override
@@ -298,6 +313,136 @@ public class DefaultOrganisePersonService implements OrganisePersonService, Init
     @Transactional(rollbackFor = Exception.class)
     public Page<Person> groupPersonPage(String groupId, int start, int end) {
         return commonMapper.selectPageByQuery(buildGroupPersonQuery(groupId), start, end);
+    }
+
+    /**
+     * 机构更新只更新基本信息和关联信息
+     * 机构编号不能更新
+     *
+     * @param organise
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long updateOrganise(Organise organise) {
+        //先查出来原来的机构信息
+        Organise old = getOrganise(new OrganiseQuery.Builder().idEqual(organise.getId()).build());
+        Assert.notNull(old, "未查询到指定的机构");
+        if (!StringUtils.isEmpty(organise.getOrganiseCode())) {
+            Assert.isTrue(old.getOrganiseCode().equals(organise.getOrganiseCode()), "机构代码不能更改");
+        }
+        //如果机构parentid改了，更新机构关联关系
+        if (!StringUtils.isEmpty(organise.getParentId()) && !old.getParentId().equals(organise.getParentId())) {
+            Assert.notNull(getOrganise(new OrganiseQuery.Builder().idEqual(organise.getId()).build()), "未查询到指定的父机构");
+            //1、先删除所有的之前的机构关联关系
+            commonMapper.deleteByQuery(SqlQuery.from(organiseOrganiseRelation)
+                    .equal(organiseOrganiseRelation.getColumn("organise_id"), old.getId())
+                    .equal(organiseOrganiseRelation.getColumn("group_id"), old.getGroupId())
+            );
+            //2、在添加新的机构关联关系
+            addOrganiseRelation(organise);
+            //更新机构人员关联关系，这个更改数据很多！！ TODO 这里有很大优化空间
+            //1、先查出来该机构所有的人员
+            List<Person> people = getPersonList(new PersonQuery.Builder().
+                    organiseIdEqual(organise.getId()).
+                    build());
+            if (people != null && !people.isEmpty()) {
+                for (Person person : people) {
+                    //2、逐条删除人员机构关联
+                    commonMapper.deleteByQuery(SqlQuery.from(personOrganiseRelation)
+                            .equal(personOrganiseRelation.getColumn("person_id"), person.getIdNo())
+                    );
+                    //3、添加新的人员机构关联
+                    addPersonOrganise(person.getId(), organise.getId());
+                }
+            }
+        }
+        //更新机构基本信息
+        SqlQuery organiseUpdate = SqlQuery.from(organiseRelation);
+        organiseUpdate.set(organiseRelation.getColumn("organise_type"), organise.getOrganiseType());
+        organiseUpdate.set(organiseRelation.getColumn("phone"), organise.getPhone());
+        organiseUpdate.set(organiseRelation.getColumn("mobile"), organise.getMobile());
+        organiseUpdate.set(organiseRelation.getColumn("concat_name"), organise.getConcatName());
+        organiseUpdate.set(organiseRelation.getColumn("address"), organise.getAddress());
+        organiseUpdate.set(organiseRelation.getColumn("summary"), organise.getSummary());
+        organiseUpdate.set(organiseRelation.getColumn("latitude"), organise.getLatitude());
+        organiseUpdate.set(organiseRelation.getColumn("longitude"), organise.getLongitude());
+        organiseUpdate.set(organiseRelation.getColumn("coordinate_type"), organise.getCoordinateType());
+        organiseUpdate.set(organiseRelation.getColumn("group_id"), organise.getGroupId());
+        organiseUpdate.set(organiseRelation.getColumn(STATUS_COLUMN_KEY), organise.getStatus());
+        commonMapper.updateIgnoreNullByQuery(organiseUpdate);
+        //TODO 发布更新消息
+        return 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long deleteOrganise(String organiseId) {
+        Assert.isTrue(!StringUtils.isEmpty(organiseId), "机构id不能为空");
+        Organise old = getOrganise(new OrganiseQuery.Builder().idEqual(organiseId).build());
+        Assert.notNull(old, "未查询到指定的机构");
+        List<Organise> child = getChildrenOrganiseList(organiseId);
+        List<String> organiseIds = Arrays.asList(organiseId);
+        if (child != null && !child.isEmpty()) {
+            organiseIds.addAll(child.stream().map(o -> o.getId()).collect(Collectors.toList()));
+        }
+        //删除机构本身和子机构
+        commonMapper.deleteByQuery(SqlQuery.from(organiseRelation)
+                .in(organiseRelation.getColumn(IdEntity.ID_COLUMN_NAME), organiseIds));
+        //删除机构关联
+        commonMapper.deleteByQuery(SqlQuery.from(organiseOrganiseRelation)
+                .in(organiseOrganiseRelation.getColumn(IdEntity.ID_COLUMN_NAME), organiseIds));
+        //删除人员
+        List<Person> people = getPersonList(new PersonQuery.Builder()
+                .organiseIdEqual(organiseIds)
+                .build()
+        );
+        if (people != null && !people.isEmpty()) {
+            for (Person person : people) {
+                deletePerson(person.getId());
+            }
+        }
+        //TODO 删除虚拟组织关联
+        return 0;
+    }
+
+    @Override
+    public long updatePerson(Person person) {
+        //TODO 这里只是更新基本信息
+        Person old = getPerson(new PersonQuery.Builder().idEqual(person.getId()).build());
+        Assert.notNull(old, "未查询到指定的用户");
+        if (!StringUtils.isEmpty(person.getUserCode())) {
+            Assert.isTrue(old.getUserCode().equals(person.getUserCode()), "用户编号不能更改");
+        }
+        SqlQuery sqlQuery = SqlQuery.from(personRelation);
+        sqlQuery.set(personRelation.getColumn("user_name"), person.getUserName());
+        sqlQuery.set(personRelation.getColumn("nick_name"), person.getNickName());
+        sqlQuery.set(personRelation.getColumn("remark"), person.getRemark());
+        sqlQuery.set(personRelation.getColumn("personType"), person.getPersonType());
+        sqlQuery.set(personRelation.getColumn("address"), person.getAddress());
+        sqlQuery.set(personRelation.getColumn("duty"), person.getDuty());
+        sqlQuery.set(personRelation.getColumn("order_info"), person.getOrder());
+        commonMapper.updateIgnoreNullByQuery(sqlQuery);
+        return 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long deletePerson(String personId) {
+        Assert.isTrue(!StringUtils.isEmpty(personId), "人员id不能为空");
+        //删除人员本身
+        commonMapper.deleteByQuery(SqlQuery.from(personRelation).equal(personRelation.getColumn(IdEntity.ID_COLUMN_NAME), personId));
+        //删除登录用户
+        loginService.removePersonLogin(personId);
+        //删除人员机构关联
+        commonMapper.deleteByQuery(SqlQuery.from(personOrganiseRelation)
+                .equal(personOrganiseRelation.getColumn("person_id"), personId)
+        );
+        //  删除人员所属分组
+        commonMapper.deleteByQuery(SqlQuery.from(personGroupRelationRelation)
+                .equal(personGroupRelationRelation.getColumn("personId"), personId)
+        );
+        return 0;
     }
 
     private SqlQuery buildGroupPersonQuery(String groupId) {
@@ -388,6 +533,7 @@ public class DefaultOrganisePersonService implements OrganisePersonService, Init
 
         checkBuildLikeQuery(organiseRelation, query, "organise_name", organiseQuery.getOrganiseName());
         checkBuildLikeQuery(organiseRelation, query, "organise_type", organiseQuery.getTypeLike());
+        checkBuildLikeQuery(organiseRelation, query, "group_id", organiseQuery.getGroupId());
         checkBuildNotLikeQuery(organiseRelation, query, "organise_type", organiseQuery.getTypeNotLike());
 
         if (organiseQuery.getCreateDateStart() != null && organiseQuery.getCreateDateStart() > 0) {
@@ -421,8 +567,8 @@ public class DefaultOrganisePersonService implements OrganisePersonService, Init
      * @return
      */
     protected SqlQuery<Person> personQueryToSqlQuery(PersonQuery personQuery) {
-        SqlQuery query = SqlQuery.from(personRelation)
-                .equal(personRelation.getColumn(IdEntity.ID_COLUMN_NAME), personQuery.getId());
+        SqlQuery query = SqlQuery.from(personRelation);
+        checkBuildInQuery(personRelation, query, IdEntity.ID_COLUMN_NAME, personQuery.getIds());
         checkBuildLikeQuery(personRelation, query, "user_name", personQuery.getPersonName());
         checkBuildLikeQuery(personRelation, query, "nick_name", personQuery.getNickName());
         checkBuildLikeQuery(personRelation, query, "email", personQuery.getEmail());
@@ -431,6 +577,8 @@ public class DefaultOrganisePersonService implements OrganisePersonService, Init
         checkBuildLikeQuery(personRelation, query, "qq", personQuery.getQq());
         checkBuildLikeQuery(personRelation, query, "weiChatId", personQuery.getWeiChatId());
         checkBuildLikeQuery(personRelation, query, "person_type", personQuery.getTypeLike());
+        checkBuildLikeQuery(personRelation, query, "duty", personQuery.getDuty());
+        checkBuildLikeQuery(personRelation, query, "user_code", personQuery.getUserCode());
         checkBuildNotLikeQuery(personRelation, query, "person_type", personQuery.getTypeNotLike());
         checkBuildInQuery(personRelation, query, "nation", personQuery.getNation());
         checkBuildInQuery(personRelation, query, "person_type", personQuery.getPersonType());
@@ -472,27 +620,5 @@ public class DefaultOrganisePersonService implements OrganisePersonService, Init
         return personQueryJoin(query);
     }
 
-    private void checkBuildInQuery(EntityRelation relation, SqlQuery query, String columnName, List values) {
-        if (values != null && !values.isEmpty()) {
-            query.in(relation.getColumn(columnName), values);
-        }
-    }
 
-    private void checkBuildNotInQuery(EntityRelation relation, SqlQuery<Person> query, String columnName, List values) {
-        if (values != null && !values.isEmpty()) {
-            query.notIn(relation.getColumn(columnName), values);
-        }
-    }
-
-    private void checkBuildLikeQuery(EntityRelation relation, SqlQuery query, String columnName, String value) {
-        if (!StringUtils.isEmpty(value)) {
-            query.like(relation.getColumn(columnName), value);
-        }
-    }
-
-    private void checkBuildNotLikeQuery(EntityRelation relation, SqlQuery query, String columnName, String value) {
-        if (!StringUtils.isEmpty(value)) {
-            query.notLike(relation.getColumn(columnName), value);
-        }
-    }
 }

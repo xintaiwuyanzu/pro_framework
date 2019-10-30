@@ -1,5 +1,7 @@
 package com.dr.framework.core.orm.database;
 
+import com.dr.framework.core.orm.database.dialect.Oracle8iDialect;
+import com.dr.framework.core.orm.database.dialect.OracleDialect;
 import com.dr.framework.core.orm.database.tools.DataBaseChangeInfo;
 import com.dr.framework.core.orm.jdbc.Column;
 import com.dr.framework.core.orm.jdbc.Relation;
@@ -117,6 +119,14 @@ public abstract class Dialect {
             }
         } catch (Exception e) {
             logger.error("解析数据库表信息失败", e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return tables;
     }
@@ -162,6 +172,12 @@ public abstract class Dialect {
             }
         } catch (Exception e) {
             logger.error("解析数据库列信息失败", e);
+        } finally {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return columns;
     }
@@ -200,6 +216,12 @@ public abstract class Dialect {
             }
         } catch (Exception e) {
             logger.error("解析数据库索引信息失败", e);
+        } finally {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -222,6 +244,12 @@ public abstract class Dialect {
             }
         } catch (Exception e) {
             logger.error("解析数据库主键信息失败", e);
+        } finally {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -248,6 +276,10 @@ public abstract class Dialect {
     public List<DataBaseChangeInfo> getCreateTableInfo(Relation<? extends Column> relation) {
         List<DataBaseChangeInfo> sqls = new ArrayList<>();
         if (relation.isTable()) {
+            if (relation.getColumns().isEmpty()) {
+                logger.warn("表【{}】没有列，忽略更新", relation.getName());
+                return sqls;
+            }
             //建表sql
             StringBuffer createTable = new StringBuffer(getCreateTableString())
                     .append(' ')
@@ -488,10 +520,17 @@ public abstract class Dialect {
         List<DataBaseChangeInfo> sqls = new ArrayList<>();
 
         if (relation.isTable()) {
+            if (relation.getColumns().isEmpty()) {
+                logger.warn("表【{}】没有列，忽略更新", relation.getName());
+                return sqls;
+            }
             //修改表注释
             if (relation.getRemark() != jdbcTable.getRemark() && supportCommentOn()) {
-                String commentTableSql = "comment on table " + convertObjectName(relation.getName()) + " is '" + relation.getRemark() + "'";
-                sqls.add(new DataBaseChangeInfo(commentTableSql, String.format("表：【%s】，添加注释【%s】", relation.getName(), relation.getRemark())));
+                //TODO oracle 默认配置获取不到注释信息
+                if (!(this instanceof OracleDialect)) {
+                    String commentTableSql = "comment on table " + convertObjectName(relation.getName()) + " is '" + relation.getRemark() + "'";
+                    sqls.add(new DataBaseChangeInfo(commentTableSql, String.format("表：【%s】，添加注释【%s】", relation.getName(), relation.getRemark())));
+                }
             }
             //遍历列
             relation.getColumns().forEach(c -> {
@@ -593,10 +632,13 @@ public abstract class Dialect {
         if (supportCommentOn()) {
             //不支持注释的就不管了，修改注释数据库影响很大
             if (!StringUtils.isEmpty(newColumn.getRemark()) && !newColumn.getRemark().equalsIgnoreCase(oldColumn.getRemark())) {
-                sqls.add(new DataBaseChangeInfo(
-                        String.format("comment on column %s.%s is '%s'", convertObjectName(oldColumn.getRelation().getName()), oldColumn.getName(), newColumn.getRemark()),
-                        String.format("表【%s】列【%s】修改注释为【%s】", oldColumn.getRelation().getName(), oldColumn.getName(), newColumn.getRemark())
-                ));
+                //TODO oracle 默认不获取备注信息
+                if (!(this instanceof OracleDialect)) {
+                    sqls.add(new DataBaseChangeInfo(
+                            String.format("comment on column %s.%s is '%s'", convertObjectName(oldColumn.getRelation().getName()), oldColumn.getName(), newColumn.getRemark()),
+                            String.format("表【%s】列【%s】修改注释为【%s】", oldColumn.getRelation().getName(), oldColumn.getName(), newColumn.getRemark())
+                    ));
+                }
             }
         }
         return sqls;

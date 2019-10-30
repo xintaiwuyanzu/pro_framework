@@ -1,9 +1,14 @@
 package com.dr.framework.common.entity;
 
+/**
+ * 带有排序字段的实体类
+ *
+ * @author dr
+ */
 public interface OrderEntity extends CreateInfoEntity, Comparable<OrderEntity> {
-    public int getOrder();
+    int getOrder();
 
-    public void setOrder(int order);
+    void setOrder(int order);
 
     @Override
     default int compareTo(OrderEntity o) {

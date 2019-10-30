@@ -1,4 +1,4 @@
-package com.dr.framework.core.system.entity;
+package com.dr.framework.core.security.entity;
 
 import com.dr.framework.common.entity.BaseStatusEntity;
 import com.dr.framework.core.orm.annotations.Column;

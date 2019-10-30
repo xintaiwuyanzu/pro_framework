@@ -1,19 +1,24 @@
 package com.dr.framework.common.entity;
 
+/**
+ * 创建人信息
+ *
+ * @author dr
+ */
 public interface CreateInfoEntity extends IdEntity {
-    public long getCreateDate();
+    long getCreateDate();
 
-    public void setCreateDate(long createDate);
+    void setCreateDate(long createDate);
 
-    public String getCreatePerson();
+    String getCreatePerson();
 
-    public void setCreatePerson(String createPerson);
+    void setCreatePerson(String createPerson);
 
-    public long getUpdateDate();
+    long getUpdateDate();
 
-    public void setUpdateDate(long updateDate);
+    void setUpdateDate(long updateDate);
 
-    public String getUpdatePerson();
+    String getUpdatePerson();
 
-    public void setUpdatePerson(String updatePerson);
+    void setUpdatePerson(String updatePerson);
 }
