@@ -49,14 +49,23 @@ public class OrganiseQuery extends IdQuery {
      */
     private List<String> personIds;
     /**
+     * ======
+     * 这里都是直接默认的parentid，只能查询一级数据
+     * ======
+     * <p>
      * 父id
      */
     private List<String> parentIds;
 
     /**
+     * 这里都是直接默认的parentid，只能查询直接下属，不能跨级查询
      * 不包含的父id
      */
     private List<String> parentIdNotIn;
+    /**
+     * 这个是祖先id，能够查询多级数据
+     */
+    private List<String> treeParentId;
 
     /**
      * 状态等于
@@ -142,6 +151,14 @@ public class OrganiseQuery extends IdQuery {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public List<String> getTreeParentId() {
+        return treeParentId;
+    }
+
+    public void setTreeParentId(List<String> treeParentId) {
+        this.treeParentId = treeParentId;
     }
 
     public static class Builder extends IdQuery.Builder<OrganiseQuery, Builder> {
@@ -266,7 +283,7 @@ public class OrganiseQuery extends IdQuery {
          * @param parentIds
          * @return
          */
-        public Builder parentIdEqual(String... parentIds) {
+        public Builder defaultParentIdEqual(String... parentIds) {
             List<String> strings = newList(parentIds);
             if (!strings.isEmpty()) {
                 if (query.parentIds == null) {
@@ -283,13 +300,30 @@ public class OrganiseQuery extends IdQuery {
          * @param parentIds
          * @return
          */
-        public Builder parentIdNotEqual(String... parentIds) {
+        public Builder defaultParentIdNotEqual(String... parentIds) {
             List<String> strings = newList(parentIds);
             if (!strings.isEmpty()) {
                 if (query.parentIdNotIn == null) {
                     query.parentIdNotIn = new ArrayList<>();
                 }
                 query.parentIdNotIn.addAll(strings);
+            }
+            return this;
+        }
+
+        /**
+         * 父祖先id等于
+         *
+         * @param parentIds
+         * @return
+         */
+        public Builder parentIdEqual(String... parentIds) {
+            List<String> strings = newList(parentIds);
+            if (!strings.isEmpty()) {
+                if (query.treeParentId == null) {
+                    query.treeParentId = new ArrayList<>();
+                }
+                query.treeParentId.addAll(strings);
             }
             return this;
         }

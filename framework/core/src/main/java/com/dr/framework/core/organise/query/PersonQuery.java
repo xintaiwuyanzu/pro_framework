@@ -21,6 +21,7 @@ public class PersonQuery extends IdQuery {
     private String email;
     private String phone;
     private String qq;
+    private String idNo;
     private String weiChatId;
 
     private List<String> nation;
@@ -154,6 +155,13 @@ public class PersonQuery extends IdQuery {
         public Builder birthdayBetween(long start, long end) {
             query.birthDayStart = start;
             query.birthDayEnd = end;
+            return this;
+        }
+
+        public Builder idNoLike(String idNo) {
+            if (!StringUtils.isEmpty(idNo)) {
+                query.setIdNo(idNo);
+            }
             return this;
         }
 
@@ -300,6 +308,14 @@ public class PersonQuery extends IdQuery {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getIdNo() {
+        return idNo;
+    }
+
+    public void setIdNo(String idNo) {
+        this.idNo = idNo;
     }
 
     public String getQq() {

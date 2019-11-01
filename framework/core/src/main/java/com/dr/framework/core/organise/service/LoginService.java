@@ -4,6 +4,8 @@ import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.organise.entity.UserLogin;
 import com.dr.framework.core.util.Constants;
 
+import java.util.List;
+
 /**
  * 登录接口类
  *
@@ -52,6 +54,15 @@ public interface LoginService {
     void addLogin(String personId, String loginType, String loginId, String password);
 
     /**
+     * 根据历史登录账户的登录密码创建登录用户
+     *  TODO 这个需求不大合理
+     * @param personId
+     * @param loginType
+     * @param loginId
+     */
+    //void addLoginWithExistPassWord(String personId, String loginType, String loginId);
+
+    /**
      * 登录验证，并返回人员基本信息
      *
      * @param loginId     登录账号
@@ -75,8 +86,28 @@ public interface LoginService {
         return login(loginId, password, LOGIN_TYPE_DEFAULT);
     }
 
+    /**
+     * 查询用户所有的登录账户
+     *
+     * @param personId
+     * @return
+     */
+    List<UserLogin> userLogin(String personId);
+
+    /**
+     * 将person转换成token码
+     *
+     * @param person
+     * @return
+     */
     String auth(Person person);
 
+    /**
+     * 将token码转换成person对象
+     *
+     * @param token
+     * @return
+     */
     Person deAuth(String token);
 
     default String auth(String loginId, String password, String loginType, String loginSource) {

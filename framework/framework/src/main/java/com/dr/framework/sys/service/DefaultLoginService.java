@@ -118,6 +118,11 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addLogin(String personId, String loginType, String loginId, String password) {
+        addLogin(personId, loginType, loginId, password, true);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    protected long addLogin(String personId, String loginType, String loginId, String password, boolean encryPass) {
         Assert.isTrue(!StringUtils.isEmpty(personId), "人员Id不能为空！");
         Person person = commonMapper.selectById(Person.class, personId);
         Assert.isTrue(person != null, "未查询到指定的人员！");
@@ -128,8 +133,11 @@ public class DefaultLoginService implements LoginService, InitializingBean {
                         .equal(userLoginRelation.getColumn("outUser"), person.isOutUser())
         ), "已存在指定类型的登录账户");
         String salt = genSalt();
-        password = encryptPassword(password, salt);
+        if (encryPass) {
+            password = encryptPassword(password, salt);
+        }
         doAddUserLogin(person, password, salt, loginId, loginType);
+        return 0;
     }
 
     /**
@@ -173,6 +181,14 @@ public class DefaultLoginService implements LoginService, InitializingBean {
         userLogin.setLastLoginDate(System.currentTimeMillis());
         commonMapper.updateIgnoreNullById(userLogin);
         return commonMapper.selectById(Person.class, userLogin.getPersonId());
+    }
+
+    @Override
+    public List<UserLogin> userLogin(String personId) {
+        Assert.isTrue(!StringUtils.isEmpty(personId), "人员Id不能为空");
+        SqlQuery<UserLogin> userLoginSqlQuery = SqlQuery.from(userLoginRelation);
+        userLoginSqlQuery.equal(userLoginRelation.getColumn("person_id"), personId);
+        return commonMapper.selectByQuery(userLoginSqlQuery);
     }
 
     /**

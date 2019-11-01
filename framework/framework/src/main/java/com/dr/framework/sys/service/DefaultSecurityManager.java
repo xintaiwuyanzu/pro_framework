@@ -513,6 +513,7 @@ public class DefaultSecurityManager
 
     protected SqlQuery<Role> roleQueryToSqlQuery(RoleQuery query) {
         SqlQuery<Role> sqlQuery = SqlQuery.from(roleRelation);
+        checkBuildInQuery(roleRelation, sqlQuery, IdEntity.ID_COLUMN_NAME, query.getIds());
         checkBuildLikeQuery(roleRelation, sqlQuery, "security_code", query.getCodeLike());
         return sqlQuery;
     }

@@ -7,6 +7,7 @@ import com.dr.framework.core.organise.entity.PersonGroup;
 import com.dr.framework.core.organise.query.OrganiseQuery;
 import com.dr.framework.core.organise.query.PersonQuery;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -138,6 +139,49 @@ public interface OrganisePersonService {
         return personList.isEmpty() ? null : personList.get(0);
     }
 
+    /**
+     * 根据用户id查询用户
+     *
+     * @param id
+     * @return
+     */
+    default @Nullable
+    Person getPersonById(String id) {
+        Assert.isTrue(!StringUtils.isEmpty(id), "用户id不能为空");
+        return getPerson(new PersonQuery.Builder().idEqual(id).build());
+    }
+
+    /**
+     * 根据code查询用户
+     *
+     * @param userCode
+     * @return
+     */
+    default @Nullable
+    Person getPersonByUserCode(String userCode) {
+        Assert.isTrue(!StringUtils.isEmpty(userCode), "用户编码不能为空");
+        return getPerson(new PersonQuery.Builder().userCodeLike(userCode).build());
+    }
+
+    /**
+     * 根据身份证查询用户
+     *
+     * @param idNO
+     * @return
+     */
+    default @Nullable
+    Person getPersonByIdNO(String idNO) {
+        Assert.isTrue(!StringUtils.isEmpty(idNO), "身份证号不能为空");
+        return getPerson(new PersonQuery.Builder().idNoLike(idNO).build());
+    }
+
+
+    /**
+     * 根据机构查询机构直属人员
+     *
+     * @param organiseId
+     * @return
+     */
     default List<Person> getOrganiseDefaultPersons(String organiseId) {
         return getPersonList(new PersonQuery.Builder().defaultOrganiseIdEqual(organiseId).build());
     }
@@ -243,6 +287,24 @@ public interface OrganisePersonService {
      * @return 影响数据条数
      */
     long updatePerson(Person person);
+
+    /**
+     * 变更人员编码
+     *
+     * @param personId
+     * @param userCode
+     * @return
+     */
+    long changePersonUserCode(String personId, String userCode);
+
+    /**
+     * 变更人员所属机构
+     *
+     * @param personId
+     * @param organiseId
+     * @return
+     */
+    long changePersonOrganise(String personId, String organiseId);
 
     /**
      * 删除人员

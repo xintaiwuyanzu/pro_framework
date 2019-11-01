@@ -238,12 +238,18 @@ public class DefaultOrganisePersonService
                 personOrganise.setDefault(organise.getId().equalsIgnoreCase(organiseId));
                 commonMapper.insert(personOrganise);
             }
+            PersonOrganise personOrganise = new PersonOrganise();
+            personOrganise.setPersonId(personId);
+            personOrganise.setOrganiseId(organiseId);
+            personOrganise.setDefault(true);
+            commonMapper.insert(personOrganise);
+        } else {
+            PersonOrganise personOrganise = new PersonOrganise();
+            personOrganise.setPersonId(personId);
+            personOrganise.setOrganiseId(DEFAULT_ROOT_ID);
+            personOrganise.setDefault(true);
+            commonMapper.insert(personOrganise);
         }
-        PersonOrganise personOrganise = new PersonOrganise();
-        personOrganise.setPersonId(personId);
-        personOrganise.setOrganiseId(DEFAULT_ROOT_ID);
-        personOrganise.setDefault(DEFAULT_ROOT_ID.equalsIgnoreCase(organiseId));
-        commonMapper.insert(personOrganise);
     }
 
     @Override
@@ -359,6 +365,8 @@ public class DefaultOrganisePersonService
         }
         //更新机构基本信息
         SqlQuery organiseUpdate = SqlQuery.from(organiseRelation);
+        organiseUpdate.set(organiseRelation.getColumn("organise_old_name"), organise.getOrganiseOldName());
+        organiseUpdate.set(organiseRelation.getColumn("organise_name"), organise.getOrganiseName());
         organiseUpdate.set(organiseRelation.getColumn("organise_type"), organise.getOrganiseType());
         organiseUpdate.set(organiseRelation.getColumn("phone"), organise.getPhone());
         organiseUpdate.set(organiseRelation.getColumn("mobile"), organise.getMobile());
@@ -422,7 +430,30 @@ public class DefaultOrganisePersonService
         sqlQuery.set(personRelation.getColumn("address"), person.getAddress());
         sqlQuery.set(personRelation.getColumn("duty"), person.getDuty());
         sqlQuery.set(personRelation.getColumn("order_info"), person.getOrder());
+        sqlQuery.set(personRelation.getColumn("avatar_file_id"), person.getAvatarFileId());
         commonMapper.updateIgnoreNullByQuery(sqlQuery);
+        return 0;
+    }
+
+    @Override
+    public long changePersonUserCode(String personId, String userCode) {
+        return 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long changePersonOrganise(String personId, String organiseId) {
+        Assert.isTrue(!StringUtils.isEmpty(personId), "用户id不能为空");
+        Assert.isTrue(!StringUtils.isEmpty(organiseId), "机构id不能为空");
+        Person person = getPersonById(personId);
+        Assert.notNull(person, "未查询到指定用户");
+        Assert.isTrue(!organiseId.equals(person.getDefaultOrganiseId()), "新机构与原有机构不能相同");
+        //删除机构人员关联
+        commonMapper.deleteByQuery(SqlQuery.from(personOrganiseRelation)
+                .equal(personOrganiseRelation.getColumn("person_id"), personId)
+        );
+        //添加到新的机构
+        addPersonOrganise(personId, organiseId);
         return 0;
     }
 
@@ -555,6 +586,14 @@ public class DefaultOrganisePersonService
                     SqlQuery.from(personOrganiseRelation, false)
                             .column(personOrganiseRelation.getColumn("organise_id"))
                             .in(personOrganiseRelation.getColumn("person_id"), organiseQuery.getPersonIds())
+            );
+        }
+
+        if (organiseQuery.getTreeParentId() != null && !organiseQuery.getTreeParentId().isEmpty()) {
+            query.in(organiseRelation.getColumn(IdEntity.ID_COLUMN_NAME),
+                    SqlQuery.from(organiseOrganiseRelation, false)
+                            .column(organiseOrganiseRelation.getColumn("organise_id"))
+                            .in(organiseOrganiseRelation.getColumn("parent_id"), organiseQuery.getTreeParentId())
             );
         }
         return query;
