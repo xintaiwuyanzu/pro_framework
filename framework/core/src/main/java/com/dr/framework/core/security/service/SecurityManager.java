@@ -137,6 +137,15 @@ public interface SecurityManager {
     boolean addRoleToUser(String userId, String... roleIds);
 
     /**
+     * 删除用户的角色
+     *
+     * @param userId
+     * @param roleIds
+     * @return
+     */
+    long removeUserRole(String userId, String... roleIds);
+
+    /**
      * 给指定用户添加权限
      *
      * @param userId
@@ -144,6 +153,15 @@ public interface SecurityManager {
      * @return
      */
     boolean addPermissionToUser(String userId, String... permissionIds);
+
+    /**
+     * 删除用户的permission
+     *
+     * @param userId
+     * @param permissionIds
+     * @return
+     */
+    long removeUserPermission(String userId, String... permissionIds);
 
     /**
      * 给指定角色添加权限
@@ -155,6 +173,15 @@ public interface SecurityManager {
     boolean addPermissionToRole(String roleId, String... permissionIds);
 
     /**
+     * 删除角色的权限
+     *
+     * @param roleId
+     * @param permissionIds
+     * @return
+     */
+    long removeRolePermission(String roleId, String... permissionIds);
+
+    /**
      * 给指定用户添加菜单
      *
      * @param userId
@@ -164,6 +191,15 @@ public interface SecurityManager {
     boolean addMenuToUser(String userId, String... menuIds);
 
     /**
+     * 删除用户菜单
+     *
+     * @param userId
+     * @param menuIds
+     * @return
+     */
+    long removeUserMenu(String userId, String... menuIds);
+
+    /**
      * 给指定角色添加菜单
      *
      * @param roleId
@@ -171,6 +207,15 @@ public interface SecurityManager {
      * @return
      */
     boolean addMenuToRole(String roleId, String... menuIds);
+
+    /**
+     * 删除角色菜单
+     *
+     * @param roleId
+     * @param menuIds
+     * @return
+     */
+    long removeRoleMenu(String roleId, String... menuIds);
 
     /**
      * ====================================================================

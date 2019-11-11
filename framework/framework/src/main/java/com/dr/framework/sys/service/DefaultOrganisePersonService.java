@@ -8,6 +8,7 @@ import com.dr.framework.common.service.CommonService;
 import com.dr.framework.common.service.DataBaseService;
 import com.dr.framework.common.service.DefaultDataBaseService;
 import com.dr.framework.common.util.IDNo;
+import com.dr.framework.core.event.BaseCRUDEvent;
 import com.dr.framework.core.organise.entity.*;
 import com.dr.framework.core.organise.query.OrganiseQuery;
 import com.dr.framework.core.organise.query.PersonQuery;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.dr.framework.common.entity.IdEntity.ID_COLUMN_NAME;
 import static com.dr.framework.common.entity.StatusEntity.STATUS_COLUMN_KEY;
 import static com.dr.framework.core.organise.entity.Organise.DEFAULT_ROOT_ID;
 
@@ -45,20 +48,32 @@ public class DefaultOrganisePersonService
         extends RelationHelper
         implements OrganisePersonService, InitDataService.DataInit, InitializingBean {
     Logger logger = LoggerFactory.getLogger(OrganisePersonService.class);
-    @Autowired
-    CommonMapper commonMapper;
-    @Autowired
-    LoginService loginService;
-    @Autowired
-    DefaultDataBaseService defaultDataBaseService;
+    private CommonMapper commonMapper;
+    private LoginService loginService;
+    private DefaultDataBaseService defaultDataBaseService;
+    private ApplicationEventPublisher applicationEventPublisher;
+
 
     EntityRelation organiseRelation;
-    EntityRelation personRelation;
     EntityRelation organiseOrganiseRelation;
-    EntityRelation userLoginRelation;
+
     EntityRelation personOrganiseRelation;
+    EntityRelation personRelation;
+
     EntityRelation personGroupRelation;
     EntityRelation personGroupRelationRelation;
+
+    EntityRelation userLoginRelation;
+
+    public DefaultOrganisePersonService(CommonMapper commonMapper,
+                                        LoginService loginService,
+                                        DefaultDataBaseService defaultDataBaseService,
+                                        ApplicationEventPublisher applicationEventPublisher) {
+        this.commonMapper = commonMapper;
+        this.loginService = loginService;
+        this.defaultDataBaseService = defaultDataBaseService;
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
 
 
     @Override
@@ -163,6 +178,7 @@ public class DefaultOrganisePersonService
         }
         commonMapper.insert(organise);
         addOrganiseRelation(organise);
+        applicationEventPublisher.publishEvent(new BaseCRUDEvent<Organise>(organise, BaseCRUDEvent.EventType.CREATE));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -220,6 +236,8 @@ public class DefaultOrganisePersonService
         }
         addPersonOrganise(person.getId(), organiseId);
         commonMapper.insert(person);
+        //发布创建人员消息
+        applicationEventPublisher.publishEvent(new BaseCRUDEvent(person, BaseCRUDEvent.EventType.CREATE));
         if (registerLogin) {
             loginService.bindLogin(person, password);
         }
@@ -378,8 +396,12 @@ public class DefaultOrganisePersonService
         organiseUpdate.set(organiseRelation.getColumn("coordinate_type"), organise.getCoordinateType());
         organiseUpdate.set(organiseRelation.getColumn("group_id"), organise.getGroupId());
         organiseUpdate.set(organiseRelation.getColumn(STATUS_COLUMN_KEY), organise.getStatus());
+        organiseUpdate.equal(organiseRelation.getColumn(ID_COLUMN_NAME), old.getId());
         commonMapper.updateIgnoreNullByQuery(organiseUpdate);
+
         //TODO 发布更新消息
+        old = getOrganise(new OrganiseQuery.Builder().idEqual(organise.getId()).build());
+        applicationEventPublisher.publishEvent(new BaseCRUDEvent(old, BaseCRUDEvent.EventType.UPDATE));
         return 0;
     }
 
@@ -411,6 +433,8 @@ public class DefaultOrganisePersonService
             }
         }
         //TODO 删除虚拟组织关联
+
+        applicationEventPublisher.publishEvent(new BaseCRUDEvent(old, BaseCRUDEvent.EventType.DELETE));
         return 0;
     }
 
@@ -426,12 +450,16 @@ public class DefaultOrganisePersonService
         sqlQuery.set(personRelation.getColumn("user_name"), person.getUserName());
         sqlQuery.set(personRelation.getColumn("nick_name"), person.getNickName());
         sqlQuery.set(personRelation.getColumn("remark"), person.getRemark());
-        sqlQuery.set(personRelation.getColumn("personType"), person.getPersonType());
+        sqlQuery.set(personRelation.getColumn("person_type"), person.getPersonType());
         sqlQuery.set(personRelation.getColumn("address"), person.getAddress());
         sqlQuery.set(personRelation.getColumn("duty"), person.getDuty());
         sqlQuery.set(personRelation.getColumn("order_info"), person.getOrder());
         sqlQuery.set(personRelation.getColumn("avatar_file_id"), person.getAvatarFileId());
+        sqlQuery.equal(personRelation.getColumn(ID_COLUMN_NAME), old.getId());
         commonMapper.updateIgnoreNullByQuery(sqlQuery);
+
+        old = getPerson(new PersonQuery.Builder().idEqual(person.getId()).build());
+        applicationEventPublisher.publishEvent(new BaseCRUDEvent(old, BaseCRUDEvent.EventType.UPDATE));
         return 0;
     }
 
@@ -461,6 +489,7 @@ public class DefaultOrganisePersonService
     @Transactional(rollbackFor = Exception.class)
     public long deletePerson(String personId) {
         Assert.isTrue(!StringUtils.isEmpty(personId), "人员id不能为空");
+        Person old = getPersonById(personId);
         //删除人员本身
         commonMapper.deleteByQuery(SqlQuery.from(personRelation).equal(personRelation.getColumn(IdEntity.ID_COLUMN_NAME), personId));
         //删除登录用户
@@ -473,6 +502,7 @@ public class DefaultOrganisePersonService
         commonMapper.deleteByQuery(SqlQuery.from(personGroupRelationRelation)
                 .equal(personGroupRelationRelation.getColumn("personId"), personId)
         );
+        applicationEventPublisher.publishEvent(new BaseCRUDEvent(old, BaseCRUDEvent.EventType.DELETE));
         return 0;
     }
 
@@ -607,7 +637,11 @@ public class DefaultOrganisePersonService
      */
     protected SqlQuery<Person> personQueryToSqlQuery(PersonQuery personQuery) {
         SqlQuery query = SqlQuery.from(personRelation);
+        if (!StringUtils.isEmpty(personQuery.getCreatePerson())) {
+            query.equal(personRelation.getColumn("createPerson"), personQuery.getCreatePerson());
+        }
         checkBuildInQuery(personRelation, query, IdEntity.ID_COLUMN_NAME, personQuery.getIds());
+        checkBuildLikeQuery(personRelation, query, "id_no", personQuery.getIdNo());
         checkBuildLikeQuery(personRelation, query, "user_name", personQuery.getPersonName());
         checkBuildLikeQuery(personRelation, query, "nick_name", personQuery.getNickName());
         checkBuildLikeQuery(personRelation, query, "email", personQuery.getEmail());
@@ -626,7 +660,6 @@ public class DefaultOrganisePersonService
         checkBuildNotInQuery(personRelation, query, "person_type", personQuery.getPersonTypeNotIn());
         checkBuildNotInQuery(personRelation, query, STATUS_COLUMN_KEY, personQuery.getStatusNotIn());
         checkBuildNotInQuery(personRelation, query, "source_ref", personQuery.getSourceRefNotIn());
-
         if (personQuery.getLoginId() != null && !personQuery.getLoginId().isEmpty()) {
             query.in(personRelation.getColumn(IdEntity.ID_COLUMN_NAME),
                     SqlQuery.from(userLoginRelation, false)
@@ -656,6 +689,14 @@ public class DefaultOrganisePersonService
         if (personQuery.getBirthDayEnd() != null && personQuery.getBirthDayEnd() >= personQuery.getBirthDayStart() && personQuery.getBirthDayEnd() > 0) {
             query.lessThanEqual(personRelation.getColumn("birthday"), personQuery.getBirthDayEnd());
         }
+        if (personQuery.getCreateDayStart() != null && personQuery.getCreateDayStart() > 0) {
+            query.greaterThanEqual(personRelation.getColumn("createDate"), personQuery.getCreateDayStart());
+        }
+        if (personQuery.getCreateDayStart() != null && personQuery.getCreateDayEnd() >= personQuery.getCreateDayStart() && personQuery.getCreateDayEnd() > 0) {
+            query.lessThanEqual(personRelation.getColumn("createDate"), personQuery.getCreateDayEnd());
+        }
+        query.orderBy(personRelation.getColumn("order_info"))
+                .equal(personOrganiseRelation.getColumn("is_default"), true);
         return personQueryJoin(query);
     }
 

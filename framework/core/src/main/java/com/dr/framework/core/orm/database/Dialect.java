@@ -1,6 +1,5 @@
 package com.dr.framework.core.orm.database;
 
-import com.dr.framework.core.orm.database.dialect.Oracle8iDialect;
 import com.dr.framework.core.orm.database.dialect.OracleDialect;
 import com.dr.framework.core.orm.database.tools.DataBaseChangeInfo;
 import com.dr.framework.core.orm.jdbc.Column;
@@ -598,7 +597,7 @@ public abstract class Dialect {
      * @param oldColumn 旧列定义
      * @return
      */
-    public Collection<? extends DataBaseChangeInfo> getChangeColumnInfo(Column newColumn, Column oldColumn) {
+    protected Collection<? extends DataBaseChangeInfo> getChangeColumnInfo(Column newColumn, Column oldColumn) {
         List<DataBaseChangeInfo> sqls = new ArrayList<>();
         //先检查类型变化
         if (typeChanged(newColumn, oldColumn)) {
@@ -644,7 +643,8 @@ public abstract class Dialect {
         return sqls;
     }
 
-    private DataBaseChangeInfo getModifyColumnChange(Column newColumn, String format) {
+    private DataBaseChangeInfo
+    getModifyColumnChange(Column newColumn, String format) {
         //类型兼容就修改表定义为新表定义
         StringBuffer sb = new StringBuffer(getAlterTableString(newColumn.getTableName()))
                 .append(' ')

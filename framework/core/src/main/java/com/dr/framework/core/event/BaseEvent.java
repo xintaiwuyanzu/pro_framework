@@ -11,8 +11,14 @@ import java.util.EventObject;
  *
  * @author dr
  */
-public class BaseEvent extends EventObject {
-    public BaseEvent(Object source) {
+public class BaseEvent<T> extends EventObject {
+
+    public BaseEvent(T source) {
         super(source);
+    }
+
+    @Override
+    public T getSource() {
+        return (T) super.getSource();
     }
 }

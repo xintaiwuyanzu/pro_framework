@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author dr
@@ -188,6 +189,17 @@ public class CommonService {
         return commonMapper.countByQuery(query);
     }
 
+    public static <T extends TreeEntity> List<TreeNode> listToTree(List<T> treeList, String parentId, Function<T, String> labelFunction) {
+        return listToTree(treeList, parentId, labelFunction, false);
+    }
+
+    public static <T extends TreeEntity> List<TreeNode> listToTree(List<T> treeList,
+                                                                   String parentId,
+                                                                   Function<T, String> labelFunction,
+                                                                   boolean checkEmpty) {
+        return listToTree(treeList, parentId, labelFunction, null, checkEmpty);
+    }
+
     /**
      * 将list转换为tree
      *
@@ -195,9 +207,14 @@ public class CommonService {
      * @param parentId
      * @param labelFunction 获取label的函数
      * @param <T>
+     * @param checkEmpty    是否检验children为空的情况
      * @return
      */
-    public static <T extends TreeEntity> List<TreeNode> listToTree(List<T> treeList, String parentId, Function<T, String> labelFunction) {
+    public static <T extends TreeEntity> List<TreeNode> listToTree(List<T> treeList,
+                                                                   String parentId,
+                                                                   Function<T, String> labelFunction,
+                                                                   Function<T, Boolean> leafFunction,
+                                                                   boolean checkEmpty) {
         // 先将list转换成map
         Map<String, List<TreeNode>> pidMaps = new HashMap<>();
         for (T treeEntity : treeList) {
@@ -208,6 +225,9 @@ public class CommonService {
             }
             treeNode.setParentId(pid);
             treeNode.setOrder(treeEntity.getOrder());
+            if (leafFunction != null) {
+                treeNode.setLeaf(leafFunction.apply(treeEntity));
+            }
             List<TreeNode> treeNodeList;
             if (pidMaps.containsKey(pid)) {
                 treeNodeList = pidMaps.get(pid);
@@ -217,7 +237,11 @@ public class CommonService {
             }
             treeNodeList.add(treeNode);
         }
-        return mapToTree(parentId, 0, pidMaps);
+        return mapToTree(parentId, 0, pidMaps, checkEmpty);
+    }
+
+    public static List<TreeNode> mapToTree(String parentId, int level, Map<String, List<TreeNode>> pidMaps) {
+        return mapToTree(parentId, level, pidMaps, false);
     }
 
     /**
@@ -225,22 +249,33 @@ public class CommonService {
      *
      * @param parentId
      * @param pidMaps
+     * @param checkEmpty
      * @return
      */
-    public static List<TreeNode> mapToTree(String parentId, int level, Map<String, List<TreeNode>> pidMaps) {
+    public static List<TreeNode> mapToTree(String parentId, int level, Map<String, List<TreeNode>> pidMaps, boolean checkEmpty) {
         if (pidMaps.containsKey(parentId)) {
-            List<TreeNode> treeNodes = pidMaps.get(parentId);
-            for (TreeNode treeNode : treeNodes) {
-                treeNode.setLevel(level);
-                List<TreeNode> children = mapToTree(treeNode.getId(), level + 1, pidMaps);
-                if (children != null) {
-                    treeNode.setChildren(children);
-                }
-            }
+            List<TreeNode> treeNodes = pidMaps.get(parentId)
+                    .stream()
+                    .filter(treeNode -> {
+                        treeNode.setLevel(level);
+                        List<TreeNode> children = mapToTree(treeNode.getId(), level + 1, pidMaps, checkEmpty);
+                        if (children != null && !children.isEmpty()) {
+                            treeNode.setChildren(children);
+                        } else if (checkEmpty) {
+                            return treeNode.isLeaf();
+                        }
+                        return true;
+                    }).collect(Collectors.toList());
             Collections.sort(treeNodes);
             return treeNodes;
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        String[] aaa = new String[]{"aaa", "bbb"};
+
+
     }
 
 }

@@ -9,7 +9,6 @@ import com.dr.framework.core.security.entity.SysMenu;
 import com.dr.framework.core.security.query.SysMenuQuery;
 import com.dr.framework.core.security.service.SecurityManager;
 import com.dr.framework.core.web.annotations.Current;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,9 +23,11 @@ import java.util.List;
 @RestController
 @RequestMapping("${common.api-path:/api}/sysmenu")
 public class SysMenuController {
-    @Autowired(required = false)
     SecurityManager securityManager;
 
+    public SysMenuController(SecurityManager securityManager) {
+        this.securityManager = securityManager;
+    }
 
     /**
      * 加载系统菜单

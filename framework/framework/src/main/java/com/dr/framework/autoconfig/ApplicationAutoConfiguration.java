@@ -2,10 +2,12 @@ package com.dr.framework.autoconfig;
 
 import com.dr.framework.core.web.interceptor.PersonInterceptor;
 import com.dr.framework.core.web.resolver.CurrentParamResolver;
+import com.dr.framework.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -22,6 +24,7 @@ import java.util.List;
  */
 @Configuration
 @ConditionalOnWebApplication
+@ComponentScan(Constants.PACKAGE_NAME)
 @EnableConfigurationProperties(CommonConfig.class)
 public class ApplicationAutoConfiguration extends WebMvcConfigurationSupport {
     @Autowired

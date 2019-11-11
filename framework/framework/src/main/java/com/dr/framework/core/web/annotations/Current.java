@@ -27,5 +27,5 @@ public @interface Current {
      *
      * @return
      */
-    boolean required() default false;
+    boolean required() default true;
 }
