@@ -5,18 +5,22 @@ import com.dr.framework.common.entity.IdEntity;
 import com.dr.framework.common.entity.ResultEntity;
 import com.dr.framework.common.page.Page;
 import com.dr.framework.common.service.CommonService;
-import com.dr.framework.core.orm.sql.TableInfo;
+import com.dr.framework.common.service.DefaultDataBaseService;
+import com.dr.framework.core.organise.entity.Person;
+import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.sys.controller.LoginController;
-import com.dr.framework.sys.entity.Person;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 基础controller父类
@@ -30,6 +34,8 @@ public class BaseController<T extends IdEntity> {
     LoginController loginController;
     @Autowired
     protected CommonService commonService;
+    @Autowired
+    protected DefaultDataBaseService dataBaseService;
 
     @RequestMapping("/insert")
     public ResultEntity<T> insert(HttpServletRequest request, T entity) {
@@ -81,7 +87,7 @@ public class BaseController<T extends IdEntity> {
 
     @RequestMapping("/page")
     public ResultEntity page(HttpServletRequest request, T entity, @RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize, @RequestParam(defaultValue = "true") boolean page) {
-        SqlQuery<T> sqlQuery = SqlQuery.from(entity, true);
+        SqlQuery<T> sqlQuery = SqlQuery.from(dataBaseService.getTableInfo(entity.getClass()), true);
         onBeforePageQuery(request, sqlQuery, entity);
         Object result;
         if (page) {
@@ -111,10 +117,17 @@ public class BaseController<T extends IdEntity> {
      */
     @RequestMapping("/delete")
     public ResultEntity<Boolean> delete(HttpServletRequest request, T entity) {
-        SqlQuery<T> sqlQuery = SqlQuery.from(entity);
+        EntityRelation entityRelation = dataBaseService.getTableInfo(entity.getClass());
+        SqlQuery<T> sqlQuery = SqlQuery.from(entityRelation);
         if (!StringUtils.isEmpty(entity.getId())) {
-            TableInfo tableInfo = SqlQuery.getTableInfo(entity.getClass());
-            sqlQuery.in(tableInfo.pk(), entity.getId());
+            List<String> pks = entityRelation.primaryKeyColumns();
+            Assert.isTrue(pks.size() == 1, ()
+                    -> String.format("实体类【%s】的主键数量为：%s，【%s】，请手动处理删除逻辑！",
+                    entity.getClass(),
+                    pks.size(),
+                    pks.stream().collect(Collectors.joining(","))
+            ));
+            sqlQuery.in(entityRelation.getColumn(pks.get(0)), entity.getId());
         }
         onBeforeDelete(request, sqlQuery, entity);
         if (sqlQuery.hasWhere()) {

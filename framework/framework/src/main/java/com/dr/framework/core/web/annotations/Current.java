@@ -1,5 +1,8 @@
 package com.dr.framework.core.web.annotations;
 
+import com.dr.framework.core.organise.entity.Organise;
+import com.dr.framework.core.organise.entity.Person;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -10,8 +13,8 @@ import java.lang.annotation.Target;
  * <p>
  * 当前登录人员相关注解依赖
  * 目前只支持
- * 当前登陆人员{@link com.dr.framework.sys.entity.Person }
- * 当前登录人员所属机构{@link com.dr.framework.sys.entity.Organise}
+ * 当前登陆人员{@link Person }
+ * 当前登录人员所属机构{@link Organise}
  *
  * @author dr
  * @see com.dr.framework.core.web.resolver.CurrentParamResolver
@@ -24,5 +27,5 @@ public @interface Current {
      *
      * @return
      */
-    boolean required() default false;
+    boolean required() default true;
 }

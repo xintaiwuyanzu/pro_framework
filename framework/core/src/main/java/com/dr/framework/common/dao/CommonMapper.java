@@ -132,9 +132,11 @@ public interface CommonMapper {
 
     default <E> Page<E> selectPageByQuery(SqlQuery<E> sqlQuery, int start, int end) {
         long count = countByQuery(sqlQuery);
-        List<E> data = selectLimitByQuery(sqlQuery, start, end);
         Page<E> page = new Page<>(start, end - start, count);
-        page.setData(data);
+        if (count > 0) {
+            List<E> data = selectLimitByQuery(sqlQuery, start, end);
+            page.setData(data);
+        }
         return page;
     }
 
@@ -150,13 +152,14 @@ public interface CommonMapper {
 
     /**
      * 查询所有的数据条数
+     * count(*)会统计值为 NULL 的行，而 count(列名)不会统计此列为 NULL 值的行。
      *
      * @return
      */
-    @Select("select count(!!{pk}) from !!{table}")
+    @Select("select count(*) from !!{table}")
     long count(Class entityClass);
 
-    @Select({"select count(!!{pk})", SqlQuery.FROM, SqlQuery.WHERE_NO_ORERY_BY})
+    @Select({"select count(*)", SqlQuery.FROM, SqlQuery.WHERE_NO_ORERY_BY})
     long countByQuery(SqlQuery sqlQuery);
 
     /**

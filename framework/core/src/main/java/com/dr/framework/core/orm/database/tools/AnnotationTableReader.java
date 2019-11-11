@@ -141,6 +141,8 @@ public class AnnotationTableReader {
         //主键
         if (field.isAnnotationPresent(Id.class)) {
             Id id = field.getAnnotation(Id.class);
+            //这里主键加上非空   这里不加上非空可能有主键的修改列非空的bug
+            fieldColumn.setNullAble(TrueOrFalse.FALSE);
             String name = id.value();
             if (StringUtils.isEmpty(name)) {
                 name = id.name();

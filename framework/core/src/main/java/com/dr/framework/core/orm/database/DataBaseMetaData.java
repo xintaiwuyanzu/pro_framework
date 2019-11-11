@@ -189,7 +189,9 @@ public class DataBaseMetaData {
     }
 
     private synchronized Map<String, Relation<Column>> forceLoadTables(String tableName) {
-        try (Connection connection = openSelfManagedConnection()) {
+        Connection connection = null;
+        try {
+            connection = openSelfManagedConnection();
             tableName = dialect.convertObjectName(tableName);
             DatabaseMetaData databaseMetaData = connection.getMetaData();
             //查询表信息
@@ -223,6 +225,12 @@ public class DataBaseMetaData {
             return concurrentMap;
         } catch (Exception e) {
             logger.error("获取数据库表结构失败", e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return Collections.emptyMap();
     }

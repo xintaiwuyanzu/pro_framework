@@ -19,6 +19,10 @@ public class TreeNode implements Comparable<TreeNode> {
      */
     private String label;
     /**
+     * 描述
+     */
+    private String description;
+    /**
      * 层级
      */
     private int level;
@@ -46,9 +50,22 @@ public class TreeNode implements Comparable<TreeNode> {
         this.label = label;
     }
 
+    public TreeNode(String id, String label, String description) {
+        this.id = id;
+        this.label = label;
+        this.description = description;
+    }
+
     public TreeNode(String id, String label, Object data) {
         this.id = id;
         this.label = label;
+        this.data = data;
+    }
+
+    public TreeNode(String id, String label, String description, Object data) {
+        this.id = id;
+        this.label = label;
+        this.description = description;
         this.data = data;
     }
 
@@ -137,5 +154,13 @@ public class TreeNode implements Comparable<TreeNode> {
         } else {
             return orderCompare;
         }
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

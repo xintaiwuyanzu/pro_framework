@@ -10,7 +10,7 @@ import com.dr.framework.core.orm.annotations.Id;
  */
 public class BaseEntity implements IdEntity {
     @Id
-    @Column(name = "id", comment = "主建", length = 100, order = 1)
+    @Column(name = ID_COLUMN_NAME, comment = "主建", length = 100, order = 1)
     private String id;
 
     @Override

@@ -146,6 +146,8 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
         Assert.notNull(ec, "未能查询到要操作的表：" + entityClass + "，没有实现@Table注解！");
         query.setReturnClass(ec).put(ENTITY_CLASS_KEY, ec);
         Table table = (Table) ec.getAnnotation(Table.class);
+        //强制模块化概念
+        Assert.isTrue(table.genInfo(), () -> "实体类【" + entityClass + "】对应的表【" + table.name() + "】不能直接操作，请调用相关的service操作");
         query.fromQuery.from(table.name(), alias);
         query.fromQuery.aliasClass(ec, alias);
         query.columnsQuery.setIncludeAll(selectAllColumns);
@@ -591,6 +593,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
 
     /**
      * TODO 可以通过简单的方式实现，但是要考虑多次查询的情况
+     * TODO 要过滤大量in条件的情况
      * {@link WhereQuery#collectionSql(Column, String, String, Collection)}
      *
      * @param column

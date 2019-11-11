@@ -424,7 +424,7 @@ class WhereQuery extends AbstractSqlQuery {
                     .append(data.get("$from"))
                     .append(' ')
                     .append(data.get("$whereno"))
-                    .append(")")
+                    .append(") ")
                     .append(suffix).toString();
         }
     }

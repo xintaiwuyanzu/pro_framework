@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @author dr
  */
 @RestController
-@RequestMapping("/api/codeGen")
+@RequestMapping("${common.api-path:/api}/codeGen")
 public class CodeGenController {
     @Autowired
     List<MybatisConfigurationBean> mybatisConfigurationBeans;

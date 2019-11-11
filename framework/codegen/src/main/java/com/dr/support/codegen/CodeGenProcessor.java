@@ -62,6 +62,9 @@ public class CodeGenProcessor extends AbstractProcessor {
         }
         String className = typeElement.getQualifiedName().toString();
         Table table = typeElement.getAnnotation(Table.class);
+        if (!table.genInfo()) {
+            return;
+        }
         String tableName = table.name();
         if (StringUtils.isEmpty(tableName)) {
             tableName = typeElement.getSimpleName().toString();
