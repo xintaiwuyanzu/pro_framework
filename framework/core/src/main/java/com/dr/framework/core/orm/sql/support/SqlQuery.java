@@ -5,7 +5,6 @@ import com.dr.framework.core.orm.jdbc.Relation;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.Column;
 import com.dr.framework.core.orm.sql.TableInfo;
-import org.apache.ibatis.reflection.SystemMetaObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
