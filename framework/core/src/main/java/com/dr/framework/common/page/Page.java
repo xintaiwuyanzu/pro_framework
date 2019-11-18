@@ -41,6 +41,13 @@ public class Page<T> {
         this.total = total;
     }
 
+    public Page(long start, long size, long total, List<T> data) {
+        this.start = start;
+        this.size = size;
+        this.total = total;
+        this.data = data;
+    }
+
     public long getSize() {
         return size;
     }

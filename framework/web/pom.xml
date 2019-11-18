@@ -22,10 +22,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-        </dependency>
         <!--单点登录相关的依赖，先放这里，不搞了，太费劲了 -->
         <dependency>
             <groupId>org.pac4j</groupId>

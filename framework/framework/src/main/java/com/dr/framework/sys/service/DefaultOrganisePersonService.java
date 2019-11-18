@@ -382,26 +382,26 @@ public class DefaultOrganisePersonService
             }
         }
         //更新机构基本信息
-        SqlQuery organiseUpdate = SqlQuery.from(organiseRelation);
-        organiseUpdate.set(organiseRelation.getColumn("organise_old_name"), organise.getOrganiseOldName());
-        organiseUpdate.set(organiseRelation.getColumn("organise_name"), organise.getOrganiseName());
-        organiseUpdate.set(organiseRelation.getColumn("organise_type"), organise.getOrganiseType());
-        organiseUpdate.set(organiseRelation.getColumn("phone"), organise.getPhone());
-        organiseUpdate.set(organiseRelation.getColumn("mobile"), organise.getMobile());
-        organiseUpdate.set(organiseRelation.getColumn("concat_name"), organise.getConcatName());
-        organiseUpdate.set(organiseRelation.getColumn("address"), organise.getAddress());
-        organiseUpdate.set(organiseRelation.getColumn("summary"), organise.getSummary());
-        organiseUpdate.set(organiseRelation.getColumn("latitude"), organise.getLatitude());
-        organiseUpdate.set(organiseRelation.getColumn("longitude"), organise.getLongitude());
-        organiseUpdate.set(organiseRelation.getColumn("coordinate_type"), organise.getCoordinateType());
-        organiseUpdate.set(organiseRelation.getColumn("group_id"), organise.getGroupId());
-        organiseUpdate.set(organiseRelation.getColumn(STATUS_COLUMN_KEY), organise.getStatus());
-        organiseUpdate.equal(organiseRelation.getColumn(ID_COLUMN_NAME), old.getId());
+        SqlQuery organiseUpdate = SqlQuery.from(organiseRelation)
+                .set(organiseRelation.getColumn("organise_old_name"), organise.getOrganiseOldName())
+                .set(organiseRelation.getColumn("organise_name"), organise.getOrganiseName())
+                .set(organiseRelation.getColumn("organise_type"), organise.getOrganiseType())
+                .set(organiseRelation.getColumn("phone"), organise.getPhone())
+                .set(organiseRelation.getColumn("mobile"), organise.getMobile())
+                .set(organiseRelation.getColumn("concat_name"), organise.getConcatName())
+                .set(organiseRelation.getColumn("address"), organise.getAddress())
+                .set(organiseRelation.getColumn("summary"), organise.getSummary())
+                .set(organiseRelation.getColumn("latitude"), organise.getLatitude())
+                .set(organiseRelation.getColumn("longitude"), organise.getLongitude())
+                .set(organiseRelation.getColumn("coordinate_type"), organise.getCoordinateType())
+                .set(organiseRelation.getColumn("group_id"), organise.getGroupId())
+                .set(organiseRelation.getColumn(STATUS_COLUMN_KEY), organise.getStatus())
+                .equal(organiseRelation.getColumn(ID_COLUMN_NAME), old.getId());
         commonMapper.updateIgnoreNullByQuery(organiseUpdate);
 
         //TODO 发布更新消息
-        old = getOrganise(new OrganiseQuery.Builder().idEqual(organise.getId()).build());
-        applicationEventPublisher.publishEvent(new BaseCRUDEvent(old, BaseCRUDEvent.EventType.UPDATE));
+        Organise nOrganise = getOrganise(new OrganiseQuery.Builder().idEqual(organise.getId()).build());
+        applicationEventPublisher.publishEvent(new BaseCRUDEvent(nOrganise, old, BaseCRUDEvent.EventType.UPDATE));
         return 0;
     }
 
@@ -446,20 +446,20 @@ public class DefaultOrganisePersonService
         if (!StringUtils.isEmpty(person.getUserCode())) {
             Assert.isTrue(old.getUserCode().equals(person.getUserCode()), "用户编号不能更改");
         }
-        SqlQuery sqlQuery = SqlQuery.from(personRelation);
-        sqlQuery.set(personRelation.getColumn("user_name"), person.getUserName());
-        sqlQuery.set(personRelation.getColumn("nick_name"), person.getNickName());
-        sqlQuery.set(personRelation.getColumn("remark"), person.getRemark());
-        sqlQuery.set(personRelation.getColumn("person_type"), person.getPersonType());
-        sqlQuery.set(personRelation.getColumn("address"), person.getAddress());
-        sqlQuery.set(personRelation.getColumn("duty"), person.getDuty());
-        sqlQuery.set(personRelation.getColumn("order_info"), person.getOrder());
-        sqlQuery.set(personRelation.getColumn("avatar_file_id"), person.getAvatarFileId());
-        sqlQuery.equal(personRelation.getColumn(ID_COLUMN_NAME), old.getId());
+        SqlQuery sqlQuery = SqlQuery.from(personRelation)
+                .set(personRelation.getColumn("user_name"), person.getUserName())
+                .set(personRelation.getColumn("nick_name"), person.getNickName())
+                .set(personRelation.getColumn("remark"), person.getRemark())
+                .set(personRelation.getColumn("person_type"), person.getPersonType())
+                .set(personRelation.getColumn("address"), person.getAddress())
+                .set(personRelation.getColumn("duty"), person.getDuty())
+                .set(personRelation.getColumn("order_info"), person.getOrder())
+                .set(personRelation.getColumn("avatar_file_id"), person.getAvatarFileId())
+                .equal(personRelation.getColumn(ID_COLUMN_NAME), old.getId());
         commonMapper.updateIgnoreNullByQuery(sqlQuery);
 
-        old = getPerson(new PersonQuery.Builder().idEqual(person.getId()).build());
-        applicationEventPublisher.publishEvent(new BaseCRUDEvent(old, BaseCRUDEvent.EventType.UPDATE));
+        Person nPerson = getPerson(new PersonQuery.Builder().idEqual(person.getId()).build());
+        applicationEventPublisher.publishEvent(new BaseCRUDEvent(nPerson, old, BaseCRUDEvent.EventType.UPDATE));
         return 0;
     }
 

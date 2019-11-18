@@ -7,6 +7,7 @@ package com.dr.framework.core.event;
  */
 public class BaseCRUDEvent<T> extends BaseEvent<T> {
 
+
     public enum EventType {
         CREATE,
         UPDATE,
@@ -14,6 +15,14 @@ public class BaseCRUDEvent<T> extends BaseEvent<T> {
     }
 
     private EventType eventType;
+
+    private T old;
+
+    public BaseCRUDEvent(T source, T old, EventType eventType) {
+        super(source);
+        this.eventType = eventType;
+        this.old = old;
+    }
 
     public BaseCRUDEvent(T source, EventType eventType) {
         super(source);
@@ -26,6 +35,14 @@ public class BaseCRUDEvent<T> extends BaseEvent<T> {
 
     public void setEventType(EventType eventType) {
         this.eventType = eventType;
+    }
+
+    public T getOld() {
+        return old;
+    }
+
+    public void setOld(T old) {
+        this.old = old;
     }
 
 

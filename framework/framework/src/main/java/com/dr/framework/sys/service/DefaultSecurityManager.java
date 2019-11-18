@@ -312,12 +312,14 @@ public class DefaultSecurityManager
                 .set(roleRelation.getColumn("isSys"), role.isSys())
                 .set(roleRelation.getColumn("order_info"), role.getOrder())
                 .set(roleRelation.getColumn(StatusEntity.STATUS_COLUMN_KEY), role.getStatus())
+                .equal(roleRelation.getColumn(Role.ID_COLUMN_NAME), old.getId())
         );
         return 0;
     }
 
     @Override
     public long deleteRole(String... roleCode) {
+        Assert.isTrue(roleCode.length > 0, "角色编码不能为空！");
         List<String> roleIds = commonMapper.selectByQuery(
                 SqlQuery.from(roleRelation)
                         .in(roleRelation.getColumn("security_code"), roleCode)
@@ -377,6 +379,7 @@ public class DefaultSecurityManager
                 .set(permissionRelation.getColumn("isSys"), permission.isSys())
                 .set(permissionRelation.getColumn("order_info"), permission.getOrder())
                 .set(permissionRelation.getColumn(StatusEntity.STATUS_COLUMN_KEY), permission.getStatus())
+                .equal(permissionRelation.getColumn(Permission.ID_COLUMN_NAME), old.getId())
         );
         return 0;
     }
@@ -384,6 +387,7 @@ public class DefaultSecurityManager
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long deletePermission(String... permissionCode) {
+        Assert.isTrue(permissionCode.length > 0, "权限编码不能为空！");
         List<String> pids = commonMapper.selectByQuery(SqlQuery.from(permissionRelation)
                 .in(permissionRelation.getColumn("security_code"), permissionCode)
         ).stream()
@@ -465,6 +469,7 @@ public class DefaultSecurityManager
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long deleteMenu(String... ids) {
+        Assert.isTrue(ids.length > 0, "菜单id不能为空！");
         int count = 0;
         //删除菜单
         commonMapper.deleteByQuery(SqlQuery.from(sysMenuRelation).
@@ -526,6 +531,7 @@ public class DefaultSecurityManager
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long deleteSubSys(String id) {
+        Assert.isTrue(!StringUtils.isEmpty(id), "子系统id不能为空！");
         int count = 0;
         //删除子系统
         count += commonMapper.deleteById(SubSystem.class, id);
@@ -555,17 +561,20 @@ public class DefaultSecurityManager
         SqlQuery<Role> sqlQuery = SqlQuery.from(roleRelation);
         checkBuildInQuery(roleRelation, sqlQuery, IdEntity.ID_COLUMN_NAME, query.getIds());
         checkBuildLikeQuery(roleRelation, sqlQuery, "security_code", query.getCodeLike());
+        sqlQuery.orderBy(roleRelation.getColumn(Role.ORDER_COLUMN_NAME));
         return sqlQuery;
     }
 
     protected SqlQuery<Permission> permissionQueryToSqlQuery(PermissionQuery query) {
         SqlQuery<Permission> sqlQuery = SqlQuery.from(permissionRelation);
+        sqlQuery.orderBy(permissionRelation.getColumn(Permission.ORDER_COLUMN_NAME));
         return sqlQuery;
     }
 
     protected SqlQuery<SubSystem> subSysQueryToSqlQuery(SubSysQuery query) {
         SqlQuery<SubSystem> sqlQuery = SqlQuery.from(subSysRelation);
         checkBuildInQuery(subSysRelation, sqlQuery, SubSystem.ID_COLUMN_NAME, query.getIds());
+        sqlQuery.orderBy(subSysRelation.getColumn(SubSystem.ORDER_COLUMN_NAME));
         return sqlQuery;
     }
 
@@ -591,6 +600,7 @@ public class DefaultSecurityManager
                             )
             );
         }
+        sysMenuSqlQuery.orderBy(sysMenuRelation.getColumn(SysMenu.ORDER_COLUMN_NAME));
         return sysMenuSqlQuery;
     }
 
