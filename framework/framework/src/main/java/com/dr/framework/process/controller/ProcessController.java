@@ -8,11 +8,9 @@ import com.dr.framework.core.process.bo.ProcessObject;
 import com.dr.framework.core.process.bo.TaskObject;
 import com.dr.framework.core.process.service.ProcessService;
 import com.dr.framework.core.web.annotations.Current;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +30,7 @@ public class ProcessController {
 
     ProcessService processService;
 
-    public ProcessController(ProcessService processService) {
+    public ProcessController(@Autowired(required = false) ProcessService processService) {
         this.processService = processService;
     }
 
@@ -48,30 +46,30 @@ public class ProcessController {
                                     @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
                                     @RequestParam(defaultValue = "true") boolean page) {
         if (page) {
-            return ResultEntity.success(processService.processDefion(processObject, pageIndex, pageSize));
+            return ResultEntity.success(processService.processDefinition(processObject, pageIndex, pageSize));
         } else {
-            return ResultEntity.success(processService.processDefion(processObject));
+            return ResultEntity.success(processService.processDefinition(processObject));
         }
     }
 
     /**
      * 创建和启动流程
      *
-     * @param processObject
+     * @param id
      * @param request
      * @param person
      * @return
      */
-    @RequestMapping("/insert")
-    public ResultEntity insert(ProcessObject processObject,
+    @PostMapping("/insert")
+    public ResultEntity insert(String id,
                                HttpServletRequest request,
                                @Current Person person) {
-        Assert.notNull(processObject, "流程【processId】参数不能为空");
+        Assert.notNull(id, "流程【processId】参数不能为空");
         //表单参数
         Map<String, Object> formMap = WebUtils.getParametersStartingWith(request, FORM_PREFIX);
         //环境变量参数
         Map<String, Object> variMap = WebUtils.getParametersStartingWith(request, VALUE_PREFIX);
-        return ResultEntity.success(processService.start(processObject, formMap, variMap, person));
+        return ResultEntity.success(processService.start(id, formMap, variMap, person));
     }
 
     //更新
@@ -79,7 +77,6 @@ public class ProcessController {
     public ResultEntity update(TaskObject taskObject,
                                HttpServletRequest request,
                                @Current Person person) {
-        Assert.notNull(taskObject, "流程【processId】参数不能为空");
         //表单参数
         Map<String, Object> formMap = WebUtils.getParametersStartingWith(request, FORM_PREFIX);
         //环境变量参数
@@ -89,11 +86,31 @@ public class ProcessController {
 
     //查询
     @RequestMapping("/page")
-    public ResultEntity page(HttpServletRequest request,
+    public ResultEntity page(@Current Person person,
+                             TaskObject taskObject,
                              @RequestParam(defaultValue = "0") int pageIndex,
                              @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
                              @RequestParam(defaultValue = "true") boolean page) {
-        return null;
+        taskObject.setAssignee(person.getId());
+        if (page) {
+            return ResultEntity.success(processService.getTask(taskObject, pageIndex, pageSize));
+        } else {
+            return ResultEntity.success(processService.getTask(taskObject));
+        }
+    }
+
+    @RequestMapping("/history")
+    public ResultEntity history(@Current Person person,
+                                TaskObject taskObject,
+                                @RequestParam(defaultValue = "0") int pageIndex,
+                                @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
+                                @RequestParam(defaultValue = "true") boolean page) {
+        taskObject.setAssignee(person.getId());
+        if (page) {
+            return ResultEntity.success(processService.getHistoryTask(taskObject, pageIndex, pageSize));
+        } else {
+            return ResultEntity.success(processService.getHistoryTask(taskObject));
+        }
     }
 
     //删除
@@ -105,7 +122,7 @@ public class ProcessController {
     //获取详细的任务信息
     @RequestMapping("/detail")
     public ResultEntity<TaskObject> detail(String id) {
-        return ResultEntity.error("找不到指定记录！");
+        return ResultEntity.success(processService.taskDetail(id));
     }
 
     @RequestMapping("/process")

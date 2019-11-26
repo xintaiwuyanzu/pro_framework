@@ -25,6 +25,7 @@ import static com.dr.framework.core.security.SecurityHolder.*;
  */
 @Component
 public class PersonInterceptor implements HandlerInterceptor, InitializingBean {
+    public static final int ORDER = 1;
     @Autowired
     LoginService loginService;
     @Autowired
@@ -150,6 +151,10 @@ public class PersonInterceptor implements HandlerInterceptor, InitializingBean {
         //还是不能获取到，最后再通过request.getRemoteAddr();获取
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ipAddresses)) {
             ip = request.getRemoteAddr();
+        }
+        if (ip != null && ip.startsWith("0:0:0:0:0:0:0:1")) {
+            //TODO 暴力处理ip6的问题
+            ip = ip.replaceFirst("0:0:0:0:0:0:0:1", "localhost");
         }
         return ip;
     }

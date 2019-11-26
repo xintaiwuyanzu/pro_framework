@@ -36,12 +36,15 @@ public abstract class AbstractHandlerProcessService implements ProcessService {
 
 
     @Override
-    public TaskObject start(ProcessObject processObject, Map<String, Object> formMap, Map<String, Object> variMap, Person person) {
+    public TaskObject start(String id, Map<String, Object> formMap, Map<String, Object> variMap, Person person) {
+        ProcessObject processObject = getProcessById(id);
         ProcessHandler processHandler = getProcessHandler(processObject.getKey());
         IdEntity formObject = newFormObject(processHandler, formMap);
         String name = processHandler.handleStart(formObject, processObject, variMap, person);
         return doStart(processObject, processHandler, formObject, name, variMap, person);
     }
+
+    protected abstract ProcessObject getProcessById(String id);
 
     /**
      * @param processObject  启动对象

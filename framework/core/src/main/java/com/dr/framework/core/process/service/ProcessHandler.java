@@ -3,6 +3,7 @@ package com.dr.framework.core.process.service;
 import com.dr.framework.common.entity.IdEntity;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.process.bo.ProcessObject;
+import com.dr.framework.core.process.bo.TaskObject;
 
 import java.util.Map;
 
@@ -21,6 +22,24 @@ public abstract class ProcessHandler<T extends IdEntity> {
      */
     public abstract boolean canHandle(String processKey);
 
-
+    /**
+     * 处理启动请求
+     *
+     * @param formObject
+     * @param processObject
+     * @param variMap
+     * @param person
+     * @return
+     */
     public abstract String handleStart(T formObject, ProcessObject processObject, Map<String, Object> variMap, Person person);
+
+    /**
+     * 处理更新请求
+     *
+     * @param formObject
+     * @param taskObject
+     * @param variMap
+     * @param person
+     */
+    public abstract void handleUpdate(IdEntity formObject, TaskObject taskObject, Map<String, Object> variMap, Person person);
 }

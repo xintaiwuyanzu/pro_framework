@@ -1,8 +1,10 @@
 package com.dr.framework.core.process.bo;
 
 import com.dr.framework.core.organise.entity.Person;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 流程定义对象
@@ -31,7 +33,14 @@ public class ProcessObject {
     private String description;
 
     private List<Person> startUser;
-
+    /**
+     * 流程上定义的扩展属性
+     */
+    private List<ProPerty> proPerties;
+    /**
+     * 流程运行时的环境变量
+     */
+    private Map<String, Object> variables;
 
     public String getId() {
         return id;
@@ -79,5 +88,34 @@ public class ProcessObject {
 
     public void setStartUser(List<Person> startUser) {
         this.startUser = startUser;
+    }
+
+    public List<ProPerty> getProPerties() {
+        return proPerties;
+    }
+
+    public void setProPerties(List<ProPerty> proPerties) {
+        this.proPerties = proPerties;
+    }
+
+    public ProPerty getProPerty(String key) {
+        if (!StringUtils.isEmpty(key)) {
+            for (ProPerty proPerty : proPerties) {
+                if (proPerty.getName().equals(key)) {
+                    return proPerty;
+                }
+            }
+        }
+
+        return null;
+    }
+
+
+    public Map<String, Object> getVariables() {
+        return variables;
+    }
+
+    public void setVariables(Map<String, Object> variables) {
+        this.variables = variables;
     }
 }

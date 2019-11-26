@@ -1,33 +1,45 @@
 package com.dr.framework.core.process.bo;
 
+import java.util.Map;
+
+/**
+ * @author dr
+ */
 public class TaskObject<T> {
 
-    /*
-     =================================================
-    上面是流程相关的属性
-     =================================================
+    /**
+     * =================================================
+     * 上面是流程相关的属性
+     * =================================================
      */
     private String id;
     private String processInstanceId;
     private String processDefineId;
     private String taskDefineKey;
     private long createDate;
+    private String createPerson;
+    private String createPersonName;
+
 
     private String owner;
+    private String ownerName;
+
     private String assignee;
+    private String assigneeName;
 
-
-    /*
-    =================================================
-   下面是业务相关的属性
-    =================================================
-    */
+    /**
+     * =================================================
+     * 下面是业务相关的属性
+     * =================================================
+     */
     private String name;
     private String description;
     private String formKey;
     private boolean suspend;
 
     private T form;
+
+    private Map<String, Object> variables;
 
     public String getId() {
         return id;
@@ -123,5 +135,45 @@ public class TaskObject<T> {
 
     public void setForm(T form) {
         this.form = form;
+    }
+
+    public String getCreatePerson() {
+        return createPerson;
+    }
+
+    public void setCreatePerson(String createPerson) {
+        this.createPerson = createPerson;
+    }
+
+    public String getCreatePersonName() {
+        return createPersonName;
+    }
+
+    public void setCreatePersonName(String createPersonName) {
+        this.createPersonName = createPersonName;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
+    public String getAssigneeName() {
+        return assigneeName;
+    }
+
+    public void setAssigneeName(String assigneeName) {
+        this.assigneeName = assigneeName;
+    }
+
+    public Map<String, Object> getVariables() {
+        return variables;
+    }
+
+    public void setVariables(Map<String, Object> variables) {
+        this.variables = variables;
     }
 }

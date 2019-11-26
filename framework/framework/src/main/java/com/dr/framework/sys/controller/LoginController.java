@@ -8,6 +8,7 @@ import com.dr.framework.core.security.bo.ClientInfo;
 import com.dr.framework.core.web.annotations.Current;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,7 +58,13 @@ public class LoginController {
         response.addHeader(SecurityHolder.TOKEN_HEADER_KEY, token);
         Cookie cookie = new Cookie(SecurityHolder.TOKEN_HEADER_KEY, token);
         //设置超时时间为2小时
-        cookie.setPath(request.getContextPath());
+        String path = request.getContextPath();
+        if (StringUtils.isEmpty(path)) {
+            path = "/";
+        }
+        cookie.setPath(path);
+        cookie.setHttpOnly(true);
+        cookie.setDomain(clientInfo.getRemoteIp());
         cookie.setMaxAge((int) timeout.getSeconds());
         response.addCookie(cookie);
         return ResultEntity.success(token);

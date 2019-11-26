@@ -52,7 +52,7 @@ public class ApplicationAutoConfiguration extends WebMvcConfigurationSupport {
              */
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(personInterceptor);
+                registry.addInterceptor(personInterceptor).order(PersonInterceptor.ORDER);
             }
         };
     }
