@@ -131,13 +131,10 @@ public interface CommonMapper {
     }
 
     default <E> Page<E> selectPageByQuery(SqlQuery<E> sqlQuery, int start, int end) {
-        long count = countByQuery(sqlQuery);
-        Page<E> page = new Page<>(start, end - start, count);
-        if (count > 0) {
-            List<E> data = selectLimitByQuery(sqlQuery, start, end);
-            page.setData(data);
-        }
-        return page;
+        return new Page<>(start,
+                end - start,
+                countByQuery(sqlQuery),
+                () -> selectLimitByQuery(sqlQuery, start, end));
     }
 
     @Select("select !!{columns} from !!{table} where !!{pk} !!{in#coll}")

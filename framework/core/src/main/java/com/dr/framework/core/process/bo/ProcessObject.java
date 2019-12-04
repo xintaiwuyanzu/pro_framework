@@ -1,115 +1,42 @@
 package com.dr.framework.core.process.bo;
 
-import com.dr.framework.core.organise.entity.Person;
-import org.springframework.util.StringUtils;
-
-import java.util.List;
 import java.util.Map;
 
 /**
  * 流程定义对象
+ *
+ * @author dr
  */
-public class ProcessObject {
+public class ProcessObject extends ProcessDefinition {
     /**
-     * 主键
+     * 流程创建时间
      */
-    private String id;
+    private long createDate;
     /**
-     * 编码
+     * 流程结束时间
      */
-    private String key;
+    private long endDate;
     /**
-     * 版本
+     * 流程创建人
      */
-    private Integer version;
+    private String createPerson;
+    /**
+     * 流程创建人名称
+     */
+    private String createPersonName;
+    /**
+     * 流程定义ID
+     */
+    private String processDefineId;
+    /**
+     * 流程是否暂停
+     */
+    private boolean suspend;
 
-    /**
-     * 名称
-     */
-    private String name;
-    /**
-     * 描述
-     */
-    private String description;
-
-    private List<Person> startUser;
-    /**
-     * 流程上定义的扩展属性
-     */
-    private List<ProPerty> proPerties;
     /**
      * 流程运行时的环境变量
      */
     private Map<String, Object> variables;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public List<Person> getStartUser() {
-        return startUser;
-    }
-
-    public void setStartUser(List<Person> startUser) {
-        this.startUser = startUser;
-    }
-
-    public List<ProPerty> getProPerties() {
-        return proPerties;
-    }
-
-    public void setProPerties(List<ProPerty> proPerties) {
-        this.proPerties = proPerties;
-    }
-
-    public ProPerty getProPerty(String key) {
-        if (!StringUtils.isEmpty(key)) {
-            for (ProPerty proPerty : proPerties) {
-                if (proPerty.getName().equals(key)) {
-                    return proPerty;
-                }
-            }
-        }
-
-        return null;
-    }
-
 
     public Map<String, Object> getVariables() {
         return variables;
@@ -117,5 +44,53 @@ public class ProcessObject {
 
     public void setVariables(Map<String, Object> variables) {
         this.variables = variables;
+    }
+
+    public String getProcessDefineId() {
+        return processDefineId;
+    }
+
+    public void setProcessDefineId(String processDefineId) {
+        this.processDefineId = processDefineId;
+    }
+
+    public long getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(long createDate) {
+        this.createDate = createDate;
+    }
+
+    public String getCreatePerson() {
+        return createPerson;
+    }
+
+    public void setCreatePerson(String createPerson) {
+        this.createPerson = createPerson;
+    }
+
+    public String getCreatePersonName() {
+        return createPersonName;
+    }
+
+    public void setCreatePersonName(String createPersonName) {
+        this.createPersonName = createPersonName;
+    }
+
+    public long getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(long endDate) {
+        this.endDate = endDate;
+    }
+
+    public boolean isSuspend() {
+        return suspend;
+    }
+
+    public void setSuspend(boolean suspend) {
+        this.suspend = suspend;
     }
 }

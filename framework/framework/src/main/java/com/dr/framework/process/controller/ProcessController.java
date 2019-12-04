@@ -6,6 +6,8 @@ import com.dr.framework.common.page.Page;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.process.bo.ProcessObject;
 import com.dr.framework.core.process.bo.TaskObject;
+import com.dr.framework.core.process.query.ProcessDefinitionQuery;
+import com.dr.framework.core.process.query.TaskQuery;
 import com.dr.framework.core.process.service.ProcessService;
 import com.dr.framework.core.web.annotations.Current;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +23,8 @@ import java.util.Map;
  *
  * @author dr
  */
-@RestController
-@RequestMapping("${common.api-path:/api}/process")
+//@RestController
+//@RequestMapping("${common.api-path:/api}/process")
 public class ProcessController {
     public static final String FORM_PREFIX = "form.";
     public static final String VALUE_PREFIX = "value.";
@@ -41,14 +43,14 @@ public class ProcessController {
      * @return
      */
     @GetMapping("/processPage")
-    public ResultEntity processPage(ProcessObject processObject,
+    public ResultEntity processPage(ProcessDefinitionQuery query,
                                     @RequestParam(defaultValue = "0") int pageIndex,
                                     @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
                                     @RequestParam(defaultValue = "true") boolean page) {
         if (page) {
-            return ResultEntity.success(processService.processDefinition(processObject, pageIndex, pageSize));
+            return ResultEntity.success(processService.processDefinitionPage(query, pageIndex, pageSize));
         } else {
-            return ResultEntity.success(processService.processDefinition(processObject));
+            return ResultEntity.success(processService.processDefinitionList(query));
         }
     }
 
@@ -69,7 +71,8 @@ public class ProcessController {
         Map<String, Object> formMap = WebUtils.getParametersStartingWith(request, FORM_PREFIX);
         //环境变量参数
         Map<String, Object> variMap = WebUtils.getParametersStartingWith(request, VALUE_PREFIX);
-        return ResultEntity.success(processService.start(id, formMap, variMap, person));
+        //  return ResultEntity.success(processService.start(id, formMap, variMap, person));
+        return null;
     }
 
     //更新
@@ -81,35 +84,36 @@ public class ProcessController {
         Map<String, Object> formMap = WebUtils.getParametersStartingWith(request, FORM_PREFIX);
         //环境变量参数
         Map<String, Object> variMap = WebUtils.getParametersStartingWith(request, VALUE_PREFIX);
-        return ResultEntity.success(processService.update(taskObject, formMap, variMap, person));
+        //return ResultEntity.success(processService.update(taskObject, formMap, variMap, person));
+        return null;
     }
 
     //查询
     @RequestMapping("/page")
     public ResultEntity page(@Current Person person,
-                             TaskObject taskObject,
+                             TaskQuery query,
                              @RequestParam(defaultValue = "0") int pageIndex,
                              @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
                              @RequestParam(defaultValue = "true") boolean page) {
-        taskObject.setAssignee(person.getId());
+        query.assigneeEqual(person.getId());
         if (page) {
-            return ResultEntity.success(processService.getTask(taskObject, pageIndex, pageSize));
+            return ResultEntity.success(processService.taskPage(query, pageIndex, pageSize));
         } else {
-            return ResultEntity.success(processService.getTask(taskObject));
+            return ResultEntity.success(processService.taskList(query));
         }
     }
 
     @RequestMapping("/history")
     public ResultEntity history(@Current Person person,
-                                TaskObject taskObject,
+                                TaskQuery query,
                                 @RequestParam(defaultValue = "0") int pageIndex,
                                 @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
                                 @RequestParam(defaultValue = "true") boolean page) {
-        taskObject.setAssignee(person.getId());
+        query.assigneeEqual(person.getId());
         if (page) {
-            return ResultEntity.success(processService.getHistoryTask(taskObject, pageIndex, pageSize));
+            return ResultEntity.success(processService.taskHistoryPage(query, pageIndex, pageSize));
         } else {
-            return ResultEntity.success(processService.getHistoryTask(taskObject));
+            return ResultEntity.success(processService.taskHistoryList(query));
         }
     }
 
@@ -122,7 +126,7 @@ public class ProcessController {
     //获取详细的任务信息
     @RequestMapping("/detail")
     public ResultEntity<TaskObject> detail(String id) {
-        return ResultEntity.success(processService.taskDetail(id));
+        return ResultEntity.success(processService.taskInfo(id));
     }
 
     @RequestMapping("/process")

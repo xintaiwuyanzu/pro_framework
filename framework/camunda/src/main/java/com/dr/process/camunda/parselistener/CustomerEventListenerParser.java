@@ -26,10 +26,12 @@ import org.springframework.util.StringUtils;
 public class CustomerEventListenerParser extends AbstractBpmnParseListener {
     Expression listenerExpression;
     Expression assigneeExpression;
+    Expression descriptionExpression;
 
     public CustomerEventListenerParser(ExpressionManager expressionManager) {
         listenerExpression = expressionManager.createExpression("${" + OwnerTaskListener.BEAN_NAME + "}");
         assigneeExpression = expressionManager.createExpression("${assignee}");
+        descriptionExpression = expressionManager.createExpression("${title}");
     }
 
     @Override
@@ -60,5 +62,10 @@ public class CustomerEventListenerParser extends AbstractBpmnParseListener {
         }
         TaskListener delegateListener = new DelegateExpressionTaskListener(listenerExpression, null);
         taskDefinition.addTaskListener(TaskListener.EVENTNAME_CREATE, delegateListener);
+
+        if (taskDefinition.getDescriptionExpression() == null) {
+            taskDefinition.setDescriptionExpression(descriptionExpression);
+        }
+
     }
 }

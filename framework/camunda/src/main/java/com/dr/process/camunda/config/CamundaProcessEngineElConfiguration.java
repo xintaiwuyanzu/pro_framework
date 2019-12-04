@@ -10,6 +10,9 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.Map;
 
+/**
+ * @author dr
+ */
 public class CamundaProcessEngineElConfiguration implements CamundaProcessEngineConfiguration {
     private ELResolver[] resolvers;
     private ApplicationContext applicationContext;
@@ -36,7 +39,7 @@ public class CamundaProcessEngineElConfiguration implements CamundaProcessEngine
         }
 
         @Override
-        protected org.camunda.bpm.engine.impl.javax.el.ELResolver createElResolver() {
+        protected ELResolver createElResolver() {
             CompositeELResolver elResolver = (CompositeELResolver) super.createElResolver();
             if (resolvers != null) {
                 for (ELResolver elResolver1 : resolvers) {

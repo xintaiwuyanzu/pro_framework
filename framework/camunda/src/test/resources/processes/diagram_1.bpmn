@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_17ugw1g" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.4.1">
-  <bpmn:process id="sp_leave" name="请假审批" isExecutable="true" camunda:versionTag="0.1">
+  <bpmn:process id="sp_leave" name="请假审批" isExecutable="true" camunda:candidateStarterUsers="${current.personId()}" camunda:versionTag="0.1">
     <bpmn:documentation>hahhahahah</bpmn:documentation>
     <bpmn:extensionElements>
       <camunda:properties>
@@ -15,17 +15,25 @@
       <bpmn:incoming>SequenceFlow_03mz9xb</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:userTask id="task_chushen" name="初审" camunda:formKey="${formId}">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="aa" value="22" />
+        </camunda:properties>
+      </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_103ayfb</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_1a6q10p</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_1kfap7e</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0guk3p0</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="SequenceFlow_0guk3p0" name="发送审核" sourceRef="task_chushen" targetRef="Task_17neao4">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${next==true}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0guk3p0" name="发送审核" sourceRef="task_chushen" targetRef="Task_17neao4" />
     <bpmn:sequenceFlow id="SequenceFlow_12gamfl" sourceRef="Task_17neao4" targetRef="Task_0oihs3n" />
     <bpmn:sequenceFlow id="SequenceFlow_03mz9xb" sourceRef="Task_0oihs3n" targetRef="EndEvent_10uzjzr" />
     <bpmn:userTask id="Task_17neao4" name="审核">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="aaa" value="vvvv" />
+        </camunda:properties>
+      </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0guk3p0</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_12gamfl</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_1a6q10p</bpmn:outgoing>

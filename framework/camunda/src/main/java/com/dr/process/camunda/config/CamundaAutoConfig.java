@@ -1,13 +1,17 @@
 package com.dr.process.camunda.config;
 
 import com.dr.framework.autoconfig.ApplicationAutoConfiguration;
+import com.dr.framework.common.service.DataBaseService;
 import com.dr.framework.core.organise.entity.Person;
+import com.dr.framework.core.orm.database.DataBaseMetaData;
 import com.dr.framework.core.security.SecurityHolder;
 import com.dr.framework.core.web.interceptor.PersonInterceptor;
 import com.dr.process.camunda.resolver.CurrentElResolver;
 import org.camunda.bpm.engine.IdentityService;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.cfg.auth.ResourceAuthorizationProvider;
+import org.camunda.bpm.engine.impl.el.ExpressionManager;
+import org.camunda.bpm.engine.impl.interceptor.CommandContextFactory;
 import org.camunda.bpm.engine.spring.SpringProcessEngineConfiguration;
 import org.camunda.bpm.spring.boot.starter.configuration.CamundaDatasourceConfiguration;
 import org.camunda.bpm.spring.boot.starter.configuration.CamundaProcessEngineConfiguration;
@@ -48,6 +52,16 @@ public class CamundaAutoConfig {
         return new CamundaProcessEngineElConfiguration(applicationContext, elResolver);
     }
 
+    @Bean
+    ExpressionManager expressionManager(ProcessEngineConfigurationImpl processEngineConfiguration) {
+        return processEngineConfiguration.getExpressionManager();
+    }
+
+    @Bean
+    CommandContextFactory commandContextFactory(ProcessEngineConfigurationImpl processEngineConfiguration) {
+        return processEngineConfiguration.getCommandContextFactory();
+    }
+
 
     /**
      * 注入组织机构权限相关
@@ -83,39 +97,25 @@ public class CamundaAutoConfig {
     CamundaDatasourceConfiguration camundaDatasourceConfiguration(PlatformTransactionManager transactionManager,
                                                                   Map<String, DataSource> dataSourceMap,
                                                                   @Value("${" + CamundaBpmProperties.PREFIX + ".database.name:}") String name,
-                                                                  CamundaBpmProperties properties
+                                                                  CamundaBpmProperties properties,
+                                                                  DataBaseService dataBaseService
     ) {
         Assert.notNull(transactionManager, "未启动事务管理器");
         Assert.isTrue(!dataSourceMap.isEmpty(), "未设置数据源");
         DataSource dataSource;
+        DataBaseMetaData dataBaseMetaData;
         if (dataSourceMap.size() == 1) {
             dataSource = dataSourceMap.values().iterator().next();
+            dataBaseMetaData = dataBaseService.getAllDatabases().get(0);
         } else {
             Assert.isTrue(!StringUtils.isEmpty(name), "检测到多个数据源，请使用：" + CamundaBpmProperties.PREFIX + ".database.name 声明流程引擎所属数据源！");
             dataSource = dataSourceMap.get(name);
+            dataBaseMetaData = dataBaseService.getDataBaseMetaData(name);
             Assert.notNull(dataSource, "未检测到名称为：" + name + "的数据源！");
         }
-        return new CamundaDatasourceConfiguration() {
 
-            @Override
-            public void preInit(ProcessEngineConfigurationImpl processEngineConfiguration) {
-                if (processEngineConfiguration instanceof SpringProcessEngineConfiguration) {
-                    SpringProcessEngineConfiguration configuration = (SpringProcessEngineConfiguration) processEngineConfiguration;
-                    configuration.setTransactionManager(transactionManager);
-                    configuration.setDataSource(dataSource);
-                    DatabaseProperty database = properties.getDatabase();
-                    configuration.setDatabaseType(database.getType());
-                    configuration.setDatabaseSchemaUpdate(database.getSchemaUpdate());
-                    if (!StringUtils.isEmpty(database.getTablePrefix())) {
-                        configuration.setDatabaseTablePrefix(database.getTablePrefix());
-                    }
-                    if (!StringUtils.isEmpty(database.getSchemaName())) {
-                        configuration.setDatabaseSchema(database.getSchemaName());
-                    }
-                    configuration.setJdbcBatchProcessing(database.isJdbcBatchProcessing());
-                }
-            }
-        };
+
+        return new CamundaDbFixConfig(transactionManager, dataSource, properties, dataBaseMetaData);
     }
 
     /**
