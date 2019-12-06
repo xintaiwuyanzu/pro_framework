@@ -2,6 +2,7 @@ package com.dr.process.camunda.command.process;
 
 import com.dr.framework.core.process.bo.ProcessObject;
 import com.dr.framework.core.process.query.ProcessQuery;
+import com.dr.process.camunda.query.CustomHistoricProcessInstanceQuery;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
 import org.camunda.bpm.engine.history.HistoricProcessInstanceQuery;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
@@ -18,8 +19,7 @@ public class AbstractGetProcessObjectHistoryCmd {
     }
 
     protected HistoricProcessInstanceQuery convert(CommandContext commandContext) {
-        HistoricProcessInstanceQuery hq = commandContext.getProcessEngineConfiguration().getHistoryService()
-                .createHistoricProcessInstanceQuery();
+        CustomHistoricProcessInstanceQuery hq = new CustomHistoricProcessInstanceQuery(commandContext.getProcessEngineConfiguration().getCommandExecutorTxRequired());
         if (query != null) {
             if (!StringUtils.isEmpty(query.getName())) {
                 hq.processDefinitionNameLike(query.getName());
@@ -27,14 +27,13 @@ public class AbstractGetProcessObjectHistoryCmd {
             if (!StringUtils.isEmpty(query.getDescription())) {
             }
             if (!StringUtils.isEmpty(query.getType())) {
-                hq.processInstanceBusinessKeyLike(query.getType());
+                hq.setProcessDefKeyLike(query.getType());
             }
             if (!StringUtils.isEmpty(query.getCreatePerson())) {
                 hq.startedBy(query.getCreatePerson());
             }
         }
-        hq.finished();
-        return hq;
+        return hq.finished();
     }
 
     protected ProcessObject convert(HistoricProcessInstance historicProcessInstance, CommandContext commandContext) {

@@ -3,12 +3,10 @@ package com.dr.process.camunda.command.process;
 import com.dr.framework.core.process.bo.ProcessObject;
 import com.dr.framework.core.process.query.ProcessQuery;
 import com.dr.framework.core.process.service.ProcessService;
+import com.dr.process.camunda.query.CustomHistoricProcessInstanceQuery;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
 import org.camunda.bpm.engine.history.HistoricProcessInstanceQuery;
-import org.camunda.bpm.engine.history.HistoricTaskInstanceQuery;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
-import org.camunda.bpm.engine.runtime.ProcessInstance;
-import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
 import org.springframework.util.StringUtils;
 
 /**
@@ -26,13 +24,7 @@ public class AbstractGetProcessObjectCmd {
     }
 
     protected HistoricProcessInstanceQuery convert(CommandContext commandContext) {
-        HistoricProcessInstanceQuery pq =
-                commandContext.getProcessEngineConfiguration()
-                        .getHistoryService()
-                        .createHistoricProcessInstanceQuery()
-                        .active()
-                        .orderByProcessInstanceStartTime()
-                        .asc();
+        CustomHistoricProcessInstanceQuery pq = new CustomHistoricProcessInstanceQuery(commandContext.getProcessEngineConfiguration().getCommandExecutorTxRequired());
         if (query != null) {
             if (!StringUtils.isEmpty(query.getDescription())) {
                 pq.variableValueLike(ProcessService.TITLE_KEY, query.getDescription());
@@ -41,8 +33,13 @@ public class AbstractGetProcessObjectCmd {
             if (!StringUtils.isEmpty(query.getName())) {
                 pq.processDefinitionNameLike(query.getName());
             }
+            if (!StringUtils.isEmpty(query.getType())) {
+                pq.setProcessDefKeyLike(query.getType());
+            }
         }
-        return pq;
+        return pq.active()
+                .orderByProcessInstanceStartTime()
+                .asc();
     }
 
     protected ProcessObject convert(HistoricProcessInstance instance, CommandContext commandContext) {

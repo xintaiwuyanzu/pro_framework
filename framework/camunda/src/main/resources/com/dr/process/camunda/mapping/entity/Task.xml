@@ -245,7 +245,7 @@
                             ${queryType} RES.PARENT_TASK_ID_ = #{query.parentTaskId}
                         </if>
                         <if test="query.taskDefinitionKeyNotLike != null">
-                            ${queryType} RES.TASK_DEF_KEY_ like #{query.taskDefinitionKeyNotLike}
+                            ${queryType} RES.TASK_DEF_KEY_ not like #{query.taskDefinitionKeyNotLike}
                         </if>
                         <if test="query.taskDefinitionKeys != null &amp;&amp; query.taskDefinitionKeys.length > 0">
                             ${queryType} RES.TASK_DEF_KEY_ in
