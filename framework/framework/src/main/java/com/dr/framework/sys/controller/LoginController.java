@@ -54,20 +54,24 @@ public class LoginController {
             , @Current ClientInfo clientInfo
             , HttpServletRequest request
             , HttpServletResponse response) {
-        String token = loginService.auth(username, password, loginType, clientInfo.getRemoteIp());
-        response.addHeader(SecurityHolder.TOKEN_HEADER_KEY, token);
-        Cookie cookie = new Cookie(SecurityHolder.TOKEN_HEADER_KEY, token);
-        //设置超时时间为2小时
-        String path = request.getContextPath();
-        if (StringUtils.isEmpty(path)) {
-            path = "/";
+        try {
+            String token = loginService.auth(username, password, loginType, clientInfo.getRemoteIp());
+            response.addHeader(SecurityHolder.TOKEN_HEADER_KEY, token);
+            Cookie cookie = new Cookie(SecurityHolder.TOKEN_HEADER_KEY, token);
+            //设置超时时间为2小时
+            String path = request.getContextPath();
+            if (StringUtils.isEmpty(path)) {
+                path = "/";
+            }
+            cookie.setPath(path);
+            cookie.setHttpOnly(true);
+            cookie.setDomain(clientInfo.getRemoteIp());
+            cookie.setMaxAge((int) timeout.getSeconds());
+            response.addCookie(cookie);
+            return ResultEntity.success(token);
+        } catch (Exception e) {
+            return ResultEntity.error("用户名或密码错误");
         }
-        cookie.setPath(path);
-        cookie.setHttpOnly(true);
-        cookie.setDomain(clientInfo.getRemoteIp());
-        cookie.setMaxAge((int) timeout.getSeconds());
-        response.addCookie(cookie);
-        return ResultEntity.success(token);
     }
 
     /**

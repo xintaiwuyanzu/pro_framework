@@ -35,6 +35,9 @@ public class UserLogin extends BaseStatusEntity<Integer> {
     @Column(name = "last_login_date", comment = "最后登陆时间", type = ColumnType.DATE)
     private long lastLoginDate;
 
+    @Column(comment = "重试次数")
+    private long retryCount;
+
     @Column(name = "last_change_pwd_date", comment = "最后修改密码时间", type = ColumnType.DATE)
     private long lastChangePwdDate;
 
@@ -204,5 +207,13 @@ public class UserLogin extends BaseStatusEntity<Integer> {
 
     public void setPwdAnswer3(String pwdAnswer3) {
         this.pwdAnswer3 = pwdAnswer3;
+    }
+
+    public long getRetryCount() {
+        return retryCount;
+    }
+
+    public void setRetryCount(long retryCount) {
+        this.retryCount = retryCount;
     }
 }

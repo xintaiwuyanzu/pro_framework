@@ -6,6 +6,7 @@ import com.dr.framework.common.service.DefaultDataBaseService;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.organise.entity.UserLogin;
 import com.dr.framework.core.organise.service.LoginService;
+import com.dr.framework.core.organise.service.PassWordEncrypt;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -14,11 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -38,6 +36,8 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     CommonMapper commonMapper;
     @Autowired
     DefaultDataBaseService defaultDataBaseService;
+    @Autowired
+    PassWordEncrypt passWordEncrypt;
 
     EntityRelation userLoginRelation;
 
@@ -52,26 +52,60 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     public void bindLogin(Person person, String password) {
         Assert.isTrue(commonMapper.exists(Person.class, person.getId()), "未查询到指定的人员！");
         String salt = genSalt();
-        password = encryptPassword(password, salt);
         if (!StringUtils.isEmpty(person.getUserCode())) {
-            doAddUserLogin(person, password, salt, person.getUserCode(), LOGIN_TYPE_DEFAULT);
+            doAddUserLogin(
+                    person,
+                    passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_DEFAULT),
+                    salt,
+                    person.getUserCode(),
+                    LOGIN_TYPE_DEFAULT
+            );
         }
         if (!StringUtils.isEmpty(person.getIdNo())) {
-            doAddUserLogin(person, password, salt, person.getIdNo(), LOGIN_TYPE_IDNO);
+            doAddUserLogin(
+                    person,
+                    passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_IDNO),
+                    salt,
+                    person.getIdNo(),
+                    LOGIN_TYPE_IDNO
+            );
         }
         if (!StringUtils.isEmpty(person.getPhone())) {
-            doAddUserLogin(person, password, salt, person.getPhone(), LOGIN_TYPE_PHONE);
+            doAddUserLogin(
+                    person,
+                    passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_PHONE),
+                    salt,
+                    person.getPhone(),
+                    LOGIN_TYPE_PHONE
+            );
         }
         if (!StringUtils.isEmpty(person.getEmail())) {
-            doAddUserLogin(person, password, salt, person.getEmail(), LOGIN_TYPE_EMAIL);
+            doAddUserLogin(
+                    person,
+                    passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_EMAIL),
+                    salt,
+                    person.getEmail(),
+                    LOGIN_TYPE_EMAIL
+            );
         }
         if (!StringUtils.isEmpty(person.getQq())) {
-            doAddUserLogin(person, password, salt, person.getQq(), LOGIN_TYPE_QQ);
+            doAddUserLogin(
+                    person,
+                    passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_QQ),
+                    salt,
+                    person.getQq(),
+                    LOGIN_TYPE_QQ
+            );
         }
         if (!StringUtils.isEmpty(person.getWeiChatId())) {
-            doAddUserLogin(person, password, salt, person.getWeiChatId(), LOGIN_TYPE_WX);
+            doAddUserLogin(
+                    person,
+                    passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_WX),
+                    salt,
+                    person.getWeiChatId(),
+                    LOGIN_TYPE_WX
+            );
         }
-
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -134,34 +168,13 @@ public class DefaultLoginService implements LoginService, InitializingBean {
         ), "已存在指定类型的登录账户");
         String salt = genSalt();
         if (encryPass) {
-            password = encryptPassword(password, salt);
+            password = passWordEncrypt.encryptAddLogin(password, salt, loginType);
         }
         doAddUserLogin(person, password, salt, loginId, loginType);
         return 0;
     }
 
-    /**
-     * 加密密码
-     *
-     * @param password 密码
-     * @param salt     加密盐
-     * @return
-     */
-    private String encryptPassword(String password, String salt) {
-        Assert.isTrue(!StringUtils.isEmpty(password), "密码不能为空！");
-        Assert.isTrue(!StringUtils.isEmpty(salt), "加密盐不能为空！");
-        //3、MD5加密
-        return DigestUtils.md5DigestAsHex(
-                //2、base64编码
-                Base64Utils.encode(
-                        //1、拼接密码和加密盐
-                        (password + salt).getBytes(Charset.forName("utf-8"))
-                )
-        );
-    }
-
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Person login(String loginId, String password, String loginType, String loginSource, boolean outUser) {
         Assert.isTrue(!StringUtils.isEmpty(loginId), "登录账户不能为空！");
         Assert.isTrue(!StringUtils.isEmpty(loginType), "登录类型不能为空！");
@@ -172,14 +185,37 @@ public class DefaultLoginService implements LoginService, InitializingBean {
                         .equal(userLoginRelation.getColumn("outUser"), outUser)
         );
         Assert.notNull(userLogin, "未查到指定的登录账户！");
-        password = encryptPassword(password, userLogin.getSalt());
-        Assert.isTrue(password.equals(userLogin.getPassword()), "密码错误！");
-        Assert.isTrue(userLogin.getStatus().equals(StatusEntity.STATUS_ENABLE), "账户已禁用！");
+        boolean statusEnabld = userLogin.getStatus().equals(StatusEntity.STATUS_ENABLE);
+
+        password = passWordEncrypt.encryptValidateLogin(password, userLogin.getSalt(), loginType);
+
+        boolean success = password.equals(userLogin.getPassword());
+
         if (!StringUtils.isEmpty(loginSource)) {
             userLogin.setLastLoginIp(loginSource);
         }
+        userLogin.setRetryCount(userLogin.getRetryCount() + 1);
         userLogin.setLastLoginDate(System.currentTimeMillis());
+        if (success) {
+            if (!statusEnabld && "超出重试次数，请稍后重试".equalsIgnoreCase(userLogin.getFreezeReason())) {
+                if (System.currentTimeMillis() - userLogin.getFreezeDate() > 10 * 60 * 60) {
+                    userLogin.setStatus(STATUS_ENABLE);
+                    userLogin.setFreezeDate(0);
+                    userLogin.setFreezeReason("");
+                    statusEnabld = true;
+                }
+            }
+        } else {
+            //超过5此锁定账户
+            if (userLogin.getRetryCount() > 5) {
+                userLogin.setStatus(StatusEntity.STATUS_DISABLE);
+                userLogin.setFreezeDate(System.currentTimeMillis());
+                userLogin.setFreezeReason("超出重试次数，请稍后重试");
+            }
+        }
         commonMapper.updateIgnoreNullById(userLogin);
+
+        Assert.isTrue(success && statusEnabld, "登录失败！");
         return commonMapper.selectById(Person.class, userLogin.getPersonId());
     }
 
@@ -215,13 +251,14 @@ public class DefaultLoginService implements LoginService, InitializingBean {
         Assert.isTrue(!StringUtils.isEmpty(personId), "人员id不能为空！");
         Assert.isTrue(!StringUtils.isEmpty(newPassword), "新密码不能为空！");
         String salt = genSalt();
-        newPassword = encryptPassword(newPassword, salt);
         List<Object> userLogins = commonMapper.selectByQuery(
                 SqlQuery.from(userLoginRelation)
                         .equal(userLoginRelation.getColumn("person_id"), personId)
         );
         for (Object o : userLogins) {
             UserLogin userLogin = (UserLogin) o;
+
+            newPassword = passWordEncrypt.encryptChangeLogin(newPassword, salt, userLogin.getUserType());
             userLogin.setPassword(newPassword);
             userLogin.setSalt(salt);
             userLogin.setLastChangePwdDate(System.currentTimeMillis());

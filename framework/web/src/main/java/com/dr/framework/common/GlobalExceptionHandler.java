@@ -40,6 +40,7 @@ public class GlobalExceptionHandler {
         if (judgeIsMoblie(request)) {
             return ResultEntity.error("服务器链接超时。");
         }
+        ex.printStackTrace();
         return ResultEntity.error("服务器错误：" + ex.getMessage());
     }
 
