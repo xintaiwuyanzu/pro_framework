@@ -421,7 +421,7 @@ public class DefaultOrganisePersonService
                 .in(organiseRelation.getColumn(IdEntity.ID_COLUMN_NAME), organiseIds));
         //删除机构关联
         commonMapper.deleteByQuery(SqlQuery.from(organiseOrganiseRelation)
-                .in(organiseOrganiseRelation.getColumn(IdEntity.ID_COLUMN_NAME), organiseIds));
+                .in(organiseOrganiseRelation.getColumn("organise_id"), organiseIds));
         //删除人员
         List<Person> people = getPersonList(new PersonQuery.Builder()
                 .organiseIdEqual(organiseIds)
