@@ -185,14 +185,37 @@ public class DefaultLoginService implements LoginService, InitializingBean {
                         .equal(userLoginRelation.getColumn("outUser"), outUser)
         );
         Assert.notNull(userLogin, "未查到指定的登录账户！");
+        boolean statusEnabld = userLogin.getStatus().equals(StatusEntity.STATUS_ENABLE);
+
         password = passWordEncrypt.encryptValidateLogin(password, userLogin.getSalt(), loginType);
+
         boolean success = password.equals(userLogin.getPassword());
-        Assert.isTrue(success, "登录失败！");
+
         if (!StringUtils.isEmpty(loginSource)) {
             userLogin.setLastLoginIp(loginSource);
         }
         userLogin.setLastLoginDate(System.currentTimeMillis());
+        if (success) {
+            if (!statusEnabld && "超出重试次数，请稍后重试".equalsIgnoreCase(userLogin.getFreezeReason())) {
+                if (System.currentTimeMillis() - userLogin.getFreezeDate() > 10 * 60 * 60) {
+                    userLogin.setStatus(STATUS_ENABLE);
+                    userLogin.setFreezeDate(0);
+                    userLogin.setFreezeReason("");
+                    statusEnabld = true;
+                }
+            }
+        } else {
+            //超过5此锁定账户
+            userLogin.setRetryCount(userLogin.getRetryCount() + 1);
+            if (userLogin.getRetryCount() > 5) {
+                userLogin.setStatus(StatusEntity.STATUS_DISABLE);
+                userLogin.setFreezeDate(System.currentTimeMillis());
+                userLogin.setFreezeReason("超出重试次数，请稍后重试");
+            }
+        }
         commonMapper.updateIgnoreNullById(userLogin);
+
+        Assert.isTrue(success && statusEnabld, "登录失败！");
         return commonMapper.selectById(Person.class, userLogin.getPersonId());
     }
 
