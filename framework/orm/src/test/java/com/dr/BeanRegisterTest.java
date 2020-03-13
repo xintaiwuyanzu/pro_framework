@@ -24,7 +24,7 @@ public class BeanRegisterTest {
     }
 
     @Test
-    public void test1() throws Exception {
+    public void test1() {
         System.out.println(dataSource.getClass().getName());
         testService.aaa();
     }

@@ -63,7 +63,7 @@ class WhereQuery extends AbstractSqlQuery {
             if (data.length == 1) {
                 parsedData = data[0];
             } else {
-                parsedData = Arrays.asList(data).stream().map(Objects::toString).collect(Collectors.joining(","));
+                parsedData = Arrays.stream(data).map(Objects::toString).collect(Collectors.joining(","));
             }
             whereSqls.concat(AND_, new ConcatTestSqlWithData(column, prefix, suffix, parsedData));
         }
@@ -154,7 +154,7 @@ class WhereQuery extends AbstractSqlQuery {
 
     }
 
-    class WhereSqlConcats {
+    static class WhereSqlConcats {
         WhereSql sql;
         String concat;
         WhereSqlConcats next;
@@ -220,7 +220,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    abstract class WhereSql {
+    abstract static class WhereSql {
         StringBuilder formatColumn(Column column, TableAlias tableAlias) {
             return new StringBuilder(AbstractSqlQuery.formatSql(column, tableAlias, false));
         }
@@ -265,7 +265,7 @@ class WhereQuery extends AbstractSqlQuery {
         abstract String getSql(TableAlias alias, SqlQuery sqlQuery);
     }
 
-    abstract class TrueSql extends WhereSql {
+    abstract static class TrueSql extends WhereSql {
         @Override
         boolean test(MetaObject metaobject) {
             return true;
@@ -295,7 +295,7 @@ class WhereQuery extends AbstractSqlQuery {
                         stream()
                         .map(c -> {
                             //TODO 这里应该有问题
-                            return ((Serializable) c).toString();
+                            return c.toString();
                         })
                         .collect(Collectors.joining(","))
                 );
@@ -318,7 +318,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    class PureSql extends WhereSql {
+    static class PureSql extends WhereSql {
         Column column;
         String sql;
 
@@ -490,6 +490,51 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
+    public static Serializable cleanXSS(Serializable serializable) {
+        if (serializable instanceof String) {
+            String value = (String) serializable;
+            //You'll need to remove the spaces from the html entities below
+            value = value.replaceAll("<", "& lt;").replaceAll(">", "& gt;");
+            value = value.replaceAll("\\(", "& #40;").replaceAll("\\)", "& #41;");
+            value = value.replaceAll("'", "& #39;");
+            value = value.replaceAll("eval\\((.*)\\)", "");
+            value = value.replaceAll("[\"'][\\s]*javascript:(.*)[\"']", "\"\"");
+            value = value.replaceAll("script", "");
+            value = value.replaceAll("[*]", "[" + "*]");
+            value = value.replaceAll("[+]", "[" + "+]");
+            value = value.replaceAll("[?]", "[" + "?]");
+
+            // replace sql 这里可以自由发挥
+            String[] values = value.split(" ");
+
+            String badStr = "'|and|exec|execute|insert|select|delete|update|count|drop|%|chr|mid|master|truncate|" +
+                    "char|declare|sitename|net user|xp_cmdshell|;|or|-|+|,|like'|and|exec|execute|insert|create|drop|" +
+                    "table|from|grant|use|group_concat|column_name|" +
+                    "information_schema.columns|table_schema|union|where|select|delete|update|order|by|count|" +
+                    "chr|mid|master|truncate|char|declare|or|;|-|--|,|like|//|/|%|#";
+
+            String[] badStrs = badStr.split("\\|");
+            for (String str : badStrs) {
+                for (int j = 0; j < values.length; j++) {
+                    if (values[j].equalsIgnoreCase(str)) {
+                        values[j] = "forbid";
+                    }
+                }
+            }
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < values.length; i++) {
+                if (i == values.length - 1) {
+                    sb.append(values[i]);
+                } else {
+                    sb.append(values[i]).append(" ");
+                }
+            }
+            value = sb.toString();
+            return value;
+        }
+        return serializable;
+    }
+
     class LikeSqlWithData extends TrueSql {
         Column column;
         boolean isLike;
@@ -512,7 +557,7 @@ class WhereQuery extends AbstractSqlQuery {
             if (pre) {
                 dataBuilder.append("%");
             }
-            dataBuilder.append(data);
+            dataBuilder.append(cleanXSS(data));
             if (end) {
                 dataBuilder.append("%");
             }
@@ -545,7 +590,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    abstract class OrderBy {
+    abstract static class OrderBy {
         boolean desc = false;
 
         OrderBy(boolean desc) {
@@ -555,7 +600,7 @@ class WhereQuery extends AbstractSqlQuery {
         abstract String sql(TableAlias alias);
     }
 
-    class ColumnOrderBy extends OrderBy {
+    static class ColumnOrderBy extends OrderBy {
         Column column;
 
         ColumnOrderBy(Column column, boolean desc) {
@@ -578,7 +623,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    class AliasOrderBy extends OrderBy {
+    static class AliasOrderBy extends OrderBy {
         String alias;
 
         AliasOrderBy(String alias, boolean desc) {

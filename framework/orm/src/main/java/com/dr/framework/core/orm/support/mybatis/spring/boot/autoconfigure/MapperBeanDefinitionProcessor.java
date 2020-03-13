@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -92,8 +93,7 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
             MultiDataSourceProperties dataSourceProperties = readDataSourceProties(annotationAttributes.getString("prefix"), annotationAttributes.getString("name"));
             registerMybatisConfigs(registry, dataSourceProperties, annotationAttributes);
         } else {
-            for (int i = 0; i < databases.length; i++) {
-                AnnotationAttributes database = databases[i];
+            for (AnnotationAttributes database : databases) {
                 registerSpecifyedDataSource(registry, database);
             }
         }
@@ -164,7 +164,7 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
         ClassPathMapperScanner classPathMapperScanner = new ClassPathMapperScanner(registry);
         setScanner(classPathMapperScanner, attributes);
 
-        classPathMapperScanner.scan(pkgs.toArray(new String[pkgs.size()]));
+        classPathMapperScanner.scan(pkgs.toArray(new String[0]));
         return classPathMapperScanner.getInterfaces();
     }
 
@@ -219,9 +219,7 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
     private List<TypeFilter> readTypeFilters(BeanDefinitionRegistry registry, AnnotationAttributes attributes, String filterName) {
         List<TypeFilter> typeFilters = new ArrayList<>();
         for (AnnotationAttributes filter : attributes.getAnnotationArray(filterName)) {
-            for (TypeFilter typeFilter : typeFiltersFor(filter, registry)) {
-                typeFilters.add(typeFilter);
-            }
+            typeFilters.addAll(typeFiltersFor(filter, registry));
         }
         return typeFilters;
     }
@@ -229,9 +227,7 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
     private List<String> readPackgeList(AnnotationAttributes attributes) {
         List<String> list = new ArrayList<>();
         if (attributes != null) {
-            for (String pkg : attributes.getStringArray("value")) {
-                list.add(pkg);
-            }
+            Collections.addAll(list, attributes.getStringArray("value"));
             for (Class clazz : attributes.getClassArray("basePackageClasses")) {
                 list.add(ClassUtils.getPackageName(clazz));
             }

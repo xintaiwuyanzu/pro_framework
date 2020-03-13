@@ -81,7 +81,7 @@ public class Relation<C extends Column> {
                 return addPrimaryKey(name, columnName, columnPosition);
             }
         }
-        indexMap.computeIfAbsent(name, s -> new ColumnsHolder<>(s))
+        indexMap.computeIfAbsent(name, ColumnsHolder::new)
                 .columns.add(new IndexHolder(columnName, columnPosition, asc, unique, type));
         return this;
     }
@@ -108,7 +108,7 @@ public class Relation<C extends Column> {
     }
 
     public String getPrimaryKeyAlias() {
-        return primaryKeyColumns().stream().collect(Collectors.joining());
+        return String.join("", primaryKeyColumns());
     }
 
     public List<String> primaryKeyColumns() {
@@ -136,7 +136,7 @@ public class Relation<C extends Column> {
                         });
             } else {
                 //声明了索引名称表示联合索引
-                boolean unique = indexHolders.columns.stream().filter(i -> i.unique).findAny().isPresent();
+                boolean unique = indexHolders.columns.stream().anyMatch(i -> i.unique);
                 map.put(
                         indexHolders.name
                         , buildCreateIndexSql(
@@ -166,7 +166,7 @@ public class Relation<C extends Column> {
                         });
             } else {
                 //声明了索引名称表示联合索引
-                boolean unique = indexHolders.columns.stream().filter(i -> i.unique).findAny().isPresent();
+                boolean unique = indexHolders.columns.stream().anyMatch(i -> i.unique);
                 map.put(
                         indexHolders.name
                         , String.format("%s_%s"
@@ -183,7 +183,7 @@ public class Relation<C extends Column> {
 
 
     private String buildCreateIndexSql(boolean unique, String indexName, String indexColumn) {
-        StringBuffer stringBuffer = new StringBuffer("create ");
+        StringBuilder stringBuffer = new StringBuilder("create ");
         if (unique) {
             stringBuffer.append("unique ");
         }
@@ -198,7 +198,7 @@ public class Relation<C extends Column> {
     }
 
     private String appendIndex(IndexHolder indexHolder) {
-        StringBuffer sb = new StringBuffer(indexHolder.columnName);
+        StringBuilder sb = new StringBuilder(indexHolder.columnName);
         switch (indexHolder.acs) {
             case TRUE:
                 sb.append(" asc");
@@ -217,7 +217,7 @@ public class Relation<C extends Column> {
         return columnMap.values()
                 .stream()
                 .sorted(Comparator.comparing(Column::getPosition))
-                .map(c -> {
+                .peek(c -> {
                     if (primaryKeys != null) {
                         //如果列是联合主键，则列不能为空
                         for (ColumnHolder columnHolder : primaryKeys.columns) {
@@ -227,7 +227,6 @@ public class Relation<C extends Column> {
                             }
                         }
                     }
-                    return c;
                 })
                 .collect(Collectors.toList());
     }
@@ -303,12 +302,12 @@ public class Relation<C extends Column> {
         if (StringUtils.isEmpty(name)) {
             name = DEFAULT_AUTO_NAME;
         }
-        uniqueKeys.computeIfAbsent(name, s -> new ColumnsHolder<>(s))
+        uniqueKeys.computeIfAbsent(name, ColumnsHolder::new)
                 .columns.add(new ColumnHolder(columnName, columnPosition));
         return this;
     }
 
-    private class ColumnsHolder<C extends ColumnHolder> {
+    private static class ColumnsHolder<C extends ColumnHolder> {
         String name;
         Collection<C> columns = new ArrayList<>();
 
@@ -317,7 +316,7 @@ public class Relation<C extends Column> {
         }
     }
 
-    private class ColumnHolder implements Comparable<ColumnHolder> {
+    private static class ColumnHolder implements Comparable<ColumnHolder> {
         String columnName;
         int columnIndex;
 
@@ -332,7 +331,7 @@ public class Relation<C extends Column> {
         }
     }
 
-    private class IndexHolder extends ColumnHolder {
+    private static class IndexHolder extends ColumnHolder {
         TrueOrFalse acs;
         boolean unique;
         int type;

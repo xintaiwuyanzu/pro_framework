@@ -265,8 +265,9 @@ public class CommonService {
                             return treeNode.isLeaf();
                         }
                         return true;
-                    }).collect(Collectors.toList());
-            Collections.sort(treeNodes);
+                    })
+                    .sorted()
+                    .collect(Collectors.toList());
             return treeNodes;
         }
         return null;

@@ -1,6 +1,8 @@
 package com.dr.framework.common.page;
 
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 /**
  * 分页工具类
@@ -40,6 +42,32 @@ public class Page<T> {
         this.size = size;
         this.total = total;
     }
+
+    public Page(long start, long size, long total, List<T> data) {
+        this.start = start;
+        this.size = size;
+        this.total = total;
+        this.data = data;
+    }
+
+    public Page(long start, long size, long total, Supplier<List<T>> data) {
+        this.start = start;
+        this.size = size;
+        this.total = total;
+        if (total > 0) {
+            this.data = data.get();
+        }
+    }
+
+    public Page(long start, long size, long total, BiFunction<Long, Long, List<T>> data) {
+        this.start = start;
+        this.size = size;
+        this.total = total;
+        if (total > 0) {
+            this.data = data.apply(start, start + size);
+        }
+    }
+
 
     public long getSize() {
         return size;

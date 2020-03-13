@@ -129,6 +129,14 @@ public interface LoginService {
     void unFreezeLogin(String personId);
 
     /**
+     * 直接修改登录账户的状态
+     *
+     * @param personId
+     * @param status
+     */
+    void changeStatus(String personId, Integer status);
+
+    /**
      * 删除指定的登录账户
      *
      * @param loginId

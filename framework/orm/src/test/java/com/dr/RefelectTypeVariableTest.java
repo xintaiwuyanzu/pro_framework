@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.function.Function;
 
 public class RefelectTypeVariableTest {
-    class Test<A, S> extends BaseStatusEntity<S> {
+    static class Test<A, S> extends BaseStatusEntity<S> {
         private A s;
     }
 
@@ -24,7 +24,7 @@ public class RefelectTypeVariableTest {
 
     }
 
-    class Test3 extends BaseStatusEntity<String> {
+    static class Test3 extends BaseStatusEntity<String> {
 
     }
 

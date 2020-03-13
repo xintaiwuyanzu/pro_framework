@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class IDNo {
     private static final Map<String, String> cityCodes;
-    private static final int power[] = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
+    private static final int[] power = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
 
     static {
         cityCodes = new HashMap();

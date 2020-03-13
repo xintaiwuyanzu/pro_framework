@@ -10,10 +10,7 @@ import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -103,8 +100,8 @@ public class DataBaseMetaData {
                     break;
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            logger.error("数据库初始化错误，获取数据库基本信息失败", e);
         }
     }
 
@@ -119,7 +116,7 @@ public class DataBaseMetaData {
      * @return
      */
     public List<Relation<Column>> getTables(boolean forceLoad) {
-        return getTableMap(forceLoad).values().stream().collect(Collectors.toList());
+        return new ArrayList<>(getTableMap(forceLoad).values());
     }
 
     public Relation<Column> getTable(String tableName) {

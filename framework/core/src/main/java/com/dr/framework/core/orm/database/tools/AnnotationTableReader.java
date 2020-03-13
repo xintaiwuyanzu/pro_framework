@@ -276,19 +276,19 @@ public class AnnotationTableReader {
         }
         if (fieldClass.equals(short.class) || fieldClass.equals(Short.class)) {
             //int类型最大存储10位十进制数据
-            precision = precision > 5 ? 5 : precision;
+            precision = Math.min(precision, 5);
             scale = 0;
         } else if (fieldClass.equals(int.class) || fieldClass.equals(Integer.class)) {
             //int类型最大存储10位十进制数据
-            precision = precision > 10 ? 10 : precision;
+            precision = Math.min(precision, 10);
             scale = 0;
         } else if (fieldClass.equals(long.class) || fieldClass.equals(Long.class)) {
             //int类型最大存储10位十进制数据
-            precision = precision > 19 ? 19 : precision;
+            precision = Math.min(precision, 19);
             scale = 0;
         } else if (fieldClass.equals(double.class) || fieldClass.equals(Double.class) || fieldClass.equals(float.class) || fieldClass.equals(Float.class)) {
             //int类型最大存储10位十进制数据
-            precision = precision > 65 ? 65 : precision;
+            precision = Math.min(precision, 65);
         }
         if (column1.getType() == Types.NULL || column1.getType() == 0) {
             column1.setType(dialect.getColumnType(fieldClass, scale, precision));
@@ -333,7 +333,7 @@ public class AnnotationTableReader {
         }
     }
 
-    private class ColumnSortHolder implements Comparable<ColumnSortHolder> {
+    private static class ColumnSortHolder implements Comparable<ColumnSortHolder> {
         EntityRelation.FieldColumn column;
         int classLevel;
         int columnOrder;
@@ -364,7 +364,7 @@ public class AnnotationTableReader {
         }
     }
 
-    private class PrimaryKeyHolder extends ColumnSortHolder {
+    private static class PrimaryKeyHolder extends ColumnSortHolder {
         String name;
 
         public PrimaryKeyHolder(EntityRelation.FieldColumn column, int classLevel, int columnOrder, int fieldOrder, String name) {
@@ -373,7 +373,7 @@ public class AnnotationTableReader {
         }
     }
 
-    private class IndexColumnHolder extends ColumnSortHolder {
+    private static class IndexColumnHolder extends ColumnSortHolder {
         String name;
         boolean unique;
         int type;
@@ -389,7 +389,7 @@ public class AnnotationTableReader {
     }
 
 
-    private class ClassTypeHolder {
+    private static class ClassTypeHolder {
         Type type;
         Class entityClass;
         List<Field> declareFields;
@@ -397,8 +397,7 @@ public class AnnotationTableReader {
         public ClassTypeHolder(Type type, Class entityClass) {
             this.type = type;
             this.entityClass = entityClass;
-            declareFields = Arrays.asList(entityClass.getDeclaredFields())
-                    .stream()
+            declareFields = Arrays.stream(entityClass.getDeclaredFields())
                     .filter(f -> f.isAnnotationPresent(Column.class))
                     .collect(Collectors.toList());
         }

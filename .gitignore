@@ -1,1 +1,5 @@
 *.iml
+.idea
+*/*/transaction-logs
+*/*/*/transaction-logs
+*/transaction-logs

@@ -1,7 +1,6 @@
 package com.dr.framework.core.orm.database.dialect;
 
 import com.dr.framework.core.orm.database.Dialect;
-import com.dr.framework.core.orm.jdbc.Column;
 import com.dr.framework.core.orm.jdbc.Relation;
 
 import java.sql.*;
@@ -60,6 +59,11 @@ public class PostgreSQLDialect extends Dialect {
         StringBuilder builder = new StringBuilder(sqlSource);
         builder.append(" limit ").append(limit).append(" offset ").append(offset);
         return builder.toString();
+    }
+
+    @Override
+    public String convertObjectName(String source) {
+        return source.toLowerCase();
     }
 
     @Override

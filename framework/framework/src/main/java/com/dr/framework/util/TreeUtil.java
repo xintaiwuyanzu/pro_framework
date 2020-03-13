@@ -18,11 +18,7 @@ public class TreeUtil {
         List<TreeNode> treeNodes = objectList.stream().map(treeNodeFunction).collect(Collectors.toList());
         Map<String, List<TreeNode>> stringListMap = new HashMap<>();
         for (TreeNode treeNode : treeNodes) {
-            List<TreeNode> treeNodeList = stringListMap.get(treeNode.getParentId());
-            if (treeNodeList == null) {
-                treeNodeList = new ArrayList<>();
-                stringListMap.put(treeNode.getParentId(), treeNodeList);
-            }
+            List<TreeNode> treeNodeList = stringListMap.computeIfAbsent(treeNode.getParentId(), k -> new ArrayList<>());
             treeNodeList.add(treeNode);
         }
         return mapToTree(stringListMap, rootId);

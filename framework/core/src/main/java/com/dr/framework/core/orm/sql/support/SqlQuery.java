@@ -585,7 +585,11 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
      */
     public SqlQuery<E> in(Column column, Serializable... datas) {
         if (datas != null && datas.length > 0) {
-            whereQuery.pureSql(column, " in (" + Arrays.asList(datas).stream().map(serializable -> String.format("'%s'", serializable)).collect(Collectors.joining(",")) + ")");
+            whereQuery.pureSql(column, " in ("
+                    + Arrays.stream(datas)
+                    .map(serializable -> String.format("'%s'", WhereQuery.cleanXSS(serializable)))
+                    .collect(Collectors.joining(","))
+                    + ")");
         }
         return this;
     }
@@ -601,7 +605,11 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
      */
     public SqlQuery<E> in(Column column, List<? extends Serializable> datas) {
         if (datas != null && datas.size() > 0) {
-            whereQuery.pureSql(column, " in (" + datas.stream().map(serializable -> String.format("'%s'", serializable)).collect(Collectors.joining(",")) + ")");
+            whereQuery.pureSql(column, " in ("
+                    + datas.stream()
+                    .map(serializable -> String.format("'%s'", WhereQuery.cleanXSS(serializable)))
+                    .collect(Collectors.joining(","))
+                    + ")");
         }
         return this;
     }
@@ -615,7 +623,11 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
      */
     public SqlQuery<E> notIn(Column column, Serializable... datas) {
         if (datas != null && datas.length > 0) {
-            whereQuery.pureSql(column, " not in (" + Arrays.asList(datas).stream().map(serializable -> String.format("'%s'", serializable)).collect(Collectors.joining(",")) + ")");
+            whereQuery.pureSql(column, " not in (" +
+                    Arrays.stream(datas)
+                            .map(serializable -> String.format("'%s'", WhereQuery.cleanXSS(serializable)))
+                            .collect(Collectors.joining(","))
+                    + ")");
         }
         return this;
     }
@@ -624,9 +636,14 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
         return concatWithSubQuery(column, "not in", "", query);
     }
 
+
     public SqlQuery<E> notIn(Column column, List<? extends Serializable> datas) {
         if (datas != null && datas.size() > 0) {
-            whereQuery.pureSql(column, " not in (" + datas.stream().map(serializable -> String.format("'%s'", serializable)).collect(Collectors.joining(",")) + ")");
+            whereQuery.pureSql(column, " not in (" +
+                    datas.stream()
+                            .map(serializable -> String.format("'%s'", WhereQuery.cleanXSS(serializable)))
+                            .collect(Collectors.joining(","))
+                    + ")");
         }
         return this;
     }

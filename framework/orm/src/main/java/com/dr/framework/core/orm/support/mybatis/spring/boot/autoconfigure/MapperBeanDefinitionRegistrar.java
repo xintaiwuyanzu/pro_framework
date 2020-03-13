@@ -20,7 +20,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure.MapperBeanDefinitionProcessor.PREFIX_KEY;
 
@@ -54,8 +53,7 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
                 registerBeanDefintionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
             } else {
                 Set<String> includedModules = new HashSet<>();
-                for (int i = 0; i < databases.length; i++) {
-                    AnnotationAttributes database = databases[i];
+                for (AnnotationAttributes database : databases) {
                     boolean primary = database.getBoolean("primary");
                     MultiDataSourceProperties dataSourceProperties = readDataSourceProties(database.getString(PREFIX_KEY), database.getString("name"));
                     int setSize = includedModules.size();
@@ -63,7 +61,7 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
                     Assert.isTrue(setSize + dataSourceProperties.getIncludeModules().size() == includedModules.size()
                             , String.format("不得在多个数据源【%s】重复声明包含模块：%s"
                                     , dataSourceProperties.getName()
-                                    , dataSourceProperties.getIncludeModules().stream().collect(Collectors.joining(","))
+                                    , String.join(",", dataSourceProperties.getIncludeModules())
                             ));
                     BeanDefinition beanDefinition = buildBeanDefinition(dataSourceProperties, primary);
                     registerBeanDefintionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());

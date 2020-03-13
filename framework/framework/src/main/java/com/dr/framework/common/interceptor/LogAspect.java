@@ -1,6 +1,5 @@
 package com.dr.framework.common.interceptor;
 
-import com.dr.framework.common.annotations.Log;
 import com.dr.framework.common.dao.CommonMapper;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;

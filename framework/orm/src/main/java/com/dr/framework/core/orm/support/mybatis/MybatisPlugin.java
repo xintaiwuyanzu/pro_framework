@@ -176,7 +176,7 @@ public class MybatisPlugin implements Interceptor {
         return executor.query(ms, params, rowBounds, resultHandler, cacheKey, boundSql);
     }
 
-    class BoundSqlWrapper extends BoundSql {
+    static class BoundSqlWrapper extends BoundSql {
         BoundSql boundSql;
         String sql;
 
@@ -235,7 +235,7 @@ public class MybatisPlugin implements Interceptor {
         }
     }
 
-    class VariableTokenHandler implements TokenHandler {
+    static class VariableTokenHandler implements TokenHandler {
         private final Properties variables;
         private final boolean enableDefaultValue;
         private final String defaultValueSeparator;

@@ -15,6 +15,7 @@
  */
 package com.dr.support.codegen.db;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -950,9 +951,7 @@ public class SqlReservedWords {
         };
 
         RESERVED_WORDS = new HashSet(words.length);
-        for (String word : words) {
-            RESERVED_WORDS.add(word);
-        }
+        RESERVED_WORDS.addAll(Arrays.asList(words));
     }
 
     public static boolean containsWord(String word) {

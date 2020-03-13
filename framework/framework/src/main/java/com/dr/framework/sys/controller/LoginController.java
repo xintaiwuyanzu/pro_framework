@@ -7,6 +7,8 @@ import com.dr.framework.core.security.SecurityHolder;
 import com.dr.framework.core.security.bo.ClientInfo;
 import com.dr.framework.core.web.annotations.Current;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.Duration;
 
 /**
  * 用户登录相关api，
@@ -25,10 +28,13 @@ import javax.servlet.http.HttpServletResponse;
 public class LoginController {
     @Autowired
     LoginService loginService;
-
+    /**
+     * 默认登录超时时间为30分钟
+     */
+    @Value("${server.session.timeout:30m}")
+    Duration timeout;
     /**
      * TODO 这里需要处理登陆时加密密码传参的相关方法
-     *
      */
 
     /**
@@ -46,11 +52,27 @@ public class LoginController {
             , @RequestParam String password
             , @RequestParam(defaultValue = LoginService.LOGIN_TYPE_DEFAULT) String loginType
             , @Current ClientInfo clientInfo
+            , HttpServletRequest request
             , HttpServletResponse response) {
-        String token = loginService.auth(username, password, loginType, clientInfo.getRemoteIp());
-        response.addHeader(SecurityHolder.TOKEN_HEADER_KEY, token);
-        response.addCookie(new Cookie(SecurityHolder.TOKEN_HEADER_KEY, token));
-        return ResultEntity.success(token);
+        try {
+            String token = loginService.auth(username, password, loginType, clientInfo.getRemoteIp());
+            response.addHeader(SecurityHolder.TOKEN_HEADER_KEY, token);
+            Cookie cookie = new Cookie(SecurityHolder.TOKEN_HEADER_KEY, token);
+            //设置超时时间为2小时
+            String path = request.getContextPath();
+            if (StringUtils.isEmpty(path)) {
+                path = "/";
+            }
+            cookie.setPath(path);
+            cookie.setHttpOnly(true);
+            cookie.setDomain(clientInfo.getRemoteIp());
+            cookie.setMaxAge((int) timeout.getSeconds());
+            response.addCookie(cookie);
+            return ResultEntity.success(token);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResultEntity.error("用户名或密码错误");
+        }
     }
 
     /**
