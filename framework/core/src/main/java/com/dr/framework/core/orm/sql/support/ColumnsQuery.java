@@ -16,8 +16,7 @@ class ColumnsQuery extends AbstractSqlQuery {
     private boolean includeAll;
 
     String columnToKey(Column column) {
-        return Stream.of(column.getTable(), column.getName(), column.getFunction())
-                .collect(Collectors.joining("_"))
+        return String.join("_", column.getTable(), column.getName(), column.getFunction())
                 .toUpperCase();
     }
 
@@ -25,7 +24,6 @@ class ColumnsQuery extends AbstractSqlQuery {
     public void bindRelation(Relation<? extends Column> relation) {
         if (includeAll) {
             relation.getColumns()
-                    .stream()
                     .forEach(c -> columnMap.put(columnToKey(c), c));
         }
         excludes.forEach(columnMap::remove);
@@ -59,9 +57,9 @@ class ColumnsQuery extends AbstractSqlQuery {
         sqlClause(builder
                 , ""
                 , columnMap
-                        .entrySet()
+                        .values()
                         .stream()
-                        .map(e -> formatSql(e.getValue(), tableAlias))
+                        .map(column -> formatSql(column, tableAlias))
                         .collect(Collectors.toList())
                 , ""
                 , ""

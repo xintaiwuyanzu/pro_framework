@@ -1,5 +1,6 @@
 package com.dr.process.camunda.service;
 
+import com.dr.framework.common.entity.BaseEntity;
 import com.dr.framework.core.organise.entity.Organise;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.organise.query.PersonQuery;
@@ -99,7 +100,7 @@ public class CurrentService {
     public List<String> organisePersonIds(String duty, String type) {
         return organisePerson(duty, type)
                 .stream()
-                .map(p -> p.getId())
+                .map(BaseEntity::getId)
                 .collect(Collectors.toList());
     }
 

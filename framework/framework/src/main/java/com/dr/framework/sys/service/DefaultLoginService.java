@@ -1,6 +1,7 @@
 package com.dr.framework.sys.service;
 
 import com.dr.framework.common.dao.CommonMapper;
+import com.dr.framework.common.entity.BaseEntity;
 import com.dr.framework.common.entity.StatusEntity;
 import com.dr.framework.common.service.DefaultDataBaseService;
 import com.dr.framework.core.organise.entity.Person;
@@ -12,6 +13,7 @@ import com.dr.framework.core.orm.sql.support.SqlQuery;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -36,6 +38,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     CommonMapper commonMapper;
     @Autowired
     DefaultDataBaseService defaultDataBaseService;
+    @Lazy
     @Autowired
     PassWordEncrypt passWordEncrypt;
 
@@ -195,6 +198,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
             userLogin.setLastLoginIp(loginSource);
         }
         userLogin.setLastLoginDate(System.currentTimeMillis());
+        userLogin.setRetryCount(userLogin.getRetryCount() + 1);
         if (success) {
             userLogin.setRetryCount(0);
             if (!statusEnabld && "超出重试次数，请稍后重试".equalsIgnoreCase(userLogin.getFreezeReason())) {
@@ -207,7 +211,6 @@ public class DefaultLoginService implements LoginService, InitializingBean {
             }
         } else {
             //超过5此锁定账户
-            userLogin.setRetryCount(userLogin.getRetryCount() + 1);
             if (userLogin.getRetryCount() > 5) {
                 userLogin.setStatus(StatusEntity.STATUS_DISABLE);
                 userLogin.setFreezeDate(System.currentTimeMillis());
@@ -251,16 +254,14 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     public void changePassword(String personId, String newPassword) {
         Assert.isTrue(!StringUtils.isEmpty(personId), "人员id不能为空！");
         Assert.isTrue(!StringUtils.isEmpty(newPassword), "新密码不能为空！");
-        String salt = genSalt();
         List<Object> userLogins = commonMapper.selectByQuery(
                 SqlQuery.from(userLoginRelation)
                         .equal(userLoginRelation.getColumn("person_id"), personId)
         );
         for (Object o : userLogins) {
             UserLogin userLogin = (UserLogin) o;
-
-            newPassword = passWordEncrypt.encryptChangeLogin(newPassword, salt, userLogin.getUserType());
-            userLogin.setPassword(newPassword);
+            String salt = genSalt();
+            userLogin.setPassword(passWordEncrypt.encryptChangeLogin(newPassword, salt, userLogin.getUserType()));
             userLogin.setSalt(salt);
             userLogin.setLastChangePwdDate(System.currentTimeMillis());
             commonMapper.updateIgnoreNullById(userLogin);
@@ -276,6 +277,11 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     @Override
     public void unFreezeLogin(String personId) {
         changeLoginStatus(personId, STATUS_ENABLE);
+    }
+
+    @Override
+    public void changeStatus(String personId, Integer status) {
+        changeLoginStatus(personId, status);
     }
 
     @Override
@@ -308,7 +314,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
         );
         List<String> loginIds = userLogins.stream()
                 .map(o -> (UserLogin) o)
-                .map(u -> u.getId())
+                .map(BaseEntity::getId)
                 .collect(Collectors.toList());
         //批量更新登录状态
         commonMapper.updateByQuery(SqlQuery.from(userLoginRelation)

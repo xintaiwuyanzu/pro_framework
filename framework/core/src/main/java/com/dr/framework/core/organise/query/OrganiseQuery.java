@@ -31,7 +31,10 @@ public class OrganiseQuery extends IdQuery {
      * 机构类型notlike
      */
     private String typeNotLike;
-
+    /**
+     * 编码相同
+     */
+    private String codeEqual;
     /**
      * 机构类型
      */
@@ -161,6 +164,10 @@ public class OrganiseQuery extends IdQuery {
         this.treeParentId = treeParentId;
     }
 
+    public String getCodeEqual() {
+        return codeEqual;
+    }
+
     public static class Builder extends IdQuery.Builder<OrganiseQuery, Builder> {
         private OrganiseQuery query = new OrganiseQuery();
 
@@ -173,8 +180,7 @@ public class OrganiseQuery extends IdQuery {
         }
 
         private List<String> newList(String... strings) {
-            return Arrays.asList(strings)
-                    .stream()
+            return Arrays.stream(strings)
                     .filter(s -> !StringUtils.isEmpty(s))
                     .collect(Collectors.toList());
         }
@@ -445,6 +451,11 @@ public class OrganiseQuery extends IdQuery {
          */
         public Builder typeNotLike(String type) {
             query.typeNotLike = type;
+            return this;
+        }
+
+        public Builder codeEqual(String code) {
+            query.codeEqual = code;
             return this;
         }
 

@@ -56,7 +56,7 @@ public class CommonHttpServletRequestWrapper extends HttpServletRequestWrapper {
         value = value.replaceAll("\\(", "& #40;").replaceAll("\\)", "& #41;");
         value = value.replaceAll("'", "& #39;");
         value = value.replaceAll("eval\\((.*)\\)", "");
-        value = value.replaceAll("[\\\"\\\'][\\s]*javascript:(.*)[\\\"\\\']", "\"\"");
+        value = value.replaceAll("[\"'][\\s]*javascript:(.*)[\"']", "\"\"");
         value = value.replaceAll("script", "");
         value = value.replaceAll("[*]", "[" + "*]");
         value = value.replaceAll("[+]", "[" + "+]");
@@ -72,9 +72,9 @@ public class CommonHttpServletRequestWrapper extends HttpServletRequestWrapper {
                 "chr|mid|master|truncate|char|declare|or|;|-|--|,|like|//|/|%|#";
 
         String[] badStrs = badStr.split("\\|");
-        for (int i = 0; i < badStrs.length; i++) {
+        for (String str : badStrs) {
             for (int j = 0; j < values.length; j++) {
-                if (values[j].equalsIgnoreCase(badStrs[i])) {
+                if (values[j].equalsIgnoreCase(str)) {
                     values[j] = "forbid";
                 }
             }
@@ -84,7 +84,7 @@ public class CommonHttpServletRequestWrapper extends HttpServletRequestWrapper {
             if (i == values.length - 1) {
                 sb.append(values[i]);
             } else {
-                sb.append(values[i] + " ");
+                sb.append(values[i]).append(" ");
             }
         }
         value = sb.toString();

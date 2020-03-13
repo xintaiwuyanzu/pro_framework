@@ -79,6 +79,7 @@ public interface CommonMapper {
     @Update({
             "<default>update !!{table} !!{set} where !!{pk}=!!{id}</default>"
             , "<sqlserver>update A !!{set} from !!{table} where !!{pk}=!!{id}</sqlserver>"
+            , "<postgre>update A !!{setNo} from !!{table} where !!{pk}=!!{id}</postgre>"
     })
     <E> long updateById(E entity);
 
@@ -91,18 +92,21 @@ public interface CommonMapper {
     @Update({
             "<default>update", SqlQuery.TABLE, "!!{set}", SqlQuery.WHERE, "</default>"
             , "<sqlserver>update A", "!!{set}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"
+            , "<postgre>update A", "!!{setNo}", SqlQuery.FROM, SqlQuery.WHERE, "</postgre>"
     })
     <E> long updateByQuery(SqlQuery<E> sqlQuery);
 
     @Update({
             "<default>update !!{table} !!{settest} where !!{pk} =!!{id}</default>"
             , "<sqlserver>update A !!{settest} from !!{table} where !!{pk} =!!{id}</sqlserver>"
+            , "<postgre>update A !!{setNotest} from !!{table} where !!{pk} =!!{id}</postgre>"
     })
     <E> long updateIgnoreNullById(E entity);
 
     @Update({
             "<default>update", SqlQuery.TABLE, "!!{settest}", SqlQuery.WHERE, "</default>"
             , "<sqlserver>update A !!{settest}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"
+            , "<postgre>update A !!{setNotest}", SqlQuery.FROM, SqlQuery.WHERE, "</postgre>"
     })
     <E> long updateIgnoreNullByQuery(SqlQuery<E> sqlQuery);
 

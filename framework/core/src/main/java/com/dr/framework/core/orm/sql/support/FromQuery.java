@@ -8,7 +8,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 class FromQuery extends AbstractSqlQuery {

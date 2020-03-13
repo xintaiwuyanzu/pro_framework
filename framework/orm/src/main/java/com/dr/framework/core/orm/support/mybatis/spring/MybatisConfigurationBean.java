@@ -135,7 +135,7 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
                 Mapper mapper = (Mapper) mapperInterface.getAnnotation(Mapper.class);
                 boolean contain = containsModules(mapper.module());
                 if (!contain) {
-                    break;
+                    continue;
                 }
             }
             super.addMapper(mapperInterface);
@@ -227,10 +227,10 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
         treeNode.setParentId(databaseId);
         List<TreeNode> childTables = dataSourceProperties.getDataBaseMetaData().getTables(true)
                 .stream()
-                .filter(table -> !entityClass.stream()
+                .filter(table -> entityClass.stream()
                         .map(SqlQuery::getTableInfo)
                         .map(tableInfo -> ((TableInfo) tableInfo).table())
-                        .anyMatch(tableName -> tableName.equalsIgnoreCase(table.getName()))
+                        .noneMatch(tableName -> tableName.equalsIgnoreCase(table.getName()))
                 )
                 .map(table -> {
                     String comment = table.getRemark();

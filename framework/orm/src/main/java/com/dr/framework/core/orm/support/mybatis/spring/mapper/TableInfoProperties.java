@@ -22,7 +22,9 @@ public class TableInfoProperties extends Properties {
     private static final String PK_KEY_ALIAS = "id";
     private static final String COLUMNS_KEY = "columns";
     private static final String SET_KEY = "set";
+    private static final String SET_NO_ALIAS_KEY = "setNo";
     private static final String SET_TEST_KEY = "settest";
+    private static final String SET_NO_ALIAS_TEST_KEY = "setNotest";
     private static final String IN_KEY = "in";
     private static final String QUERY = "query";
     private Relation tableInfo;
@@ -54,7 +56,9 @@ public class TableInfoProperties extends Properties {
                     || keyStr.equalsIgnoreCase(PK_KEY)
                     || keyStr.equalsIgnoreCase(PK_KEY_ALIAS)
                     || keyStr.equalsIgnoreCase(SET_KEY)
+                    || keyStr.equalsIgnoreCase(SET_NO_ALIAS_KEY)
                     || keyStr.equalsIgnoreCase(SET_TEST_KEY)
+                    || keyStr.equalsIgnoreCase(SET_NO_ALIAS_TEST_KEY)
                     || keyStr.equalsIgnoreCase(COLUMNS_KEY)
                     || (keyStr.startsWith(IN_KEY) && keyStr.contains("#"))
                     || (keyStr.startsWith(QUERY) && keyStr.contains("#"));
@@ -101,6 +105,9 @@ public class TableInfoProperties extends Properties {
                 case SET_KEY:
                     value = " set " + join(true, "%3$s.%1$s = #{%2$s,jdbcType=%4$s}", ",");
                     break;
+                case SET_NO_ALIAS_KEY:
+                    value = " set " + join(true, "%1$s = #{%2$s,jdbcType=%4$s}", ",");
+                    break;
                 case SET_TEST_KEY:
                     value = String.format(
                             hasSqlQuery ?
@@ -111,6 +118,18 @@ public class TableInfoProperties extends Properties {
                                             isDate(column.getType()) ?
                                                     "<if test=\"%2$s!=null\">%3$s.%1$s=#{%2$s,jdbcType=%4$s},</if>"
                                                     : "<if test=\"%2$s!=null and %2$s!='' or %2$s==0\">%3$s.%1$s=#{%2$s,jdbcType=%4$s},</if>"
+                                    , ""));
+                    break;
+                case SET_NO_ALIAS_TEST_KEY:
+                    value = String.format(
+                            hasSqlQuery ?
+                                    "<set><if test=\"$set!=null\">${$setQ},</if>%s</set>"
+                                    : "<set>%s</set>"
+                            , join(true
+                                    , column ->
+                                            isDate(column.getType()) ?
+                                                    "<if test=\"%2$s!=null\">%1$s=#{%2$s,jdbcType=%4$s},</if>"
+                                                    : "<if test=\"%2$s!=null and %2$s!='' or %2$s==0\">%1$s=#{%2$s,jdbcType=%4$s},</if>"
                                     , ""));
                     break;
                 case IN_KEY:

@@ -33,7 +33,7 @@ public class AsyncPropertyValidator extends ProcessLevelValidator {
             }
 
             if ((flowElement instanceof Event)) {
-                ((Event) flowElement).getEventDefinitions().stream().forEach(event -> {
+                ((Event) flowElement).getEventDefinitions().forEach(event -> {
                     if (event instanceof TimerEventDefinition) {
                         addWarning(errors, Problems.EVENT_TIMER_ASYNC_NOT_AVAILABLE, process, flowElement, "Timer event is not available when asyncExecutor is disabled.");
                     } else if ((event instanceof SignalEventDefinition) && ((SignalEventDefinition) event).isAsync()) {

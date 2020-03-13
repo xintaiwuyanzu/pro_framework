@@ -32,6 +32,8 @@ public interface PassWordEncrypt {
      * @param loginType
      * @return
      */
-    String encryptChangeLogin(String password, String salt, String loginType);
+    default String encryptChangeLogin(String password, String salt, String loginType) {
+        return encryptAddLogin(password, salt, loginType);
+    }
 
 }

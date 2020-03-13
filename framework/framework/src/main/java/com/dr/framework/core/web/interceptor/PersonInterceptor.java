@@ -32,7 +32,7 @@ public class PersonInterceptor implements HandlerInterceptor, InitializingBean {
     OrganisePersonService organisePersonService;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         //处理登录人员信息
         handlePersonInfo(request);
         //处理机构信息

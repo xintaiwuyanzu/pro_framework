@@ -1,6 +1,7 @@
 package com.dr.framework.common.cache;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -45,7 +46,7 @@ public class CacheController {
             cac = cac.filter(c -> c.startsWith(cacheName));
         }
         cac.map(c -> cacheManager.getCache(c))
-                .forEach(c -> c.clear());
+                .forEach(Cache::clear);
     }
 
 }

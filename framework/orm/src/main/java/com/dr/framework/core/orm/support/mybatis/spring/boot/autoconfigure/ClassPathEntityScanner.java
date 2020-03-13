@@ -31,7 +31,7 @@ class ClassPathEntityScanner extends ClassPathBeanDefinitionScanner {
         if (!dataSourceProperties.getExcludeModules().isEmpty()) {
             addExcludeFilter(new EntityModuleTypeFilter(dataSourceProperties.getExcludeModules()));
         }
-        Set<BeanDefinitionHolder> definitionHolders = doScan(pkgs.toArray(new String[pkgs.size()]));
+        Set<BeanDefinitionHolder> definitionHolders = doScan(pkgs.toArray(new String[0]));
         return definitionHolders.stream().map(beanDefinitionHolder -> beanDefinitionHolder.getBeanDefinition().getBeanClassName()).collect(Collectors.toList());
     }
 

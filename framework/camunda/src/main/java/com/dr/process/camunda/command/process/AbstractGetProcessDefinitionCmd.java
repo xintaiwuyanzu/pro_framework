@@ -106,6 +106,6 @@ public abstract class AbstractGetProcessDefinitionCmd {
         return source.entrySet()
                 .stream()
                 .filter(e -> !CUSTOM_KEYS.contains(e.getKey()))
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

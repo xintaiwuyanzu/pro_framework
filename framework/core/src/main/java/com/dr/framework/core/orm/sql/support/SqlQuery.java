@@ -586,7 +586,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     public SqlQuery<E> in(Column column, Serializable... datas) {
         if (datas != null && datas.length > 0) {
             whereQuery.pureSql(column, " in ("
-                    + Arrays.asList(datas).stream()
+                    + Arrays.stream(datas)
                     .map(serializable -> String.format("'%s'", WhereQuery.cleanXSS(serializable)))
                     .collect(Collectors.joining(","))
                     + ")");
@@ -624,7 +624,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     public SqlQuery<E> notIn(Column column, Serializable... datas) {
         if (datas != null && datas.length > 0) {
             whereQuery.pureSql(column, " not in (" +
-                    Arrays.asList(datas).stream()
+                    Arrays.stream(datas)
                             .map(serializable -> String.format("'%s'", WhereQuery.cleanXSS(serializable)))
                             .collect(Collectors.joining(","))
                     + ")");

@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  * 连表查询数据
  */
 class JoinColumns {
-    class JoinOrder {
+    static class JoinOrder {
         JoinOrder(String table, int order) {
             this.table = table;
             this.order = order;

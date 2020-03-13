@@ -25,7 +25,7 @@ public class GetTaskHistoryPageCmd extends AbstractGetTaskHistoryCmd implements 
     @Override
     public Page<TaskObject> execute(CommandContext commandContext) {
         HistoricTaskInstanceQuery hq = convert(commandContext);
-        return new Page<TaskObject>(
+        return new Page<>(
                 start,
                 end - start,
                 hq.count(),

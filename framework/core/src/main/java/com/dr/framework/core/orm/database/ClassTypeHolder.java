@@ -96,7 +96,7 @@ public final class ClassTypeHolder {
         return order;
     }
 
-    class SqlType {
+    static class SqlType {
         int type;
         //标度：小数点后几位
         long scale;

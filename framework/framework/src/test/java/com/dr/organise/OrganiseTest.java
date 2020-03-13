@@ -28,10 +28,10 @@ public class OrganiseTest {
     @Test
     public void testLogin() {
         Person person = loginService.login("admin", "1234");
-        Assert.assertTrue(person != null);
+        Assert.assertNotNull(person);
         loginService.addLogin(person.getId(), "test", "test", "test");
         Person person2 = loginService.login("test", "test", "test");
-        Assert.assertTrue(person.getId().equals(person2.getId()));
+        Assert.assertEquals(person.getId(), person2.getId());
     }
 
     @Test
@@ -41,21 +41,21 @@ public class OrganiseTest {
         person.setUserCode("aaaa");
         organisePersonService.addPerson(person, Organise.DEFAULT_ROOT_ID, true, "aaa");
         Person person1 = loginService.login(person.getUserCode(), "aaa");
-        Assert.assertTrue(person.getId().equals(person1.getId()));
+        Assert.assertEquals(person.getId(), person1.getId());
     }
 
     @Test
     public void testQuery() {
         testAddPerson();
         List<Person> people = organisePersonService.getOrganiseDefaultPersons(Organise.DEFAULT_ROOT_ID);
-        Assert.assertTrue(people.size() == 2);
+        Assert.assertEquals(2, people.size());
     }
 
     @Test
     public void testQueryOrganise() {
         testAddPerson();
         Organise organise = organisePersonService.getPersonDefaultOrganise("admin");
-        Assert.assertTrue(organise.getId().equals(Organise.DEFAULT_ROOT_ID));
+        Assert.assertEquals(organise.getId(), Organise.DEFAULT_ROOT_ID);
     }
 
     @Test
@@ -68,8 +68,8 @@ public class OrganiseTest {
         organise1.setParentId(organise.getId());
         organisePersonService.addOrganise(organise1);
         List<Organise> organises = organisePersonService.getChildrenOrganiseList(Organise.DEFAULT_ROOT_ID);
-        Assert.assertTrue(organises.size() == 2);
-        Assert.assertTrue(organisePersonService.getParentOrganiseList(organise1.getId()).size() == 2);
+        Assert.assertEquals(2, organises.size());
+        Assert.assertEquals(2, organisePersonService.getParentOrganiseList(organise1.getId()).size());
     }
 
 

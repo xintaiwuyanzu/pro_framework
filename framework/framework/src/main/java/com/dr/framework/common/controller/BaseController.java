@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 基础controller父类
@@ -125,7 +124,7 @@ public class BaseController<T extends IdEntity> {
                     -> String.format("实体类【%s】的主键数量为：%s，【%s】，请手动处理删除逻辑！",
                     entity.getClass(),
                     pks.size(),
-                    pks.stream().collect(Collectors.joining(","))
+                    String.join(",", pks)
             ));
             sqlQuery.in(entityRelation.getColumn(pks.get(0)), entity.getId());
         }

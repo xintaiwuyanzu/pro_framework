@@ -402,7 +402,7 @@ public class SqlSessionTemplate implements SqlSession, DisposableBean {
      * @see "org.springframework.beans.factory.support.DisposableBeanAdapter#CLOSE_METHOD_NAME"
      */
     @Override
-    public void destroy() throws Exception {
+    public void destroy() {
         //This method forces spring disposer to avoid call of SqlSessionTemplate.close() which gives UnsupportedOperationException
     }
 

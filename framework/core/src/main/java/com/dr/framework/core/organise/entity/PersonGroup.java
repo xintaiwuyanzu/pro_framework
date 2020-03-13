@@ -1,6 +1,5 @@
 package com.dr.framework.core.organise.entity;
 
-import com.dr.framework.common.entity.BaseCreateInfoEntity;
 import com.dr.framework.common.entity.BaseStatusEntity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;

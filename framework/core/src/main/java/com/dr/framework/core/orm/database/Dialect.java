@@ -280,7 +280,7 @@ public abstract class Dialect {
                 return sqls;
             }
             //建表sql
-            StringBuffer createTable = new StringBuffer(getCreateTableString())
+            StringBuilder createTable = new StringBuilder(getCreateTableString())
                     .append(' ')
                     .append(convertObjectName(relation.getName()))
                     .append(" (");
@@ -375,9 +375,7 @@ public abstract class Dialect {
      * @return
      */
     protected String getColumnType(Column column) {
-        Iterator<ClassTypeHolder> iterator = classTypeHolders.iterator();
-        while (iterator.hasNext()) {
-            ClassTypeHolder classTypeHolder = iterator.next();
+        for (ClassTypeHolder classTypeHolder : classTypeHolders) {
             String name = classTypeHolder.getTypeName(column.getType(), column.getDecimalDigits(), column.getSize());
             if (!StringUtils.isEmpty(name)) {
                 return name;
@@ -395,9 +393,7 @@ public abstract class Dialect {
      * @return
      */
     public int getColumnType(Class clazz, int scale, int precision) {
-        Iterator<ClassTypeHolder> iterator = classTypeHolders.iterator();
-        while (iterator.hasNext()) {
-            ClassTypeHolder classTypeHolder = iterator.next();
+        for (ClassTypeHolder classTypeHolder : classTypeHolders) {
             int type = classTypeHolder.getType(clazz, scale, precision);
             if (type != 0) {
                 return type;
@@ -414,7 +410,7 @@ public abstract class Dialect {
         ClassTypeHolder classTypeHolder = new ClassTypeHolder(order);
         classTypeHolder.registerClasses(classes);
         classTypeHolders.add(classTypeHolder);
-        Collections.sort(classTypeHolders, Comparator.comparingInt(ClassTypeHolder::getOrder));
+        classTypeHolders.sort(Comparator.comparingInt(ClassTypeHolder::getOrder));
         return classTypeHolder;
     }
 
@@ -524,7 +520,7 @@ public abstract class Dialect {
                 return sqls;
             }
             //修改表注释
-            if (relation.getRemark() != jdbcTable.getRemark() && supportCommentOn()) {
+            if (!relation.getRemark().equals(jdbcTable.getRemark()) && supportCommentOn()) {
                 //TODO oracle 默认配置获取不到注释信息
                 if (!(this instanceof OracleDialect)) {
                     String commentTableSql = "comment on table " + convertObjectName(relation.getName()) + " is '" + relation.getRemark() + "'";
@@ -543,8 +539,8 @@ public abstract class Dialect {
                 }
             });
             //主键
-            String newPkColumns = relation.primaryKeyColumns().stream().collect(Collectors.joining(","));
-            String oldPkColumns = jdbcTable.primaryKeyColumns().stream().collect(Collectors.joining(","));
+            String newPkColumns = String.join(",", relation.primaryKeyColumns());
+            String oldPkColumns = String.join(",", jdbcTable.primaryKeyColumns());
             if (!oldPkColumns.equalsIgnoreCase(newPkColumns)) {
                 //主键定义不同
                 String oldPkName = jdbcTable.getPrimaryKeyName();

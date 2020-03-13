@@ -23,7 +23,7 @@ public class Application {
     }
 
     @Bean
-    @Order(Ordered.LOWEST_PRECEDENCE)
+    @Order()
     InitializingBean initData() {
         return () -> {
             Organise organise = new Organise();

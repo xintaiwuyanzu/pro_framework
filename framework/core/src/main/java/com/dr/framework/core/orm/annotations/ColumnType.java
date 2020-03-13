@@ -48,7 +48,7 @@ public enum ColumnType {
     /**
      * 其他不支持的类型，用来报错提示
      */
-    OTHER;
+    OTHER
 
 
 }

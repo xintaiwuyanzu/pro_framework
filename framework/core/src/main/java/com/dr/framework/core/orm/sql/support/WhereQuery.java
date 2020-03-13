@@ -63,7 +63,7 @@ class WhereQuery extends AbstractSqlQuery {
             if (data.length == 1) {
                 parsedData = data[0];
             } else {
-                parsedData = Arrays.asList(data).stream().map(Objects::toString).collect(Collectors.joining(","));
+                parsedData = Arrays.stream(data).map(Objects::toString).collect(Collectors.joining(","));
             }
             whereSqls.concat(AND_, new ConcatTestSqlWithData(column, prefix, suffix, parsedData));
         }
@@ -154,7 +154,7 @@ class WhereQuery extends AbstractSqlQuery {
 
     }
 
-    class WhereSqlConcats {
+    static class WhereSqlConcats {
         WhereSql sql;
         String concat;
         WhereSqlConcats next;
@@ -220,7 +220,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    abstract class WhereSql {
+    abstract static class WhereSql {
         StringBuilder formatColumn(Column column, TableAlias tableAlias) {
             return new StringBuilder(AbstractSqlQuery.formatSql(column, tableAlias, false));
         }
@@ -265,7 +265,7 @@ class WhereQuery extends AbstractSqlQuery {
         abstract String getSql(TableAlias alias, SqlQuery sqlQuery);
     }
 
-    abstract class TrueSql extends WhereSql {
+    abstract static class TrueSql extends WhereSql {
         @Override
         boolean test(MetaObject metaobject) {
             return true;
@@ -295,7 +295,7 @@ class WhereQuery extends AbstractSqlQuery {
                         stream()
                         .map(c -> {
                             //TODO 这里应该有问题
-                            return ((Serializable) c).toString();
+                            return c.toString();
                         })
                         .collect(Collectors.joining(","))
                 );
@@ -318,7 +318,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    class PureSql extends WhereSql {
+    static class PureSql extends WhereSql {
         Column column;
         String sql;
 
@@ -498,7 +498,7 @@ class WhereQuery extends AbstractSqlQuery {
             value = value.replaceAll("\\(", "& #40;").replaceAll("\\)", "& #41;");
             value = value.replaceAll("'", "& #39;");
             value = value.replaceAll("eval\\((.*)\\)", "");
-            value = value.replaceAll("[\\\"\\\'][\\s]*javascript:(.*)[\\\"\\\']", "\"\"");
+            value = value.replaceAll("[\"'][\\s]*javascript:(.*)[\"']", "\"\"");
             value = value.replaceAll("script", "");
             value = value.replaceAll("[*]", "[" + "*]");
             value = value.replaceAll("[+]", "[" + "+]");
@@ -514,9 +514,9 @@ class WhereQuery extends AbstractSqlQuery {
                     "chr|mid|master|truncate|char|declare|or|;|-|--|,|like|//|/|%|#";
 
             String[] badStrs = badStr.split("\\|");
-            for (int i = 0; i < badStrs.length; i++) {
+            for (String str : badStrs) {
                 for (int j = 0; j < values.length; j++) {
-                    if (values[j].equalsIgnoreCase(badStrs[i])) {
+                    if (values[j].equalsIgnoreCase(str)) {
                         values[j] = "forbid";
                     }
                 }
@@ -526,7 +526,7 @@ class WhereQuery extends AbstractSqlQuery {
                 if (i == values.length - 1) {
                     sb.append(values[i]);
                 } else {
-                    sb.append(values[i] + " ");
+                    sb.append(values[i]).append(" ");
                 }
             }
             value = sb.toString();
@@ -590,7 +590,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    abstract class OrderBy {
+    abstract static class OrderBy {
         boolean desc = false;
 
         OrderBy(boolean desc) {
@@ -600,7 +600,7 @@ class WhereQuery extends AbstractSqlQuery {
         abstract String sql(TableAlias alias);
     }
 
-    class ColumnOrderBy extends OrderBy {
+    static class ColumnOrderBy extends OrderBy {
         Column column;
 
         ColumnOrderBy(Column column, boolean desc) {
@@ -623,7 +623,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    class AliasOrderBy extends OrderBy {
+    static class AliasOrderBy extends OrderBy {
         String alias;
 
         AliasOrderBy(String alias, boolean desc) {

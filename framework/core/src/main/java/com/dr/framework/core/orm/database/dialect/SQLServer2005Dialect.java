@@ -86,11 +86,10 @@ public class SQLServer2005Dialect extends Dialect {
         }
         long firstParam = offset + 1;
         long secondParam = offset + limit;
-        String sql = "WITH selectTemp AS (SELECT " + distinctStr + "TOP 100 PERCENT " +
+        return "WITH selectTemp AS (SELECT " + distinctStr + "TOP 100 PERCENT " +
                 " ROW_NUMBER() OVER (" + orderby + ") as __row_number__, " + pagingBuilder +
                 ") SELECT * FROM selectTemp WHERE __row_number__ BETWEEN " +
                 firstParam + " AND " + secondParam + " ORDER BY __row_number__";
-        return sql;
     }
 
     private String getOrderByPart(String sql) {

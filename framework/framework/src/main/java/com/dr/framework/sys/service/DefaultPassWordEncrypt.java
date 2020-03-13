@@ -42,9 +42,4 @@ public class DefaultPassWordEncrypt implements PassWordEncrypt {
                 )
         );
     }
-
-    @Override
-    public String encryptChangeLogin(String password, String salt, String loginType) {
-        return encryptValidateLogin(password, salt, loginType);
-    }
 }

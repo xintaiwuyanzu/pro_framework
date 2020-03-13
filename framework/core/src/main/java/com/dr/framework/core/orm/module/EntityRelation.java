@@ -42,7 +42,7 @@ public class EntityRelation extends Relation<EntityRelation.FieldColumn> {
     public String getPrimaryKeyAlias() {
         return primaryKeyColumns()
                 .stream()
-                .map(c -> getColumn(c))
+                .map(this::getColumn)
                 .map(f -> f.field.getName())
                 .collect(Collectors.joining());
     }

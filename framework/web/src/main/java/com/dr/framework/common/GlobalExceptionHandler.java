@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
         if (request.getHeader("User-Agent") != null) {
             String agent = request.getHeader("User-Agent");
             for (String mobileAgent : mobileAgents) {
-                if (agent.toLowerCase().indexOf(mobileAgent) >= 0 && agent.toLowerCase().indexOf("windows nt") <= 0 && agent.toLowerCase().indexOf("macintosh") <= 0) {
+                if (agent.toLowerCase().contains(mobileAgent) && agent.toLowerCase().indexOf("windows nt") <= 0 && agent.toLowerCase().indexOf("macintosh") <= 0) {
                     isMoblie = true;
                     break;
                 }

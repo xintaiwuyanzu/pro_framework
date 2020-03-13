@@ -20,8 +20,7 @@ import org.springframework.stereotype.Component;
 public class TestApplication {
     MultiDataSourceProperties dataSourceProperties(Environment environment) {
         BindResult<MultiDataSourceProperties> bindResult = Binder.get(environment).bind("spring.datasource", MultiDataSourceProperties.class);
-        MultiDataSourceProperties multiDataSourceProperties = bindResult.get();
-        return multiDataSourceProperties;
+        return bindResult.get();
     }
 
 

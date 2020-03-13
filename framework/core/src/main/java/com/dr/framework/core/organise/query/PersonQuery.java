@@ -55,8 +55,7 @@ public class PersonQuery extends IdQuery {
         private PersonQuery query = new PersonQuery();
 
         private List<String> newList(String... strings) {
-            return Arrays.asList(strings)
-                    .stream()
+            return Arrays.stream(strings)
                     .filter(s -> !StringUtils.isEmpty(s))
                     .collect(Collectors.toList());
         }

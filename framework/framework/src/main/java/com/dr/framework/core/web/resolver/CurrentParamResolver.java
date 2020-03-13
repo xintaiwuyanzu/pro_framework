@@ -9,6 +9,7 @@ import com.dr.framework.core.web.annotations.Current;
 import com.dr.framework.core.web.interceptor.PersonInterceptor;
 import com.dr.framework.sys.controller.LoginController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -34,10 +35,11 @@ public class CurrentParamResolver implements HandlerMethodArgumentResolver {
     @Autowired
     LoginController loginController;
     @Autowired
+    @Lazy
     OrganisePersonService organisePersonService;
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         Class type = parameter.getParameterType();
         Current current = parameter.getParameterAnnotation(Current.class);
         if (type.equals(ClientInfo.class)) {

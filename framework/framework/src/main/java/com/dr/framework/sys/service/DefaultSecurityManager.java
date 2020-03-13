@@ -2,6 +2,7 @@ package com.dr.framework.sys.service;
 
 
 import com.dr.framework.common.dao.CommonMapper;
+import com.dr.framework.common.entity.BaseEntity;
 import com.dr.framework.common.entity.IdEntity;
 import com.dr.framework.common.entity.StatusEntity;
 import com.dr.framework.common.entity.TreeNode;
@@ -94,7 +95,7 @@ public class DefaultSecurityManager
         SqlQuery subQuery = SqlQuery.from(rolePermissionRelation, false)
                 .column(rolePermissionRelation.getColumn("permission_id"))
                 .in(rolePermissionRelation.getColumn("roleId"),
-                        roles.stream().map(r -> r.getId()).collect(Collectors.toList()));
+                        roles.stream().map(BaseEntity::getId).collect(Collectors.toList()));
 
         query.in(permissionRelation.getColumn(IdEntity.ID_COLUMN_NAME), subQuery);
         //逻辑权限
@@ -157,7 +158,7 @@ public class DefaultSecurityManager
     public boolean addRoleToUser(String userId, String... role) {
         checkUser(userId);
         //查出来该用户已经有的角色
-        List<String> roles = userRoles(userId).stream().map(r -> r.getId()).collect(Collectors.toList());
+        List<String> roles = userRoles(userId).stream().map(BaseEntity::getId).collect(Collectors.toList());
         //TODO 过滤没有的角色id
         for (String r : role) {
             if (!roles.contains(r)) {
@@ -237,7 +238,7 @@ public class DefaultSecurityManager
                 );
         List<String> oldPermission = commonMapper.selectByQuery(permissionSqlQuery)
                 .stream()
-                .map(p -> p.getId())
+                .map(BaseEntity::getId)
                 .collect(Collectors.toList());
         //添加新的权限
         for (String p : permission) {
@@ -538,7 +539,7 @@ public class DefaultSecurityManager
         //删除子系统对应的菜单
         List<SysMenu> sysMenus = selectMenuList(new SysMenuQuery.Builder().sysIdEqual(id).build());
         deleteMenu(sysMenus.stream()
-                .map(s -> s.getId())
+                .map(BaseEntity::getId)
                 .collect(Collectors.toList())
                 .toArray(new String[sysMenus.size()])
         );

@@ -4,8 +4,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MatcherTest {
-    private static final Pattern inPattern = Pattern.compile("\\#\\{(\\$\\w+)\\}|\\#\\{(\\$\\w+\\#\\w+)\\}");
-    private static Pattern inPattern1 = Pattern.compile("(\\$[in]\\#)");
+    private static final Pattern inPattern = Pattern.compile("#\\{(\\$\\w+)}|#\\{(\\$\\w+#\\w+)}");
+    private static Pattern inPattern1 = Pattern.compile("(\\$[in]#)");
 
     public static void main(String[] args) {
         Matcher matcher = inPattern.matcher("select #{columns} from  #{$table} #{$in#222} 222 ");
@@ -19,14 +19,14 @@ public class MatcherTest {
         matcher.appendTail(stringBuffer);
         System.out.println(stringBuffer);
 
-        Pattern pattern = Pattern.compile("\\#\\w+");
+        Pattern pattern = Pattern.compile("#\\w+");
 
         Matcher matcher1 = pattern.matcher("#{$in#aaa}");
 
         while (matcher1.find()) {
             System.out.println(matcher1.group());
         }
-        System.out.println("aaa#bbb".split("\\#")[1]);
+        System.out.println("aaa#bbb".split("#")[1]);
 
 
         System.out.println(String.format("aaa  %s", "bbb"));

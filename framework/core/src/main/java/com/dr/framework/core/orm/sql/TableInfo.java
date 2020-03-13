@@ -13,7 +13,7 @@ public interface TableInfo {
      * @return
      */
     @Deprecated
-    public String moudle();
+    String moudle();
 
     /**
      * 获取一张表的表名
@@ -22,7 +22,7 @@ public interface TableInfo {
      * @deprecated
      */
     @Deprecated
-    public String table();
+    String table();
 
     /**
      * 获取主建列名
@@ -30,13 +30,13 @@ public interface TableInfo {
      * @return
      */
     @Deprecated
-    public Column pk();
+    Column pk();
 
     /**
      * 获取一张表的所有列
      *
      * @return
      */
-    public List<Column> columns();
+    List<Column> columns();
 
 }

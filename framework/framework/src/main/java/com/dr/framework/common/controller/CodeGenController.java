@@ -181,7 +181,7 @@ public class CodeGenController {
     }
 
     private String firstUplower(String text) {
-        return Character.toUpperCase(text.charAt(0)) + text.substring(1, text.length());
+        return Character.toUpperCase(text.charAt(0)) + text.substring(1);
     }
 
 }

@@ -6,17 +6,55 @@ package com.dr.framework.core.orm.jdbc;
  * @author dr
  */
 public class Column extends com.dr.framework.core.orm.sql.Column {
+    /**
+     * 列名
+     */
     private String name;
+    /**
+     * 表名
+     */
     private String tableName;
+    /**
+     * 表对象
+     */
     private Relation relation;
+    /**
+     * 长度
+     */
     private int size;
+    /**
+     * 类型，详细参考
+     *
+     * @see java.sql.Types
+     */
     private int type;
-    private int position;
-    private int decimalDigits;
-    private String remark;
+    /**
+     * 类型名称
+     */
     private String typeName;
+    /**
+     * 列位置
+     */
+    private int position;
+    /**
+     * 列精度，小数点后位数
+     */
+    private int decimalDigits;
+    /**
+     * 备注
+     */
+    private String remark;
+    /**
+     * 默认值
+     */
     private String defaultValue;
+    /**
+     * 是否可为空
+     */
     private TrueOrFalse nullAble;
+    /**
+     * 是否可自增长
+     */
     private TrueOrFalse autoIncrement;
 
     public Column(String table, String name, String alias) {

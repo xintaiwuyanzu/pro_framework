@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DataSourceTableInfoTest {
     static Logger logger = LoggerFactory.getLogger(DataSourceTableInfoTest.class);
@@ -37,17 +38,14 @@ public class DataSourceTableInfoTest {
                                 c -> String.format("name:%s,type:%s", c.getTypeName(), c.getType())
                                 , Arrays::asList
                                 , (s, t) ->
-                                        Arrays.asList(s, t)
-                                                .stream()
+                                        Stream.of(s, t)
                                                 .flatMap(List::stream)
                                                 .collect(Collectors.toList())
                         )
                 )
                 .forEach((s, columns) -> {
                     logger.info("{},count:{}", s, columns.size());
-                    columns.forEach(c -> {
-                        logger.info(c.toString());
-                    });
+                    columns.forEach(c -> logger.info(c.toString()));
                 });
     }
 }

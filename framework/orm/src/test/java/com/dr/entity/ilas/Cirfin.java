@@ -199,6 +199,6 @@ public class Cirfin implements IdEntity {
 
     @Override
     public void setId(String s) {
-        setFIN00(Double.valueOf(s));
+        setFIN00(Double.parseDouble(s));
     }
 }

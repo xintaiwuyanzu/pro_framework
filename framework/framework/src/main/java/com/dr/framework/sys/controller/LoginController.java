@@ -70,6 +70,7 @@ public class LoginController {
             response.addCookie(cookie);
             return ResultEntity.success(token);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResultEntity.error("用户名或密码错误");
         }
     }

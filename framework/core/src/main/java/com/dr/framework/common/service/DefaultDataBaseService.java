@@ -33,7 +33,7 @@ public class DefaultDataBaseService implements DataBaseService {
 
     @Override
     public List<DataBaseMetaData> getAllDatabases() {
-        return databaseMetaMap.values().stream().collect(Collectors.toList());
+        return new ArrayList<>(databaseMetaMap.values());
     }
 
     @Override
@@ -90,6 +90,7 @@ public class DefaultDataBaseService implements DataBaseService {
                 return entityRelation;
             }
         }
+        logger.error("未找到实体类{}的表结构信息，请检查配置，确保实体类所在包或所属模块被扫描", entityCLass);
         return null;
     }
 
@@ -100,6 +101,7 @@ public class DefaultDataBaseService implements DataBaseService {
                 return entityRelation;
             }
         }
+        logger.error("未找到实体类{}的表结构信息，请检查配置，确保实体类所在包或所属模块被扫描", className);
         return null;
     }
 

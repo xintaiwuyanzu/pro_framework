@@ -1,6 +1,7 @@
 package com.dr.framework.sys.service;
 
 import com.dr.framework.common.dao.CommonMapper;
+import com.dr.framework.common.entity.BaseEntity;
 import com.dr.framework.common.entity.IdEntity;
 import com.dr.framework.common.entity.StatusEntity;
 import com.dr.framework.common.page.Page;
@@ -22,7 +23,6 @@ import com.dr.framework.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -178,7 +178,7 @@ public class DefaultOrganisePersonService
         }
         commonMapper.insert(organise);
         addOrganiseRelation(organise);
-        applicationEventPublisher.publishEvent(new BaseCRUDEvent<Organise>(organise, BaseCRUDEvent.EventType.CREATE));
+        applicationEventPublisher.publishEvent(new BaseCRUDEvent<>(organise, BaseCRUDEvent.EventType.CREATE));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -316,9 +316,8 @@ public class DefaultOrganisePersonService
         List<String> savedPersons = personGroupRelations.stream()
                 .map(o -> ((PersonGroupRelation) o).getPersonId())
                 .collect(Collectors.toList());
-        Arrays.asList(personIds)
-                .stream()
-                .filter(p -> savedPersons.contains(p))
+        Arrays.stream(personIds)
+                .filter(savedPersons::contains)
                 .forEach(p -> {
                     PersonGroupRelation personGroupRelation = new PersonGroupRelation();
                     personGroupRelation.setGroupId(groupId);
@@ -414,7 +413,7 @@ public class DefaultOrganisePersonService
         List<Organise> child = getChildrenOrganiseList(organiseId);
         List<String> organiseIds = Arrays.asList(organiseId);
         if (child != null && !child.isEmpty()) {
-            organiseIds.addAll(child.stream().map(o -> o.getId()).collect(Collectors.toList()));
+            organiseIds.addAll(child.stream().map(BaseEntity::getId).collect(Collectors.toList()));
         }
         //删除机构本身和子机构
         commonMapper.deleteByQuery(SqlQuery.from(organiseRelation)
@@ -456,8 +455,14 @@ public class DefaultOrganisePersonService
                 .set(personRelation.getColumn("order_info"), person.getOrder())
                 .set(personRelation.getColumn("avatar_file_id"), person.getAvatarFileId())
                 .equal(personRelation.getColumn(ID_COLUMN_NAME), old.getId());
-        commonMapper.updateIgnoreNullByQuery(sqlQuery);
 
+        if (!StringUtils.isEmpty(person.getUpdateDate())) {
+            sqlQuery.set(personRelation.getColumn("updateDate"), person.getUpdateDate());
+        }
+        if (!StringUtils.isEmpty(person.getUpdateDate())) {
+            sqlQuery.set(personRelation.getColumn("updatePerson"), person.getUpdatePerson());
+        }
+        commonMapper.updateIgnoreNullByQuery(sqlQuery);
         Person nPerson = getPerson(new PersonQuery.Builder().idEqual(person.getId()).build());
         applicationEventPublisher.publishEvent(new BaseCRUDEvent(nPerson, old, BaseCRUDEvent.EventType.UPDATE));
         return 0;
@@ -556,7 +561,7 @@ public class DefaultOrganisePersonService
             person.setUserCode("admin");
             person.setUserName("超级管理员");
             if (!commonMapper.exists(Person.class, person.getId())) {
-                addPerson(person, DEFAULT_ROOT_ID, true, "1234");
+                addPerson(person, DEFAULT_ROOT_ID, true, "MTIzNA==");
             }
         }
     }
@@ -626,6 +631,11 @@ public class DefaultOrganisePersonService
                             .in(organiseOrganiseRelation.getColumn("parent_id"), organiseQuery.getTreeParentId())
             );
         }
+        if (!StringUtils.isEmpty(organiseQuery.getCodeEqual())) {
+            query.equal(organiseRelation.getColumn("organise_code"), organiseQuery.getCodeEqual());
+        }
+
+
         return query;
     }
 
