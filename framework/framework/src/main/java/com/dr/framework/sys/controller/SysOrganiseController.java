@@ -3,17 +3,26 @@ package com.dr.framework.sys.controller;
 import com.dr.framework.common.entity.ResultEntity;
 import com.dr.framework.common.service.CommonService;
 import com.dr.framework.core.organise.entity.Organise;
+import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.organise.query.OrganiseQuery;
 import com.dr.framework.core.organise.service.OrganisePersonService;
 import com.dr.framework.core.util.Constants;
+import com.dr.framework.core.web.annotations.Current;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.dr.framework.common.entity.ResultEntity.error;
+import static com.dr.framework.common.entity.ResultEntity.success;
 
 /**
  * 组织机构
@@ -23,6 +32,7 @@ import java.util.List;
 @RestController
 @RequestMapping("${common.api-path:/api}/organise")
 public class SysOrganiseController {
+
     @Autowired
     OrganisePersonService organisePersonService;
 
@@ -91,4 +101,20 @@ public class SysOrganiseController {
         List<Organise> organises = organisePersonService.getOrganiseList(builder.build());
         return ResultEntity.success(CommonService.listToTree(organises, parentId, Organise::getOrganiseName));
     }
+
+    /**
+     * 查询所有部门
+     *
+     * @return
+     */
+    @PostMapping(value = "/getAllDepartment")
+    public ResultEntity getAllDepartment() {
+        OrganiseQuery organiseQuery = new OrganiseQuery.Builder().build();
+        List<Organise> list = organisePersonService.getOrganiseList(organiseQuery);
+        return success(list);
+    }
+
+
+
+
 }

@@ -2,6 +2,7 @@ package com.dr.framework.core.security.service;
 
 import com.dr.framework.common.entity.TreeNode;
 import com.dr.framework.common.page.Page;
+import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.security.entity.Permission;
 import com.dr.framework.core.security.entity.Role;
 import com.dr.framework.core.security.entity.SysMenu;
@@ -13,6 +14,7 @@ import com.dr.framework.core.security.query.SysMenuQuery;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author dr
@@ -284,5 +286,21 @@ public interface SecurityManager {
 
     Page<SubSystem> selectSubSysPage(SubSysQuery query, int start, int end);
 
+    /**
+     * 获取角色列表，根据用户ID标注哪些角色已授权给该用户
+     *
+     * @param userId
+     * @return
+     */
+    Map<String, Object> getRoleList(String userId);
 
+    /**
+     * 获取权限列表和菜单列表，根据角色ID标注哪些权限已授权给该角色
+     *
+     * @param sysMenu
+     * @return
+     */
+    List<TreeNode> getPermissionMenuList(Person person, SysMenu sysMenu);
+
+    List<TreeNode> getPermissionMenuListOne(Person person, String roleId, String type);
 }

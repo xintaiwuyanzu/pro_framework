@@ -6,9 +6,12 @@ import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.organise.query.PersonQuery;
 import com.dr.framework.core.organise.service.OrganisePersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 /**
  * 系统人员访问页面
@@ -35,6 +38,8 @@ public class PersonController {
             @RequestParam(defaultValue = "false") boolean registerLogin,
             String password,
             String organiseId) {
+        if (StringUtils.isEmpty(person.getId()))
+            person.setId(UUID.randomUUID().toString());
         organisePersonService.addPerson(person, organiseId, registerLogin, password);
         return ResultEntity.success(person);
     }
@@ -89,4 +94,5 @@ public class PersonController {
             );
         }
     }
+
 }

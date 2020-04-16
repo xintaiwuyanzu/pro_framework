@@ -20,6 +20,7 @@ import com.dr.framework.core.security.query.RoleQuery;
 import com.dr.framework.core.security.query.SubSysQuery;
 import com.dr.framework.core.security.query.SysMenuQuery;
 import com.dr.framework.core.security.service.SecurityManager;
+import com.dr.framework.sys.entity.PermissionExistVo;
 import com.dr.framework.util.Constants;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -549,6 +549,170 @@ public class DefaultSecurityManager
     @Transactional(readOnly = true, rollbackFor = Exception.class)
     public Page<SubSystem> selectSubSysPage(SubSysQuery query, int start, int end) {
         return commonMapper.selectPageByQuery(subSysQueryToSqlQuery(query), start, end);
+    }
+
+    /**
+     * 获取角色列表，根据用户ID标注哪些角色已授权给该用户
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public Map<String, Object> getRoleList(String userId) {
+        List<Role> roles = selectRoleList(new RoleQuery.Builder().build());
+        List<Role> roleList = userRoles(userId);
+        List<PermissionExistVo> list = new ArrayList<>();
+        for (Role role : roleList) {
+            list.add(addRole(role, true));
+        }
+        for (Role role : roles) {
+            boolean flag = true;
+            for (Role r : roleList) {
+                if (r.getId().equals(role.getId())) {
+                    flag = false;
+                }
+            }
+            if (flag) {
+                list.add(addRole(role, false));
+            }
+        }
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put("id", "99999");
+        valueMap.put("name", "所有角色");
+        valueMap.put("children", list);
+        valueMap.put("disabled", true);
+        return valueMap;
+    }
+
+    private PermissionExistVo addRole(Role role, Boolean exist) {
+        PermissionExistVo permissionExistVo = new PermissionExistVo();
+        permissionExistVo.setId(role.getId());
+        permissionExistVo.setName(role.getName());
+        permissionExistVo.setDescription(role.getDescription());
+        permissionExistVo.setExist(exist);
+        permissionExistVo.setType("role");
+        return permissionExistVo;
+    }
+
+    /**
+     * 获取权限列表和菜单列表，根据角色ID标注哪些权限已授权给该角色
+     *
+     * @param sysMenus
+     * @return
+     */
+    @Override
+    public List<TreeNode> getPermissionMenuList(Person person, SysMenu sysMenus) {
+        List<PermissionExistVo> list = new ArrayList<>();
+        List<TreeNode> aDefault = null;
+        if ("menu".equals(sysMenus.getName())) {
+            aDefault = menuTree("default", person.getId(), true);
+            List<SysMenu> sysMenusNotInRole = selectMenuList(new SysMenuQuery.Builder().build());
+            List<SysMenu> sysMenusInRole = selectMenuList(new SysMenuQuery.Builder().roleIdIn(sysMenus.getId()).build());
+            for (SysMenu sysMenu : sysMenusInRole) {
+                list.add(addSysMenu(sysMenu, true));
+            }
+            for (TreeNode treeNode : aDefault) {
+                addTreeNode(sysMenusInRole, treeNode);
+            }
+            for (SysMenu sysMenu : sysMenusNotInRole) {
+                boolean flag = true;
+                for (SysMenu menu : sysMenusInRole) {
+                    if (menu.getId().equals(sysMenu.getId())) {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    list.add(addSysMenu(sysMenu, false));
+                }
+            }
+
+        }
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put("id", "99999");
+        valueMap.put("name", "所有权限");
+        valueMap.put("children", aDefault);
+        valueMap.put("disabled", true);
+        return aDefault;
+    }
+
+    @Override
+    public List<TreeNode> getPermissionMenuListOne(Person person, String roleId, String type) {
+        List<PermissionExistVo> list = new ArrayList<>();
+        List<TreeNode> aDefault = null;
+        if ("menu".equals(type)) {
+            aDefault =menuTree("defaultone", person.getId(), true);
+            List<SysMenu> sysMenusNotInRole = selectMenuList(new SysMenuQuery.Builder().build());
+            List<SysMenu> sysMenusInRole = selectMenuList(new SysMenuQuery.Builder().roleIdIn(roleId).build());
+            for (SysMenu sysMenu : sysMenusInRole) {
+                list.add(addSysMenu(sysMenu, true));
+            }
+            for (TreeNode treeNode : aDefault) {
+                addTreeNode(sysMenusInRole, treeNode);
+            }
+            for (SysMenu sysMenu : sysMenusNotInRole) {
+                boolean flag = true;
+                for (SysMenu menu : sysMenusInRole) {
+                    if (menu.getId().equals(sysMenu.getId())) {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    list.add(addSysMenu(sysMenu, false));
+                }
+            }
+        }
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put("id", "99999");
+        valueMap.put("name", "所有权限");
+        valueMap.put("children", aDefault);
+        valueMap.put("disabled", true);
+        return aDefault;
+    }
+
+    private PermissionExistVo addSysMenu(SysMenu sysMenu, Boolean exist) {
+        PermissionExistVo permissionExistVo = new PermissionExistVo();
+        permissionExistVo.setExist(exist);
+        permissionExistVo.setId(sysMenu.getId());
+        permissionExistVo.setName(sysMenu.getName());
+        permissionExistVo.setDescription(sysMenu.getDescription());
+        permissionExistVo.setType("sysMenu");
+        return permissionExistVo;
+    }
+
+    private void addTreeNode(List<SysMenu> sysMenusInRole, TreeNode treeNode) {
+        List<TreeNode> nodeChildren = treeNode.getChildren();
+        if (nodeChildren != null) {
+            boolean flag = true;
+            for (SysMenu sysMenu : sysMenusInRole) {
+                if (sysMenu.getId().equals(treeNode.getId())) {
+                    flag = false;
+                }
+            }
+            if (flag) {
+                SysMenu data = (SysMenu) treeNode.getData();
+                treeNode.setData(addSysMenu(data, false));
+            } else {
+                SysMenu data = (SysMenu) treeNode.getData();
+                treeNode.setData(addSysMenu(data, true));
+            }
+            for (TreeNode nodeChild : nodeChildren) {
+                addTreeNode(sysMenusInRole, nodeChild);
+            }
+        } else {
+            boolean flag = true;
+            for (SysMenu sysMenu : sysMenusInRole) {
+                if (sysMenu.getId().equals(treeNode.getId())) {
+                    flag = false;
+                }
+            }
+            if (flag) {
+                SysMenu data = (SysMenu) treeNode.getData();
+                treeNode.setData(addSysMenu(data, false));
+            } else {
+                SysMenu data = (SysMenu) treeNode.getData();
+                treeNode.setData(addSysMenu(data, true));
+            }
+        }
     }
 
     protected SqlQuery<Role> roleQueryToSqlQuery(RoleQuery query) {
