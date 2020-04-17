@@ -610,12 +610,7 @@ class WhereQuery extends AbstractSqlQuery {
 
         @Override
         String sql(TableAlias alias) {
-            StringBuilder sb = new StringBuilder();
-            if (!StringUtils.isEmpty(column.getTable())) {
-                sb.append(alias.alias(column.getTable()));
-                sb.append(".");
-            }
-            sb.append(column.getName());
+            StringBuilder sb = new StringBuilder(AbstractSqlQuery.formatSql(column, alias, false));
             if (desc) {
                 sb.append(" desc");
             }
