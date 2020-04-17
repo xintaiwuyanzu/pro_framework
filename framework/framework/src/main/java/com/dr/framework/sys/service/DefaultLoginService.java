@@ -36,6 +36,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
 
     @Autowired
     CommonMapper commonMapper;
+
     @Autowired
     DefaultDataBaseService defaultDataBaseService;
 
@@ -285,4 +286,5 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     public void afterPropertiesSet() {
         userLoginRelation = defaultDataBaseService.getTableInfo(UserLogin.class);
     }
+
 }
