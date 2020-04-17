@@ -26,16 +26,15 @@ import java.time.Duration;
 @RestController
 @RequestMapping("${common.api-path:/api}/login")
 public class LoginController {
+
     @Autowired
     LoginService loginService;
+
     /**
      * 默认登录超时时间为30分钟
      */
     @Value("${server.session.timeout:30m}")
     Duration timeout;
-    /**
-     * TODO 这里需要处理登陆时加密密码传参的相关方法
-     */
 
     /**
      * 登录校验
@@ -55,22 +54,22 @@ public class LoginController {
             , HttpServletRequest request
             , HttpServletResponse response) {
         try {
-            String token = loginService.auth(username, password, loginType, clientInfo.getRemoteIp());
-            response.addHeader(SecurityHolder.TOKEN_HEADER_KEY, token);
+            Person person = loginService.login(username, password, loginType, clientInfo.getRemoteIp());
+            String token = loginService.auth(person);
             Cookie cookie = new Cookie(SecurityHolder.TOKEN_HEADER_KEY, token);
+            response.addHeader(SecurityHolder.TOKEN_HEADER_KEY, token);
             //设置超时时间为2小时
             String path = request.getContextPath();
             if (StringUtils.isEmpty(path)) {
                 path = "/";
             }
+            cookie.setMaxAge((int) timeout.getSeconds());
             cookie.setPath(path);
             cookie.setHttpOnly(true);
             cookie.setDomain(clientInfo.getRemoteIp());
-            cookie.setMaxAge((int) timeout.getSeconds());
             response.addCookie(cookie);
             return ResultEntity.success(token);
         } catch (Exception e) {
-            e.printStackTrace();
             return ResultEntity.error("用户名或密码错误");
         }
     }
