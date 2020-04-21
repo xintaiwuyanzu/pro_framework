@@ -166,10 +166,10 @@ public class SysRoleController {
         String[] addRoles = getArray(addRoleIds);
         String[] delRoles = getArray(delRoleIds);
         if (delRoles != null) {
-            securityManager.removeUserRole(userId, delRoleIds);
+            securityManager.removeUserRole(userId, delRoles);
         }
         if (addRoles != null) {
-            securityManager.addRoleToUser(userId, addRoleIds);
+            securityManager.addRoleToUser(userId, addRoles);
         }
         return success();
     }
