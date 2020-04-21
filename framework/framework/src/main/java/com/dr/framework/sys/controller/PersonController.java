@@ -80,6 +80,7 @@ public class PersonController {
                 .typeLike(person.getPersonType())
                 .userCodeLike(person.getUserCode())
                 .statusEqual(person.getStatus())
+                .organiseIdEqual(person.getDefaultOrganiseId())
                 .build();
         if (page) {
             return ResultEntity.success(

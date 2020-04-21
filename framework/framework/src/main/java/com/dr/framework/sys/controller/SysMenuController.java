@@ -79,7 +79,7 @@ public class SysMenuController {
                              @RequestParam(defaultValue = "0") int pageIndex,
                              @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
                              @RequestParam(defaultValue = "true") boolean page) {
-        SysMenuQuery query = new SysMenuQuery.Builder().sysIdEqual(entity.getSysId()).build();
+        SysMenuQuery query = new SysMenuQuery.Builder().sysIdEqual(entity.getSysId()).roleIdIn(entity.getId()).build();
         if (page) {
             return ResultEntity.success(securityManager.selectMenuPage(query, pageIndex * pageSize, (pageIndex + 1) * pageSize));
         } else {
