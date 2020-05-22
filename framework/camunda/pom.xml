@@ -19,7 +19,6 @@
         </snapshotRepository>
     </distributionManagement>
     <properties>
-        <repository.baseUrl>http://58.56.43.98:8081/maven/repository</repository.baseUrl>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -40,7 +39,7 @@
             <dependency>
                 <groupId>org.camunda.bpm.springboot</groupId>
                 <artifactId>camunda-bpm-spring-boot-starter</artifactId>
-                <version>3.4.0</version>
+                <version>3.4.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

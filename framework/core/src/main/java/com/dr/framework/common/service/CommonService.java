@@ -272,11 +272,4 @@ public class CommonService {
         }
         return null;
     }
-
-    public static void main(String[] args) {
-        String[] aaa = new String[]{"aaa", "bbb"};
-
-
-    }
-
 }

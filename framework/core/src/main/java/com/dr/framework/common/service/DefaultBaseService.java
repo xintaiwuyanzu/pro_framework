@@ -20,13 +20,13 @@ import java.util.List;
  */
 public class DefaultBaseService<T extends IdEntity> implements BaseService<T>, InitializingBean {
     @Autowired
-    DefaultDataBaseService defaultDataBaseService;
+    protected DefaultDataBaseService defaultDataBaseService;
     @Autowired
-    CommonMapper commonMapper;
+    protected CommonMapper commonMapper;
     @Autowired
     private CommonService commonService;
 
-    private EntityRelation entityRelation;
+    protected EntityRelation entityRelation;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

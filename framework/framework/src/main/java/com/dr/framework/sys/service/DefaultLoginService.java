@@ -19,8 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.dr.framework.common.entity.StatusEntity.STATUS_COLUMN_KEY;
@@ -252,15 +251,20 @@ public class DefaultLoginService implements LoginService, InitializingBean {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void changePassword(String personId, String newPassword) {
+    public void changePassword(String personId, String newPassword, String... notIncludeLoginTypes) {
         Assert.isTrue(!StringUtils.isEmpty(personId), "人员id不能为空！");
         Assert.isTrue(!StringUtils.isEmpty(newPassword), "新密码不能为空！");
         List<Object> userLogins = commonMapper.selectByQuery(
                 SqlQuery.from(userLoginRelation)
                         .equal(userLoginRelation.getColumn("person_id"), personId)
         );
+        Set<String> notTypes = new HashSet<>(Arrays.asList(notIncludeLoginTypes));
         for (Object o : userLogins) {
             UserLogin userLogin = (UserLogin) o;
+            if (!notTypes.isEmpty() && notTypes.contains(userLogin.getUserType())) {
+                //指定登录类型的密码不修改，微信、支付宝的授权登录情况
+                continue;
+            }
             String salt = genSalt();
             userLogin.setPassword(passWordEncrypt.encryptChangeLogin(newPassword, salt, userLogin.getUserType()));
             userLogin.setSalt(salt);

@@ -69,6 +69,9 @@ public class DefaultSecurityManager
     EntityRelation sysMenuRelation;
     EntityRelation subSysRelation;
 
+
+    EntityRelation personRelation;
+
     @Override
     public List<Role> userRoles(String userId) {
         if (StringUtils.isEmpty(userId)) {
@@ -84,6 +87,24 @@ public class DefaultSecurityManager
                         )
         ).stream()
                 .map(o -> (Role) o)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Person> roleUsers(String roleId) {
+        if (StringUtils.isEmpty(roleId)) {
+            return Collections.emptyList();
+        }
+        return commonMapper.selectByQuery(
+                SqlQuery.from(personRelation)
+                        .in(
+                                personRelation.getColumn(IdEntity.ID_COLUMN_NAME),
+                                SqlQuery.from(rolePersonRelation, false)
+                                        .column(rolePersonRelation.getColumn("personId"))
+                                        .equal(rolePersonRelation.getColumn("roleId"), roleId)
+                        )
+        ).stream()
+                .map(o -> (Person) o)
                 .collect(Collectors.toList());
     }
 
@@ -117,6 +138,12 @@ public class DefaultSecurityManager
 
 
         return permissions;
+    }
+
+    @Override
+    public List<Person> permissionUsers(String permissionId) {
+        //TODO 这个逻辑太复杂，
+        return null;
     }
 
     @Override
@@ -175,11 +202,10 @@ public class DefaultSecurityManager
     @Transactional(rollbackFor = Exception.class)
     public long removeUserRole(String userId, String... roleIds) {
         checkUser(userId);
+
         SqlQuery sqlQuery = SqlQuery.from(rolePersonRelation)
-                .equal(rolePersonRelation.getColumn("personId"), userId);
-        for (String str : roleIds) {
-            sqlQuery.equal(rolePersonRelation.getColumn("roleId"), str);
-        }
+                .equal(rolePersonRelation.getColumn("personId"), userId)
+                .in(rolePersonRelation.getColumn("roleId"), roleIds);
         //删除用户角色关联
         return commonMapper.deleteByQuery(sqlQuery);
     }
@@ -784,6 +810,8 @@ public class DefaultSecurityManager
 
         subSysRelation = defaultDataBaseService.getTableInfo(SubSystem.class);
         sysMenuRelation = defaultDataBaseService.getTableInfo(SysMenu.class);
+
+        personRelation = defaultDataBaseService.getTableInfo(Person.class);
     }
 
     @Override

@@ -122,7 +122,14 @@ public interface LoginService {
         return auth(login(loginId, password));
     }
 
-    void changePassword(String personId, String newPassword);
+    /**
+     * 更新密码
+     *
+     * @param personId             用户id
+     * @param newPassword          新密码
+     * @param notIncludeLoginTypes 指定登录类型不更改密码
+     */
+    void changePassword(String personId, String newPassword, String... notIncludeLoginTypes);
 
     void freezeLogin(String personId);
 
