@@ -96,4 +96,12 @@ public interface CommonConfigService extends BaseService<CommonConfig> {
      * @return 返回转换后并且保存到数据库的多条配置数据
      */
     <T> List<CommonConfig> saveConfigs(T configBean, String refId, String... codes);
+
+    /**
+     * 修改指定数据的状态
+     *
+     * @param id
+     * @param status
+     */
+    void changeStatus(String id, String status);
 }

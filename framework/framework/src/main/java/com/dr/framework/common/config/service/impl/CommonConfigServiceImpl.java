@@ -1,6 +1,7 @@
 package com.dr.framework.common.config.service.impl;
 
 import com.dr.framework.common.config.entity.CommonConfig;
+import com.dr.framework.common.config.entity.CommonConfigInfo;
 import com.dr.framework.common.config.service.CommonConfigBeanFactory;
 import com.dr.framework.common.config.service.CommonConfigService;
 import com.dr.framework.common.service.CommonService;
@@ -56,6 +57,17 @@ public class CommonConfigServiceImpl extends DefaultBaseService<CommonConfig> im
             }
         }
         return commonConfigs;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void changeStatus(String id, String status) {
+        if (!StringUtils.isEmpty(id) && !StringUtils.isEmpty(status)) {
+            commonMapper.updateIgnoreNullByQuery(SqlQuery.from(CommonConfig.class)
+                    .set(CommonConfigInfo.STATUS, status)
+                    .equal(CommonConfigInfo.ID, id)
+            );
+        }
     }
 
     @Override
