@@ -5,6 +5,7 @@ import com.dr.framework.common.config.annotations.Value;
 import com.dr.framework.common.config.entity.CommonConfig;
 import com.dr.framework.common.config.service.CommonConfigBeanFactory;
 import com.dr.framework.common.entity.BaseDescriptionEntity;
+import com.dr.framework.common.entity.StatusEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -36,9 +37,14 @@ public class DefaultCommonConfigBeanFactory implements CommonConfigBeanFactory {
         Set<String> codes = new HashSet<>();
 
         String classCode = null;
+        String defaultType = null;
         if (beanClass.isAnnotationPresent(Config.class)) {
             Config config = beanClass.getAnnotation(Config.class);
             classCode = config.code();
+            defaultType = config.type();
+            if (StringUtils.isEmpty(defaultType)) {
+                defaultType = config.value();
+            }
         }
 
         String finalClassCode = classCode;
@@ -54,57 +60,41 @@ public class DefaultCommonConfigBeanFactory implements CommonConfigBeanFactory {
         });
         //根据code初始化对象
         Map<String, CommonConfig> commonConfigCodeMap = codes.stream()
-                .collect(
-                        Collectors.toMap(c -> c,
-                                c -> {
-                                    CommonConfig config = new CommonConfig();
-                                    config.setCode(c);
-                                    return config;
-                                }
-                        ));
-
+                .collect(Collectors.toMap(c -> c, c -> new CommonConfig()));
         //绑定数据
         ReflectionUtils.doWithFields(beanClass, f -> bindConfigField(commonConfigCodeMap, f, configBean));
+
+        String finalDefaultType = defaultType;
+        commonConfigCodeMap.entrySet().forEach(e -> {
+            CommonConfig config = e.getValue();
+            if (StringUtils.isEmpty(config.getCode())) {
+                config.setCode(e.getKey());
+            }
+            if (StringUtils.isEmpty(config.getStatus())) {
+                config.setStatus(StatusEntity.STATUS_ENABLE_STR);
+            }
+            if (StringUtils.isEmpty(config.getType()) && !StringUtils.isEmpty(finalDefaultType)) {
+                config.setType(finalDefaultType);
+            }
+        });
         return new ArrayList<>(commonConfigCodeMap.values());
     }
 
     protected <T> void bindConfigField(Map<String, CommonConfig> commonConfigCodeMap, Field field, T bean) {
-        Class<T> beanClass = (Class<T>) bean.getClass();
         //TODO 这里可能会把code  type  refid等信息覆盖掉
-        String fieldCode = null;
-        String fieldName = null;
-
-        if (field.isAnnotationPresent(Value.class)) {
-            Value value = field.getAnnotation(Value.class);
-            fieldCode = value.code();
-            fieldName = value.name().name();
-            if (StringUtils.isEmpty(fieldName)) {
-                fieldName = value.value().name();
-            }
-        }
-        if (StringUtils.isEmpty(fieldCode)) {
-            if (beanClass.isAnnotationPresent(Config.class)) {
-                Config config = beanClass.getAnnotation(Config.class);
-                fieldCode = config.code();
-            }
-        }
-        if (StringUtils.isEmpty(fieldName)) {
-            fieldName = field.getName();
-        }
-
-        CommonConfig config = commonConfigCodeMap.get(fieldCode);
+        FieldInfo info = getFieldInfo(field, bean.getClass());
+        CommonConfig config = commonConfigCodeMap.get(info.code);
         if (config != null) {
-            Field configField = ReflectionUtils.findField(CommonConfig.class, fieldName);
+            Field configField = ReflectionUtils.findField(CommonConfig.class, info.name);
             if (configField != null) {
-                Object value = ReflectionUtils.getField(field, bean);
-                if (canConvertClass.contains(value.getClass())) {
-                    ReflectionUtils.setField(configField, config, value);
-                } else if (value.getClass() != CommonConfig.class) {
+                Object value = getFieldValue(field, bean);
+                if (canConvertClass.contains(configField.getType())) {
+                    bindFieldValue(configField, config, value);
+                } else if (value != null && configField.getType() != CommonConfig.class) {
                     //复杂类型
-                    String finalFieldCode = fieldCode;
                     newConfigs(value).forEach(
                             c -> {
-                                if (c.getCode().equalsIgnoreCase(finalFieldCode)) {
+                                if (c.getCode().equalsIgnoreCase(info.code)) {
                                     BeanUtils.copyProperties(c, config);
                                 }
                             }
@@ -170,7 +160,6 @@ public class DefaultCommonConfigBeanFactory implements CommonConfigBeanFactory {
                 configBeans.add(bean);
             }
         });
-
     }
 
     /**
@@ -205,41 +194,20 @@ public class DefaultCommonConfigBeanFactory implements CommonConfigBeanFactory {
      * @param <T>
      */
     protected <T> void bindField(T bean, Field field, Map<String, CommonConfig> commonConfigCodeMap) {
-        Class<T> beanClass = (Class<T>) bean.getClass();
-        String fieldCode = null;
-        String fieldName = null;
-        if (field.isAnnotationPresent(Value.class)) {
-            Value value = field.getAnnotation(Value.class);
-            fieldCode = value.code().toUpperCase();
-
-            fieldName = value.value().name();
-            if (StringUtils.isEmpty(fieldName)) {
-                fieldName = value.name().name();
-            }
-        }
-
-        if (StringUtils.isEmpty(fieldName) || "AUTO".equalsIgnoreCase(fieldName)) {
-            fieldName = field.getName();
-        }
-        if (StringUtils.isEmpty(fieldCode) && beanClass.isAnnotationPresent(Config.class)) {
-            //如果字段里面没有声明，则从类上面找
-            Config config = beanClass.getAnnotation(Config.class);
-            fieldCode = config.code().toUpperCase();
-        }
-        CommonConfig commonConfig = commonConfigCodeMap.get(fieldCode);
+        FieldInfo info = getFieldInfo(field, bean.getClass());
+        CommonConfig commonConfig = commonConfigCodeMap.get(info.code);
         if (commonConfig == null) {
             logger.warn("未找到字段" + field + "对应的数据");
             return;
         }
         Class fieldClass = field.getType();
-
         Object fieldValue = null;
         if (canConvertClass.contains(fieldClass)) {
-            Field configField = ReflectionUtils.findField(CommonConfig.class, fieldName);
+            Field configField = ReflectionUtils.findField(CommonConfig.class, info.name);
             if (configField == null) {
                 logger.warn("未找到字段" + field + "在通用配置类种对应的字段");
             } else {
-                fieldValue = ReflectionUtils.getField(configField, commonConfig);
+                fieldValue = getFieldValue(configField, commonConfig);
             }
         } else if (fieldClass.equals(CommonConfig.class)) {
             fieldValue = commonConfig;
@@ -247,12 +215,55 @@ public class DefaultCommonConfigBeanFactory implements CommonConfigBeanFactory {
             fieldValue = bindBean(commonConfigCodeMap.values(), fieldClass);
         }
         try {
-            ReflectionUtils.setField(field, bean, fieldValue);
+            bindFieldValue(field, bean, fieldValue);
         } catch (Exception e) {
             throw new RuntimeException("设置字段" + field + "值失败！", e);
         }
-
     }
 
+    protected FieldInfo getFieldInfo(Field field, Class beanClass) {
+        String fieldCode = null;
+        String fieldName = null;
+        if (field.isAnnotationPresent(Value.class)) {
+            Value value = field.getAnnotation(Value.class);
+            fieldCode = value.code().toUpperCase();
+
+            Value.Name name1 = value.name();
+            Value.Name name2 = value.value();
+            fieldName = name1.equals(name2) ? name1.name() : (name1.equals(Value.Name.AUTO) ? name2.name() : name1.name());
+        }
+        if (StringUtils.isEmpty(fieldName) || "AUTO".equalsIgnoreCase(fieldName)) {
+            fieldName = field.getName();
+        }
+        if (StringUtils.isEmpty(fieldCode) && beanClass.isAnnotationPresent(Config.class)) {
+            //如果字段里面没有声明，则从类上面找
+            Config config = (Config) beanClass.getAnnotation(Config.class);
+            fieldCode = config.code().toUpperCase();
+        }
+        return new FieldInfo(fieldName, fieldCode);
+    }
+
+    protected Object getFieldValue(Field field, Object target) {
+        field.setAccessible(true);
+        return ReflectionUtils.getField(field, target);
+    }
+
+    protected void bindFieldValue(Field field, Object target, Object value) {
+        if (value != null) {
+            field.setAccessible(true);
+            ReflectionUtils.setField(field, target, value);
+        }
+    }
+
+
+    class FieldInfo {
+        String name;
+        String code;
+
+        public FieldInfo(String name, String code) {
+            this.name = name;
+            this.code = code;
+        }
+    }
 
 }
