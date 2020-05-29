@@ -200,11 +200,11 @@ public class DefaultLoginService implements LoginService, InitializingBean {
         userLogin.setLastLoginDate(System.currentTimeMillis());
         userLogin.setRetryCount(userLogin.getRetryCount() + 1);
         if (success) {
-            userLogin.setRetryCount(0);
+            userLogin.setRetryCount((long) 0);
             if (!statusEnabld && "超出重试次数，请稍后重试".equalsIgnoreCase(userLogin.getFreezeReason())) {
                 if (System.currentTimeMillis() - userLogin.getFreezeDate() > 10 * 60 * 60) {
                     userLogin.setStatus(STATUS_ENABLE);
-                    userLogin.setFreezeDate(0);
+                    userLogin.setFreezeDate((long) 0);
                     userLogin.setFreezeReason("");
                     statusEnabld = true;
                 }

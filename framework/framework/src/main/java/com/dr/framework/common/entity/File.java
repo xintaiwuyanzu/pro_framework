@@ -6,7 +6,7 @@ import com.dr.framework.core.orm.annotations.Table;
 @Table(name = "common_file", comment = "通用附件", module = "common")
 public class File extends BaseStatusEntity<Integer> {
     @Column(name = "file_length", comment = "文件长度", length = 50)
-    private long length;
+    private Long length;
     @Column(name = "file_name", comment = "文件原始名称", length = 100)
     private String name;
     @Column(name = "suffix", comment = "文件后缀", length = 10)
@@ -18,11 +18,11 @@ public class File extends BaseStatusEntity<Integer> {
     @Column(name = "file_description", comment = "文件描述", length = 500)
     private String description;
 
-    public long getLength() {
+    public Long getLength() {
         return length;
     }
 
-    public void setLength(long length) {
+    public void setLength(Long length) {
         this.length = length;
     }
 
