@@ -153,6 +153,12 @@
                 <artifactId>netty-all</artifactId>
                 <version>4.1.42.Final</version>
             </dependency>
+            <!--网络发现-->
+            <dependency>
+                <groupId>javax.jmdns</groupId>
+                <artifactId>jmdns</artifactId>
+                <version>3.4.1</version>
+            </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>

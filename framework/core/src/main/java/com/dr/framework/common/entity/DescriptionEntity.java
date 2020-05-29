@@ -16,6 +16,8 @@ public interface DescriptionEntity<T> extends StatusEntity<T> {
 
     /**
      * 设置名称
+     *
+     * @param name
      */
     void setName(String name);
 
@@ -26,7 +28,11 @@ public interface DescriptionEntity<T> extends StatusEntity<T> {
      */
     String getCode();
 
-
+    /**
+     * 设置编码
+     *
+     * @param code
+     */
     void setCode(String code);
 
     /**
@@ -36,13 +42,25 @@ public interface DescriptionEntity<T> extends StatusEntity<T> {
      */
     String getType();
 
+    /**
+     * 设置类型
+     *
+     * @param type
+     */
     void setType(String type);
 
     /**
+     * 获取描述信息
+     *
      * @return
      */
     String getDescription();
 
+    /**
+     * 设置描述信息
+     *
+     * @param description
+     */
     void setDescription(String description);
 
 }

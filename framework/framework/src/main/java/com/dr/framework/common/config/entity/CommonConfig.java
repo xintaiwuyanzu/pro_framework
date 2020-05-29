@@ -54,11 +54,11 @@ public class CommonConfig extends BaseDescriptionEntity<String> {
     private String value3;
 
     @Column(length = 10)
-    private long longValue;
+    private Long longValue;
     @Column(length = 10)
-    private long longValue1;
+    private Long longValue1;
     @Column(length = 10)
-    private long longValue2;
+    private Long longValue2;
 
 
     public String getRefId() {
@@ -109,27 +109,27 @@ public class CommonConfig extends BaseDescriptionEntity<String> {
         this.value3 = value3;
     }
 
-    public long getLongValue() {
+    public Long getLongValue() {
         return longValue;
     }
 
-    public void setLongValue(long longValue) {
+    public void setLongValue(Long longValue) {
         this.longValue = longValue;
     }
 
-    public long getLongValue1() {
+    public Long getLongValue1() {
         return longValue1;
     }
 
-    public void setLongValue1(long longValue1) {
+    public void setLongValue1(Long longValue1) {
         this.longValue1 = longValue1;
     }
 
-    public long getLongValue2() {
+    public Long getLongValue2() {
         return longValue2;
     }
 
-    public void setLongValue2(long longValue2) {
+    public void setLongValue2(Long longValue2) {
         this.longValue2 = longValue2;
     }
 

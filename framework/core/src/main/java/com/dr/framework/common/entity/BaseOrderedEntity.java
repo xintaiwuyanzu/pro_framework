@@ -11,15 +11,15 @@ public class BaseOrderedEntity extends BaseCreateInfoEntity implements OrderEnti
     public static final String ORDER_COLUMN_NAME = "order_info";
 
     @Column(name = ORDER_COLUMN_NAME, comment = "排序", order = 6)
-    private int orderBy;
+    private Integer orderBy;
 
     @Override
-    public int getOrder() {
+    public Integer getOrder() {
         return orderBy;
     }
 
     @Override
-    public void setOrder(int order) {
+    public void setOrder(Integer order) {
         this.orderBy = order;
     }
 }
