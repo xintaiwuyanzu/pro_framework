@@ -452,6 +452,9 @@ public class DefaultOrganisePersonService
                 .set(personRelation.getColumn("person_type"), person.getPersonType())
                 .set(personRelation.getColumn("address"), person.getAddress())
                 .set(personRelation.getColumn("duty"), person.getDuty())
+                .set(personRelation.getColumn("email"), person.getEmail())
+                .set(personRelation.getColumn("mobile"), person.getMobile())
+                .set(personRelation.getColumn("status_info"), person.getStatus())
                 .set(personRelation.getColumn("order_info"), person.getOrder())
                 .set(personRelation.getColumn("avatar_file_id"), person.getAvatarFileId())
                 .equal(personRelation.getColumn(ID_COLUMN_NAME), old.getId());

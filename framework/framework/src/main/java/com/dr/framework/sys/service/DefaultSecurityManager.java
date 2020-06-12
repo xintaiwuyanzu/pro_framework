@@ -175,11 +175,13 @@ public class DefaultSecurityManager
     @Transactional(rollbackFor = Exception.class)
     public long removeUserRole(String userId, String... roleIds) {
         checkUser(userId);
+        SqlQuery sqlQuery = SqlQuery.from(rolePersonRelation)
+                .equal(rolePersonRelation.getColumn("personId"), userId);
+        for (String str : roleIds) {
+            sqlQuery.equal(rolePersonRelation.getColumn("roleId"), str);
+        }
         //删除用户角色关联
-        return commonMapper.deleteByQuery(
-                SqlQuery.from(rolePersonRelation)
-                        .equal(rolePersonRelation.getColumn("personId"), userId)
-        );
+        return commonMapper.deleteByQuery(sqlQuery);
     }
 
     /**
@@ -647,7 +649,7 @@ public class DefaultSecurityManager
         List<PermissionExistVo> list = new ArrayList<>();
         List<TreeNode> aDefault = null;
         if ("menu".equals(type)) {
-            aDefault =menuTree("defaultone", person.getId(), true);
+            aDefault = menuTree("defaultone", person.getId(), true);
             List<SysMenu> sysMenusNotInRole = selectMenuList(new SysMenuQuery.Builder().build());
             List<SysMenu> sysMenusInRole = selectMenuList(new SysMenuQuery.Builder().roleIdIn(roleId).build());
             for (SysMenu sysMenu : sysMenusInRole) {

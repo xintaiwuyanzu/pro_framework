@@ -6,6 +6,7 @@ import com.dr.framework.core.organise.query.PersonQuery;
 import com.dr.framework.core.organise.service.LoginService;
 import com.dr.framework.core.organise.service.OrganisePersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -13,6 +14,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class SysAdminService {
 
     @Autowired

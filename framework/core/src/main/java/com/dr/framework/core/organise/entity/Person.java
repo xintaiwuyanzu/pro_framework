@@ -306,8 +306,16 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
         this.outUser = outUser;
     }
 
+    public void setDefaultOrganiseId(String defaultOrganiseId) {
+        this.defaultOrganiseId = defaultOrganiseId;
+    }
+
     public String getDefaultOrganiseId() {
         return defaultOrganiseId;
+    }
+
+    public void setDefaultOrganiseName(String defaultOrganiseName) {
+        this.defaultOrganiseName = defaultOrganiseName;
     }
 
     public String getDefaultOrganiseName() {

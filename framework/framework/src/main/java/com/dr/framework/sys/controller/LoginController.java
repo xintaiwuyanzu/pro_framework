@@ -22,6 +22,7 @@ import java.time.Duration;
  * 用户登录相关api，
  *
  * @author dr
+ * @author lc
  */
 @RestController
 @RequestMapping("${common.api-path:/api}/login")

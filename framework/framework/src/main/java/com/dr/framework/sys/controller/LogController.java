@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 系统操作日志
  *
- * @author dr
+ * @author lc
  */
 @RestController
 @RequestMapping("${common.api-path:/api}/sysRecord")
