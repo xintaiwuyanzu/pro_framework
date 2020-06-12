@@ -57,7 +57,7 @@ public class SubsysController {
     @RequestMapping("/page")
     public ResultEntity page(SubSystem entity,
                              @RequestParam(defaultValue = "0") int pageIndex,
-                             @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
+                             @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE_STR) int pageSize,
                              @RequestParam(defaultValue = "true") boolean page) {
         SubSysQuery query = new SubSysQuery.Builder().idEqual(entity.getId()).build();
         if (page) {

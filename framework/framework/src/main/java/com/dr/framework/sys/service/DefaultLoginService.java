@@ -13,6 +13,7 @@ import com.dr.framework.core.orm.sql.support.SqlQuery;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,10 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     @Lazy
     @Autowired
     PassWordEncrypt passWordEncrypt;
+
+    @Value("${sys.login.retryCount:5}")
+    Integer retryCount;
+
 
     EntityRelation userLoginRelation;
 
@@ -133,6 +138,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
             userLogin.setUpdateDate(System.currentTimeMillis());
             userLogin.setUpdatePerson(person.getUpdatePerson());
             userLogin.setStatus(StatusEntity.STATUS_ENABLE);
+            userLogin.setRetryCount((long) 0);
             userLogin.setLastChangePwdDate(System.currentTimeMillis());
             commonMapper.insert(userLogin);
         } else {
@@ -211,7 +217,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
             }
         } else {
             //超过5此锁定账户
-            if (userLogin.getRetryCount() > 5) {
+            if (userLogin.getRetryCount() > retryCount) {
                 userLogin.setStatus(StatusEntity.STATUS_DISABLE);
                 userLogin.setFreezeDate(System.currentTimeMillis());
                 userLogin.setFreezeReason("超出重试次数，请稍后重试");

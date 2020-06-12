@@ -85,7 +85,11 @@ public class BaseController<T extends IdEntity> {
     }
 
     @RequestMapping("/page")
-    public ResultEntity page(HttpServletRequest request, T entity, @RequestParam(defaultValue = "0") int pageIndex, @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize, @RequestParam(defaultValue = "true") boolean page) {
+    public ResultEntity page(HttpServletRequest request,
+                             T entity,
+                             @RequestParam(defaultValue = "0") int pageIndex,
+                             @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE_STR) int pageSize,
+                             @RequestParam(defaultValue = "true") boolean page) {
         SqlQuery<T> sqlQuery = SqlQuery.from(dataBaseService.getTableInfo(entity.getClass()), true);
         onBeforePageQuery(request, sqlQuery, entity);
         Object result;

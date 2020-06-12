@@ -100,16 +100,24 @@ public class PersonInterceptor implements HandlerInterceptor, InitializingBean {
     }
 
     protected String getToken(HttpServletRequest request) {
-        String token = request.getParameter(TOKEN_HEADER_KEY);
+        String token = doGetToken(request, TOKEN_HEADER_KEY);
         if (StringUtils.isEmpty(token)) {
-            token = (String) request.getAttribute(TOKEN_HEADER_KEY);
+            token = doGetToken(request, "dauth");
+        }
+        return token;
+    }
+
+    protected String doGetToken(HttpServletRequest request, String tokenHeaderKey) {
+        String token = request.getParameter(tokenHeaderKey);
+        if (StringUtils.isEmpty(token)) {
+            token = (String) request.getAttribute(tokenHeaderKey);
             if (StringUtils.isEmpty(token)) {
-                token = request.getHeader(TOKEN_HEADER_KEY);
+                token = request.getHeader(tokenHeaderKey);
                 if (StringUtils.isEmpty(token)) {
                     Cookie[] cookies = request.getCookies();
                     if (cookies != null) {
                         for (Cookie cookie : cookies) {
-                            if (cookie.getName().equals(TOKEN_HEADER_KEY)) {
+                            if (cookie.getName().equals(tokenHeaderKey)) {
                                 token = cookie.getValue();
                                 break;
                             }
@@ -119,7 +127,7 @@ public class PersonInterceptor implements HandlerInterceptor, InitializingBean {
             }
         }
         if (!StringUtils.isEmpty(token)) {
-            request.setAttribute(TOKEN_HEADER_KEY, token);
+            request.setAttribute(tokenHeaderKey, token);
         }
         return token;
     }

@@ -73,7 +73,7 @@ public class PersonController {
     @RequestMapping("/page")
     public ResultEntity page(Person person,
                              @RequestParam(defaultValue = "0") int pageIndex,
-                             @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
+                             @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE_STR) int pageSize,
                              @RequestParam(defaultValue = "true") boolean page) {
         PersonQuery personQuery = new PersonQuery.Builder()
                 .nameLike(person.getUserName())

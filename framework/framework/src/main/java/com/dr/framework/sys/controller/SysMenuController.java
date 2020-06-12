@@ -77,7 +77,7 @@ public class SysMenuController {
     @RequestMapping("/page")
     public ResultEntity page(SysMenu entity,
                              @RequestParam(defaultValue = "0") int pageIndex,
-                             @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
+                             @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE_STR) int pageSize,
                              @RequestParam(defaultValue = "true") boolean page) {
         SysMenuQuery query = new SysMenuQuery.Builder().sysIdEqual(entity.getSysId()).roleIdIn(entity.getId()).build();
         if (page) {
