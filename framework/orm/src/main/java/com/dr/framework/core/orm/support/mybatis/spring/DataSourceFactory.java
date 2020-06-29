@@ -13,7 +13,6 @@ import org.springframework.boot.context.properties.source.ConfigurationPropertyN
 import org.springframework.boot.context.properties.source.ConfigurationPropertyNameAliases;
 import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
 import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
-import org.springframework.boot.jdbc.DatabaseDriver;
 import org.springframework.boot.jdbc.XADataSourceWrapper;
 import org.springframework.boot.jta.atomikos.AtomikosDataSourceBean;
 import org.springframework.util.Assert;
@@ -50,7 +49,7 @@ public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoad
                 logger.error("创建多数据源失败，请检查添加spring-jta相关的依赖或数据库驱动版本", e);
             }
         } else {
-            dataSource = properties.initializeDataSourceBuilder().build();
+            dataSource = DriverUtils.buildDataSource(properties);
         }
         if (dataSource instanceof BeanNameAware) {
             ((BeanNameAware) dataSource).setBeanName(beanName);
@@ -84,7 +83,7 @@ public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoad
     private XADataSource createXaDataSource() {
         String className = this.properties.getXa().getDataSourceClassName();
         if (!StringUtils.hasLength(className)) {
-            className = DatabaseDriver.fromJdbcUrl(this.properties.determineUrl()).getXaDataSourceClassName();
+            className = DriverUtils.xaDriverClass(this.properties.determineUrl());
         }
         Assert.state(StringUtils.hasLength(className), "No XA DataSource class name specified");
         XADataSource xaDataSourceInstance = createXaDataSourceInstance(className);

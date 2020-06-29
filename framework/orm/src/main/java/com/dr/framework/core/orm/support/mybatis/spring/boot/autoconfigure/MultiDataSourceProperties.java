@@ -2,6 +2,7 @@ package com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure;
 
 import com.dr.framework.core.orm.database.DataBaseMetaData;
 import com.dr.framework.core.orm.database.Dialect;
+import com.dr.framework.core.orm.support.mybatis.spring.DriverUtils;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -43,7 +44,7 @@ public class MultiDataSourceProperties extends DataSourceProperties {
     @Override
     public void afterPropertiesSet() throws Exception {
         super.afterPropertiesSet();
-        selfManagedDatasource = initializeDataSourceBuilder().build();
+        selfManagedDatasource = DriverUtils.buildDataSource(this);
         if (selfManagedDatasource instanceof HikariDataSource) {
             //TODO oracle 默认不读取注释信息的，得在这里加 remarksReporting 属性。没想到比较好的办法
             ((HikariDataSource) selfManagedDatasource).getDataSourceProperties().setProperty("remarksReporting", "true");

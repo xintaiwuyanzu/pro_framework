@@ -824,6 +824,7 @@ public class DefaultSecurityManager
                 parent.setParentId(SubSystem.DEFAULT_SYSTEM_ID);
                 parent.setLeaf(false);
                 parent.setIcon("grid");
+                parent.setOrder(1);
                 parent.setId(rootMenuId);
                 addMenu(parent);
                 SysMenu sysMenu = new SysMenu();
@@ -831,6 +832,7 @@ public class DefaultSecurityManager
                 sysMenu.setName("菜单管理");
                 sysMenu.setParentId(rootMenuId);
                 sysMenu.setLeaf(true);
+                sysMenu.setOrder(0);
                 sysMenu.setIcon("align-justify");
                 sysMenu.setUrl("/main/sysMenu");
                 addMenu(sysMenu);

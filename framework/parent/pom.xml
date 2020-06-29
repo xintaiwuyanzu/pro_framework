@@ -210,6 +210,11 @@
                 <version>3.6.1</version>
             </dependency>
             <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.6</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-pool2</artifactId>
                 <version>2.8.0</version>
@@ -243,6 +248,16 @@
                 <groupId>de.odysseus.juel</groupId>
                 <artifactId>juel-spi</artifactId>
                 <version>${juel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dm.jdbc</groupId>
+                <artifactId>oracle-wraper</artifactId>
+                <version>8.16</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dm.jdbc</groupId>
+                <artifactId>driver</artifactId>
+                <version>8.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

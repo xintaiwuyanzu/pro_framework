@@ -541,6 +541,7 @@ public class DefaultOrganisePersonService
         //添加默认的子系统信息
         if (dataBaseService.tableExist(SubSystem.SUBSYS_TABLE_NAME, Constants.SYS_MODULE_NAME)) {
             SubSystem subSystem = new SubSystem();
+            subSystem.setOrder(0);
             subSystem.setId(SubSystem.DEFAULT_SYSTEM_ID);
             subSystem.setSysName("默认系统");
             if (!commonMapper.exists(SubSystem.class, subSystem.getId())) {
@@ -552,6 +553,7 @@ public class DefaultOrganisePersonService
             Organise organise = new Organise();
             organise.setId(DEFAULT_ROOT_ID);
             organise.setOrganiseName("默认机构");
+            organise.setOrder(0);
             organise.setOrganiseCode(DEFAULT_ROOT_ID);
             if (!commonMapper.exists(Organise.class, organise.getId())) {
                 addOrganise(organise);
@@ -561,6 +563,7 @@ public class DefaultOrganisePersonService
         if (dataBaseService.tableExist(Person.PERSON_TABLE_NAME, Constants.SYS_MODULE_NAME)) {
             Person person = new Person();
             person.setId("admin");
+            person.setOrder(0);
             person.setUserCode("admin");
             person.setUserName("超级管理员");
             if (!commonMapper.exists(Person.class, person.getId())) {

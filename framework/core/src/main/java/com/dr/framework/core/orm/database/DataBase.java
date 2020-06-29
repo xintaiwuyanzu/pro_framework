@@ -64,6 +64,25 @@ public enum DataBase {
         }
     },
     /**
+     * oracle数据库
+     */
+    DM {
+        @Override
+        public Class<? extends Dialect> lastestDialect() {
+            return Dm8Dialect.class;
+        }
+
+        @Override
+        public Class<? extends Dialect> getDialectClass(DataBaseMetaData dataBaseMetaData) {
+            return Dm8Dialect.class;
+        }
+
+        @Override
+        public boolean match(String productionName) {
+            return "DM DBMS".equalsIgnoreCase(productionName);
+        }
+    },
+    /**
      * sqlserver数据库
      */
     SQLSERVER {
