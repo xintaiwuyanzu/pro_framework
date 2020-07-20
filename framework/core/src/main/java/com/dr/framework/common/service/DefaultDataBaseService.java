@@ -80,7 +80,11 @@ public class DefaultDataBaseService implements DataBaseService {
     public Relation getTableInfo(@Nonnull String tableName, @Nonnull String moduleName) {
         DataBaseMetaData metaData = getDataBaseMetaDataByModuleName(moduleName);
         Assert.notNull(metaData, "未找到指定模块所属的数据库配置");
-        return metaData.getTable(tableName);
+        Relation relation = metaData.getTable(tableName);
+        if (relation != null) {
+            relation.setModule(moduleName);
+        }
+        return relation;
     }
 
     public EntityRelation getTableInfo(Class entityCLass) {

@@ -89,12 +89,24 @@ public class MysqlDialect extends Dialect {
 
     @Override
     protected String getTableRemark(String remark) {
-        return " comment='" + remark + "'";
+        StringBuilder sb = new StringBuilder();
+        if (!StringUtils.isEmpty(remark)) {
+            sb.append(" comment='")
+                    .append(remark)
+                    .append("' ");
+        }
+        return sb.toString();
     }
 
     @Override
     protected String getColumnRemark(String remark) {
-        return " comment '" + remark + "'";
+        StringBuilder sb = new StringBuilder();
+        if (!StringUtils.isEmpty(remark)) {
+            sb.append(" comment '")
+                    .append(remark)
+                    .append("' ");
+        }
+        return sb.toString();
     }
 
     @Override

@@ -179,7 +179,20 @@ public interface CommonMapper {
             , "<sqlserver>delete A from !!{table} where !!{pk}= #{id}</sqlserver>"
             , "<mysql>delete A from !!{table} where !!{pk}= #{id}</mysql>"
     })
-    long deleteById(Class entityClass, @Param("id") Serializable... id);
+    long deleteById(Class entityClass, @Param("id") Serializable id);
+
+    /**
+     * 这种方式传参有问题
+     *
+     * @param entityClass
+     * @param id
+     * @return
+     * @deprecated {@link #deleteBatchIds(Class, Serializable...)}
+     */
+    @Deprecated
+    default long deleteById(Class entityClass, @Param("id") Serializable... id) {
+        return deleteBatchIds(entityClass, id);
+    }
 
     /**
      * 根据指定的id删除数据

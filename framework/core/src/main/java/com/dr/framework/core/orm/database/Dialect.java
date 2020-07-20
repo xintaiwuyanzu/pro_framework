@@ -260,10 +260,14 @@ public abstract class Dialect {
      * @return
      */
     public List<DataBaseChangeInfo> getDropTableInfo(Relation relation) {
-        //删除索引
-        //删除序列
+        //TODO 删除索引
+        //TODO 删除序列
         //删除表定义
-        return Collections.emptyList();
+        DataBaseChangeInfo dropTableInfo = new DataBaseChangeInfo(
+                String.format("drop table %s", relation.getName()),
+                String.format("删除表【%s】", relation.getName())
+        );
+        return Arrays.asList(dropTableInfo);
     }
 
     /**
