@@ -1,5 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.dr.framework.autoconfig.CacheAutoConfiguration,\
   com.dr.framework.autoconfig.ApplicationAutoConfiguration,\
-  com.dr.framework.autoconfig.TaskAutoConfiguration
-
+  com.dr.framework.autoconfig.TaskAutoConfiguration,\
+  com.dr.framework.common.config.autoconfig.CommonConfigAutoConfiguration

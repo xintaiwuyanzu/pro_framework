@@ -224,7 +224,11 @@ public class CommonService {
                 pid = "$default_parentId";
             }
             treeNode.setParentId(pid);
-            treeNode.setOrder(treeEntity.getOrder());
+            if (treeEntity.getOrder() == null) {
+                treeEntity.setOrder(0);
+            } else {
+                treeNode.setOrder(treeEntity.getOrder());
+            }
             if (leafFunction != null) {
                 treeNode.setLeaf(leafFunction.apply(treeEntity));
             }
@@ -272,11 +276,4 @@ public class CommonService {
         }
         return null;
     }
-
-    public static void main(String[] args) {
-        String[] aaa = new String[]{"aaa", "bbb"};
-
-
-    }
-
 }

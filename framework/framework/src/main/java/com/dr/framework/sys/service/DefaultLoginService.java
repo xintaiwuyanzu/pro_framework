@@ -13,14 +13,14 @@ import com.dr.framework.core.orm.sql.support.SqlQuery;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.dr.framework.common.entity.StatusEntity.STATUS_COLUMN_KEY;
@@ -42,6 +42,10 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     @Lazy
     @Autowired
     PassWordEncrypt passWordEncrypt;
+
+    @Value("${sys.login.retryCount:5}")
+    Integer retryCount;
+
 
     EntityRelation userLoginRelation;
 
@@ -134,6 +138,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
             userLogin.setUpdateDate(System.currentTimeMillis());
             userLogin.setUpdatePerson(person.getUpdatePerson());
             userLogin.setStatus(StatusEntity.STATUS_ENABLE);
+            userLogin.setRetryCount((long) 0);
             userLogin.setLastChangePwdDate(System.currentTimeMillis());
             commonMapper.insert(userLogin);
         } else {
@@ -201,18 +206,18 @@ public class DefaultLoginService implements LoginService, InitializingBean {
         userLogin.setLastLoginDate(System.currentTimeMillis());
         userLogin.setRetryCount(userLogin.getRetryCount() + 1);
         if (success) {
-            userLogin.setRetryCount(0);
+            userLogin.setRetryCount((long) 0);
             if (!statusEnabld && "超出重试次数，请稍后重试".equalsIgnoreCase(userLogin.getFreezeReason())) {
                 if (System.currentTimeMillis() - userLogin.getFreezeDate() > 10 * 60 * 60) {
                     userLogin.setStatus(STATUS_ENABLE);
-                    userLogin.setFreezeDate(0);
+                    userLogin.setFreezeDate((long) 0);
                     userLogin.setFreezeReason("");
                     statusEnabld = true;
                 }
             }
         } else {
             //超过5此锁定账户
-            if (userLogin.getRetryCount() > 5) {
+            if (userLogin.getRetryCount() > retryCount) {
                 userLogin.setStatus(StatusEntity.STATUS_DISABLE);
                 userLogin.setFreezeDate(System.currentTimeMillis());
                 userLogin.setFreezeReason("超出重试次数，请稍后重试");
@@ -252,15 +257,20 @@ public class DefaultLoginService implements LoginService, InitializingBean {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void changePassword(String personId, String newPassword) {
+    public void changePassword(String personId, String newPassword, String... notIncludeLoginTypes) {
         Assert.isTrue(!StringUtils.isEmpty(personId), "人员id不能为空！");
         Assert.isTrue(!StringUtils.isEmpty(newPassword), "新密码不能为空！");
         List<Object> userLogins = commonMapper.selectByQuery(
                 SqlQuery.from(userLoginRelation)
                         .equal(userLoginRelation.getColumn("person_id"), personId)
         );
+        Set<String> notTypes = new HashSet<>(Arrays.asList(notIncludeLoginTypes));
         for (Object o : userLogins) {
             UserLogin userLogin = (UserLogin) o;
+            if (!notTypes.isEmpty() && notTypes.contains(userLogin.getUserType())) {
+                //指定登录类型的密码不修改，微信、支付宝的授权登录情况
+                continue;
+            }
             String salt = genSalt();
             userLogin.setPassword(passWordEncrypt.encryptChangeLogin(newPassword, salt, userLogin.getUserType()));
             userLogin.setSalt(salt);

@@ -10,21 +10,21 @@ import com.dr.framework.core.orm.annotations.ColumnType;
  */
 public class BaseCreateInfoEntity extends BaseEntity implements CreateInfoEntity {
     @Column(comment = "创建日期", type = ColumnType.DATE, order = 2)
-    private long createDate;
+    private Long createDate;
     @Column(comment = "创建人ID", simple = "创建人", length = 100, order = 3)
     private String createPerson;
     @Column(comment = "更新日期", type = ColumnType.DATE, order = 4)
-    private long updateDate;
+    private Long updateDate;
     @Column(comment = "更新人ID", simple = "更新人", length = 100, order = 5)
     private String updatePerson;
 
     @Override
-    public long getCreateDate() {
+    public Long getCreateDate() {
         return createDate;
     }
 
     @Override
-    public void setCreateDate(long createDate) {
+    public void setCreateDate(Long createDate) {
         this.createDate = createDate;
     }
 
@@ -39,12 +39,12 @@ public class BaseCreateInfoEntity extends BaseEntity implements CreateInfoEntity
     }
 
     @Override
-    public long getUpdateDate() {
+    public Long getUpdateDate() {
         return updateDate;
     }
 
     @Override
-    public void setUpdateDate(long updateDate) {
+    public void setUpdateDate(Long updateDate) {
         this.updateDate = updateDate;
     }
 

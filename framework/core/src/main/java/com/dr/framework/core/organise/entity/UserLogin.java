@@ -33,21 +33,21 @@ public class UserLogin extends BaseStatusEntity<Integer> {
     @Column(name = "last_login_ip", comment = "最后登陆IP", length = 20)
     private String lastLoginIp;
     @Column(name = "last_login_date", comment = "最后登陆时间", type = ColumnType.DATE)
-    private long lastLoginDate;
+    private Long lastLoginDate;
 
     @Column(comment = "重试次数")
-    private long retryCount;
+    private Long retryCount;
 
     @Column(name = "last_change_pwd_date", comment = "最后修改密码时间", type = ColumnType.DATE)
-    private long lastChangePwdDate;
+    private Long lastChangePwdDate;
 
     @Column(name = "freeze_reason", comment = "冻结原因", length = 1000)
     private String freezeReason;
     @Column(name = "freeze_date", comment = "冻结时间", type = ColumnType.DATE)
-    private long freezeDate;
+    private Long freezeDate;
 
     @Column(name = "invalid_date", comment = "失效时间", type = ColumnType.DATE)
-    private long invalidDate;
+    private Long invalidDate;
 
     @Column(name = "pwd_question1", comment = "密保问题1", length = 500)
     private String pwdQuestion1;
@@ -121,19 +121,19 @@ public class UserLogin extends BaseStatusEntity<Integer> {
         this.lastLoginIp = lastLoginIp;
     }
 
-    public long getLastLoginDate() {
+    public Long getLastLoginDate() {
         return lastLoginDate;
     }
 
-    public void setLastLoginDate(long lastLoginDate) {
+    public void setLastLoginDate(Long lastLoginDate) {
         this.lastLoginDate = lastLoginDate;
     }
 
-    public long getLastChangePwdDate() {
+    public Long getLastChangePwdDate() {
         return lastChangePwdDate;
     }
 
-    public void setLastChangePwdDate(long lastChangePwdDate) {
+    public void setLastChangePwdDate(Long lastChangePwdDate) {
         this.lastChangePwdDate = lastChangePwdDate;
     }
 
@@ -145,19 +145,19 @@ public class UserLogin extends BaseStatusEntity<Integer> {
         this.freezeReason = freezeReason;
     }
 
-    public long getFreezeDate() {
+    public Long getFreezeDate() {
         return freezeDate;
     }
 
-    public void setFreezeDate(long freezeDate) {
+    public void setFreezeDate(Long freezeDate) {
         this.freezeDate = freezeDate;
     }
 
-    public long getInvalidDate() {
+    public Long getInvalidDate() {
         return invalidDate;
     }
 
-    public void setInvalidDate(long invalidDate) {
+    public void setInvalidDate(Long invalidDate) {
         this.invalidDate = invalidDate;
     }
 
@@ -209,11 +209,11 @@ public class UserLogin extends BaseStatusEntity<Integer> {
         this.pwdAnswer3 = pwdAnswer3;
     }
 
-    public long getRetryCount() {
+    public Long getRetryCount() {
         return retryCount;
     }
 
-    public void setRetryCount(long retryCount) {
+    public void setRetryCount(Long retryCount) {
         this.retryCount = retryCount;
     }
 }

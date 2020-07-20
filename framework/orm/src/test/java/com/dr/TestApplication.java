@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 @SpringBootApplication
 @EnableAutoMapper(databases = {
-        @EnableAutoMapper.DataBase(name = "two", primary = true)
+        @EnableAutoMapper.DataBase(name = "three", primary = true)
         /* @EnableAutoMapper.DataBase(name = "two")*/
 })
 public class TestApplication {

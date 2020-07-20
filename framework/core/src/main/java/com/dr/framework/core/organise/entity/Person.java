@@ -36,7 +36,7 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
      * 范围查询的时候用到了
      */
     @Column(comment = "出生日期", length = 10)
-    private long birthday;
+    private Long birthday;
 
     /**
      * 多个可以使用
@@ -63,7 +63,7 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
      * -1是未知
      */
     @Column(name = "sex", comment = "性别")
-    private int sex;
+    private Integer sex;
     @Column(name = "nation", comment = "民族", length = 10)
     private String nation;
     @Column(comment = "微信账号", length = 200)
@@ -95,11 +95,11 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
     @Column(comment = "创建机构id", length = 50)
     private String createOrganiseId;
     @Column(comment = "启用日期", type = ColumnType.DATE)
-    private long enableDate;
+    private Long enableDate;
     @Column(comment = "启用人ID", simple = "创建人", length = 100)
     private String enablePerson;
     @Column(comment = "禁用日期", type = ColumnType.DATE)
-    private long disableDate;
+    private Long disableDate;
     @Column(comment = "禁用人ID", simple = "更新人", length = 100)
     private String disablePerson;
     @Column(comment = "人员职务", length = 200)
@@ -186,11 +186,11 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
         this.phone = phone;
     }
 
-    public int getSex() {
+    public Integer getSex() {
         return sex;
     }
 
-    public void setSex(int sex) {
+    public void setSex(Integer sex) {
         this.sex = sex;
     }
 
@@ -234,11 +234,11 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
         this.address = address;
     }
 
-    public long getEnableDate() {
+    public Long getEnableDate() {
         return enableDate;
     }
 
-    public void setEnableDate(long enableDate) {
+    public void setEnableDate(Long enableDate) {
         this.enableDate = enableDate;
     }
 
@@ -250,11 +250,11 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
         this.enablePerson = enablePerson;
     }
 
-    public long getDisableDate() {
+    public Long getDisableDate() {
         return disableDate;
     }
 
-    public void setDisableDate(long disableDate) {
+    public void setDisableDate(Long disableDate) {
         this.disableDate = disableDate;
     }
 
@@ -282,11 +282,11 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
         this.idNo = idNo;
     }
 
-    public long getBirthday() {
+    public Long getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(long birthday) {
+    public void setBirthday(Long birthday) {
         this.birthday = birthday;
     }
 

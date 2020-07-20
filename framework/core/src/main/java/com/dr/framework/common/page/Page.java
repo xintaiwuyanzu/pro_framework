@@ -15,6 +15,7 @@ public class Page<T> {
      */
     public static final long DEFAULT_PAGE_SIZE = 15;
 
+    public static final String DEFAULT_PAGE_SIZE_STR = "15";
     /**
      * 默认最大分页数量 为10w
      */

@@ -5,10 +5,10 @@ import com.dr.framework.common.page.Page;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.security.entity.Permission;
 import com.dr.framework.core.security.entity.Role;
+import com.dr.framework.core.security.entity.SubSystem;
 import com.dr.framework.core.security.entity.SysMenu;
 import com.dr.framework.core.security.query.PermissionQuery;
 import com.dr.framework.core.security.query.RoleQuery;
-import com.dr.framework.core.security.entity.SubSystem;
 import com.dr.framework.core.security.query.SubSysQuery;
 import com.dr.framework.core.security.query.SysMenuQuery;
 
@@ -82,12 +82,28 @@ public interface SecurityManager {
     List<Role> userRoles(String userId);
 
     /**
+     * 指定角色的所有用户
+     *
+     * @param roleId
+     * @return
+     */
+    List<Person> roleUsers(String roleId);
+
+    /**
      * 用户权限列表
      *
      * @param userId
      * @return
      */
     List<Permission> userPermissions(String userId);
+
+    /**
+     * 指定权限所有的用户
+     *
+     * @param permissionId
+     * @return
+     */
+    List<Person> permissionUsers(String permissionId);
 
     /**
      * 是否有角色

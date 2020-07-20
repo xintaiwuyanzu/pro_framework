@@ -24,6 +24,7 @@ import static com.dr.framework.common.entity.ResultEntity.success;
 
 /**
  * 角色管理
+ *
  * @author lc
  */
 @RestController
@@ -92,7 +93,7 @@ public class SysRoleController {
      */
     @RequestMapping(value = "/page")
     public ResultEntity<Page<Role>> getRolePage(@RequestParam(defaultValue = "1") int page,
-                                                @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "15") int pageSize) {
+                                                @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE_STR) int pageSize) {
         return success(securityManager.selectRolePage(new RoleQuery.Builder().build(), (page - 1) * pageSize, page * pageSize - 1));
     }
 
@@ -208,8 +209,6 @@ public class SysRoleController {
     }
 
     /**
-     *
-     *
      * @param person
      * @param roleId
      * @param type

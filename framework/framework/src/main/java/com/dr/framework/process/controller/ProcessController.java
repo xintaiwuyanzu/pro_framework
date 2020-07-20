@@ -12,7 +12,10 @@ import com.dr.framework.core.process.service.ProcessService;
 import com.dr.framework.core.web.annotations.Current;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,7 +48,7 @@ public class ProcessController {
     @GetMapping("/processPage")
     public ResultEntity processPage(ProcessDefinitionQuery query,
                                     @RequestParam(defaultValue = "0") int pageIndex,
-                                    @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
+                                    @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE_STR) int pageSize,
                                     @RequestParam(defaultValue = "true") boolean page) {
         if (page) {
             return ResultEntity.success(processService.processDefinitionPage(query, pageIndex, pageSize));
@@ -93,7 +96,7 @@ public class ProcessController {
     public ResultEntity page(@Current Person person,
                              TaskQuery query,
                              @RequestParam(defaultValue = "0") int pageIndex,
-                             @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
+                             @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE_STR) int pageSize,
                              @RequestParam(defaultValue = "true") boolean page) {
         query.assigneeEqual(person.getId());
         if (page) {
@@ -107,7 +110,7 @@ public class ProcessController {
     public ResultEntity history(@Current Person person,
                                 TaskQuery query,
                                 @RequestParam(defaultValue = "0") int pageIndex,
-                                @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE + "") int pageSize,
+                                @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE_STR) int pageSize,
                                 @RequestParam(defaultValue = "true") boolean page) {
         query.assigneeEqual(person.getId());
         if (page) {

@@ -161,6 +161,7 @@ public class CodeGenProcessor extends AbstractProcessor {
                             case "Integer":
                             case "double":
                             case "long":
+                            case "Long":
                             case "float":
                             case "boolean":
                             case "Boolean":
