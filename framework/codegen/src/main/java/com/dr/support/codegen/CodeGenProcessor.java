@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.slf4j.helpers.NOPLogger;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -134,21 +135,7 @@ public class CodeGenProcessor extends AbstractProcessor {
                         colNames.add(value.toUpperCase());
                     }
                     map.put("value", value);
-                    TypeMirror typeMirror = element2.asType();
-
-                    if (typeMirror.getKind().equals(TypeKind.TYPEVAR)) {
-                        List<? extends TypeMirror> typeMirrors = typeUtils.directSupertypes(implace.asType());
-                        if (typeMirrors.size() > 0) {
-                            TypeMirror typeMirror12 = typeMirrors.get(0);
-                            if (typeMirror12 instanceof DeclaredType) {
-                                List<? extends TypeMirror> typeMirrors1 = ((DeclaredType) typeMirror12).getTypeArguments();
-                                if (typeMirrors1.size() > 0) {
-                                    typeMirror = typeMirrors1.get(0);
-                                }
-                            }
-                        }
-                    }
-
+                    TypeMirror typeMirror = readType(element2.asType(), implace.asType(), typeUtils);
                     map.put("type", typeMirror.toString().replace("java.lang.", ""));
                     if (column.jdbcType() != java.sql.Types.NULL) {
                         map.put("jdbcType", JdbcType.forCode(column.jdbcType()).name());
@@ -187,6 +174,25 @@ public class CodeGenProcessor extends AbstractProcessor {
                 });
     }
 
+    private TypeMirror readType(TypeMirror typeMirror, TypeMirror implace, Types typeUtils) {
+        if (typeMirror.getKind().equals(TypeKind.TYPEVAR)) {
+            List<? extends TypeMirror> typeMirrors = typeUtils.directSupertypes(implace);
+            if (typeMirrors.size() > 0) {
+                TypeMirror typeMirror12 = typeMirrors.get(0);
+                if (typeMirror12 instanceof DeclaredType) {
+                    List<? extends TypeMirror> typeMirrors1 = ((DeclaredType) typeMirror12).getTypeArguments();
+                    if (typeMirrors1.size() > 0) {
+                        return typeMirrors1.get(0);
+                    } else {
+                        return readType(typeMirror, typeMirror12, typeUtils);
+                    }
+                }
+            }
+        }
+        return typeMirror;
+    }
+
+
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
@@ -200,6 +206,7 @@ public class CodeGenProcessor extends AbstractProcessor {
                 Properties props = new Properties();
                 URL url = this.getClass().getClassLoader().getResource("velocity.properties");
                 props.load(url.openStream());
+                props.put("runtime.log.instance", NOPLogger.NOP_LOGGER);
                 velocityEngine = new VelocityEngine(props);
             } catch (IOException e) {
                 e.printStackTrace();

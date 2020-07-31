@@ -28,6 +28,8 @@ public class DefaultBaseService<T extends IdEntity> implements BaseService<T>, I
 
     protected EntityRelation entityRelation;
 
+    private Class<T> entityClass;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long insert(T entity) {
@@ -80,13 +82,15 @@ public class DefaultBaseService<T extends IdEntity> implements BaseService<T>, I
      *
      * @return
      */
-    public Class<T> getEntityClass() {
-        Type sc = getClass().getGenericSuperclass();
-        if (ParameterizedType.class.isAssignableFrom(sc.getClass())) {
-            Type[] types = ((ParameterizedType) sc).getActualTypeArguments();
-            return (Class<T>) types[0];
+    public synchronized Class<T> getEntityClass() {
+        if (entityClass == null) {
+            Type sc = getClass().getGenericSuperclass();
+            if (ParameterizedType.class.isAssignableFrom(sc.getClass())) {
+                Type[] types = ((ParameterizedType) sc).getActualTypeArguments();
+                entityClass = (Class<T>) types[0];
+            }
         }
-        return null;
+        return entityClass;
     }
 
     public EntityRelation getEntityRelation() {
