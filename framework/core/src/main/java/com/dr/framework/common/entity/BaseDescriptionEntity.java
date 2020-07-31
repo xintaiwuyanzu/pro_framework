@@ -8,13 +8,13 @@ import com.dr.framework.core.orm.annotations.Column;
  * @author dr
  */
 public class BaseDescriptionEntity<T> extends BaseStatusEntity<T> implements DescriptionEntity<T> {
-    @Column(name = "pName", comment = "名称", length = 500, order = 8)
+    @Column(name = NAME_COLUMN_NAME, comment = "名称", length = 500, order = 8)
     private String name;
-    @Column(name = "pCode", comment = "编码", length = 500, order = 9)
+    @Column(name = CODE_COLUMN_NAME, comment = "编码", length = 500, order = 9)
     private String code;
-    @Column(name = "pType", comment = "类型", length = 500, order = 10)
+    @Column(name = TYPE_COLUMN_NAME, comment = "类型", length = 500, order = 10)
     private String type;
-    @Column(name = "pDescription", comment = "描述", length = 1000, order = 11)
+    @Column(name = Description_COLUMN_NAME, comment = "描述", length = 1000, order = 11)
     private String description;
 
     @Override

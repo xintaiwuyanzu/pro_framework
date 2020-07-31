@@ -8,8 +8,6 @@ import com.dr.framework.core.orm.annotations.Column;
  * @author dr
  */
 public class BaseOrderedEntity extends BaseCreateInfoEntity implements OrderEntity {
-    public static final String ORDER_COLUMN_NAME = "order_info";
-
     @Column(name = ORDER_COLUMN_NAME, comment = "排序", order = 6)
     private Integer orderBy;
 

@@ -7,6 +7,12 @@ package com.dr.framework.common.entity;
  * @author dr
  */
 public interface DescriptionEntity<T> extends StatusEntity<T> {
+
+    String NAME_COLUMN_NAME = "pName";
+    String CODE_COLUMN_NAME = "pCode";
+    String TYPE_COLUMN_NAME = "pType";
+    String Description_COLUMN_NAME = "pDescription";
+
     /**
      * 获取名称
      *
