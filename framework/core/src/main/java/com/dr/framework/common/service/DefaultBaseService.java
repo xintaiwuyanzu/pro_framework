@@ -67,6 +67,12 @@ public class DefaultBaseService<T extends IdEntity> implements BaseService<T>, I
     }
 
     @Override
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
+    public long count(SqlQuery<T> sqlQuery) {
+        return commonMapper.countByQuery(sqlQuery);
+    }
+
+    @Override
     public boolean exists(String id) {
         return commonService.exists(entityRelation.getEntityClass(), id);
     }

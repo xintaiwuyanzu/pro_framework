@@ -64,6 +64,14 @@ public interface BaseService<T extends IdEntity> {
     Page<T> selectPage(SqlQuery<T> sqlQuery, int pageIndex, int pageSize);
 
     /**
+     * 统计方法
+     *
+     * @param sqlQuery
+     * @return
+     */
+    long count(SqlQuery<T> sqlQuery);
+
+    /**
      * 指定的id是否存在
      *
      * @param id
