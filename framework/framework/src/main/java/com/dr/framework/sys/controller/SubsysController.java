@@ -31,12 +31,13 @@ public class SubsysController {
 
     @RequestMapping("/update")
     public ResultEntity<SubSystem> update(SubSystem entity) {
-        return ResultEntity.success(securityManager.updateSubSys(entity));
+        securityManager.updateSubSys(entity);
+        return ResultEntity.success(entity);
     }
 
     @RequestMapping("/delete")
     public ResultEntity<Boolean> delete(SubSystem entity) {
-        return ResultEntity.success(securityManager.deleteSubSys(entity.getId()));
+        return ResultEntity.success(securityManager.deleteSubSys(entity.getId()) > 0);
     }
 
     @RequestMapping("/detail")

@@ -1,5 +1,6 @@
 package com.dr.framework.sys.controller;
 
+import com.dr.framework.common.controller.BaseController;
 import com.dr.framework.common.entity.ResultEntity;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.organise.service.LoginService;
@@ -75,6 +76,7 @@ public class LoginController {
         }
     }
 
+
     /**
      * 获取当前登陆人详细信息
      *
@@ -83,7 +85,7 @@ public class LoginController {
      */
     @RequestMapping("/info")
     public ResultEntity<Person> personInfo(HttpServletRequest request) {
-        Object person = request.getAttribute(SecurityHolder.CURRENT_PERSON_KEY);
+        Person person = BaseController.getUserLogin(request);
         if (person != null) {
             return ResultEntity.success(person);
         } else {

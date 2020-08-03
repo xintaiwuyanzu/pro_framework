@@ -44,6 +44,67 @@ final class SecurityHolderHelper {
         }
     }
 
+
+    @Nullable
+    public static Person getPerson(RequestAttributes requestAttributes) {
+        SecurityHolder securityHolder = get(requestAttributes);
+        return securityHolder == null ? null : securityHolder.currentPerson();
+    }
+
+    @Nullable
+    public static Organise getOrganise(RequestAttributes requestAttributes) {
+        SecurityHolder securityHolder = get(requestAttributes);
+        return securityHolder == null ? null : securityHolder.currentOrganise();
+    }
+
+    @Nullable
+    public static ClientInfo getClientInfo(RequestAttributes requestAttributes) {
+        SecurityHolder securityHolder = get(requestAttributes);
+        return securityHolder == null ? null : securityHolder.getClientInfo();
+    }
+
+    /**
+     * 获取上下文
+     *
+     * @param requestAttributes
+     * @return
+     */
+    @Nullable
+    public static SecurityHolder get(RequestAttributes requestAttributes) {
+        return requestAttributes == null ? null : (SecurityHolder) requestAttributes.getAttribute(SecurityHolder.SECURITY_HOLDER_KEY, RequestAttributes.SCOPE_REQUEST);
+    }
+
+    /**
+     * 设置上下文
+     *
+     * @param securityHolder
+     * @param requestAttributes
+     */
+    public static void set(SecurityHolder securityHolder, RequestAttributes requestAttributes) {
+        if (requestAttributes != null && securityHolder != null) {
+            requestAttributes.setAttribute(ClientInfo.CLIENT_INFO_KEY, securityHolder.getClientInfo(), RequestAttributes.SCOPE_REQUEST);
+            requestAttributes.setAttribute(SecurityHolder.SECURITY_HOLDER_KEY, securityHolder, RequestAttributes.SCOPE_REQUEST);
+            requestAttributes.setAttribute(SecurityHolder.CURRENT_PERSON_KEY, securityHolder.currentPerson(), RequestAttributes.SCOPE_REQUEST);
+            requestAttributes.setAttribute(SecurityHolder.TOKEN_HEADER_KEY, securityHolder.personToken(), RequestAttributes.SCOPE_REQUEST);
+            requestAttributes.setAttribute(SecurityHolder.CURRENT_ORGANISE_KEY, securityHolder.currentOrganise(), RequestAttributes.SCOPE_REQUEST);
+        }
+    }
+
+    /**
+     * 清空上下文
+     *
+     * @param requestAttributes
+     */
+    public static void reset(RequestAttributes requestAttributes) {
+        if (requestAttributes != null) {
+            requestAttributes.removeAttribute(ClientInfo.CLIENT_INFO_KEY, RequestAttributes.SCOPE_REQUEST);
+            requestAttributes.removeAttribute(SecurityHolder.SECURITY_HOLDER_KEY, RequestAttributes.SCOPE_REQUEST);
+            requestAttributes.removeAttribute(SecurityHolder.CURRENT_PERSON_KEY, RequestAttributes.SCOPE_REQUEST);
+            requestAttributes.removeAttribute(SecurityHolder.TOKEN_HEADER_KEY, RequestAttributes.SCOPE_REQUEST);
+            requestAttributes.removeAttribute(SecurityHolder.CURRENT_ORGANISE_KEY, RequestAttributes.SCOPE_REQUEST);
+        }
+    }
+
     /**
      * 返回当前线程登录用户相关信息
      *
@@ -53,8 +114,7 @@ final class SecurityHolderHelper {
     public static SecurityHolder get() {
         SecurityHolder securityHolder;
         try {
-            RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-            securityHolder = (SecurityHolder) requestAttributes.getAttribute(SecurityHolder.SECURITY_HOLDER_KEY, RequestAttributes.SCOPE_REQUEST);
+            securityHolder = get(RequestContextHolder.getRequestAttributes());
             if (securityHolder == null) {
                 securityHolder = securityHolders.get();
             }
@@ -71,32 +131,14 @@ final class SecurityHolderHelper {
         return securityHolder;
     }
 
+
     public static void set(SecurityHolder securityHolder) {
-        try {
-            if (securityHolder != null) {
-                RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-                requestAttributes.setAttribute(ClientInfo.CLIENT_INFO_KEY, securityHolder.getClientInfo(), RequestAttributes.SCOPE_REQUEST);
-                requestAttributes.setAttribute(SecurityHolder.SECURITY_HOLDER_KEY, securityHolder, RequestAttributes.SCOPE_REQUEST);
-                requestAttributes.setAttribute(SecurityHolder.CURRENT_PERSON_KEY, securityHolder.currentPerson(), RequestAttributes.SCOPE_REQUEST);
-                requestAttributes.setAttribute(SecurityHolder.TOKEN_HEADER_KEY, securityHolder.personToken(), RequestAttributes.SCOPE_REQUEST);
-                requestAttributes.setAttribute(SecurityHolder.CURRENT_ORGANISE_KEY, securityHolder.currentOrganise(), RequestAttributes.SCOPE_REQUEST);
-            }
-        } catch (Exception e) {
-            securityHolders.set(securityHolder);
-        }
+        set(securityHolder, RequestContextHolder.getRequestAttributes());
+        securityHolders.set(securityHolder);
     }
 
     public static void reset() {
-        try {
-            RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-            requestAttributes.removeAttribute(ClientInfo.CLIENT_INFO_KEY, RequestAttributes.SCOPE_REQUEST);
-            requestAttributes.removeAttribute(SecurityHolder.SECURITY_HOLDER_KEY, RequestAttributes.SCOPE_REQUEST);
-            requestAttributes.removeAttribute(SecurityHolder.CURRENT_PERSON_KEY, RequestAttributes.SCOPE_REQUEST);
-            requestAttributes.removeAttribute(SecurityHolder.TOKEN_HEADER_KEY, RequestAttributes.SCOPE_REQUEST);
-            requestAttributes.removeAttribute(SecurityHolder.CURRENT_ORGANISE_KEY, RequestAttributes.SCOPE_REQUEST);
-            securityHolders.remove();
-        } catch (Exception e) {
-            securityHolders.remove();
-        }
+        reset(RequestContextHolder.getRequestAttributes());
+        securityHolders.remove();
     }
 }

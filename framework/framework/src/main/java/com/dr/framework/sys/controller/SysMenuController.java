@@ -52,12 +52,13 @@ public class SysMenuController {
 
     @RequestMapping("/update")
     public ResultEntity<SysMenu> update(SysMenu entity) {
-        return ResultEntity.success(securityManager.updateMenu(entity));
+        securityManager.updateMenu(entity);
+        return ResultEntity.success(entity);
     }
 
     @RequestMapping("/delete")
     public ResultEntity<Boolean> delete(SysMenu entity) {
-        return ResultEntity.success(securityManager.deleteMenu(entity.getId()));
+        return ResultEntity.success(securityManager.deleteMenu(entity.getId()) > 0);
     }
 
     @RequestMapping("/detail")

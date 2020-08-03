@@ -24,12 +24,12 @@ public class ResultEntity<T> {
         return new ResultEntity(true, null, null);
     }
 
-    public static <T> ResultEntity success(T data) {
+    public static <T> ResultEntity<T> success(T data) {
         return new ResultEntity<>(true, null, data);
     }
 
 
-    public static <T> ResultEntity success(String message, T data) {
+    public static <T> ResultEntity<T> success(String message, T data) {
         return new ResultEntity<>(true, message, data);
     }
 
@@ -37,15 +37,15 @@ public class ResultEntity<T> {
         return new ResultEntity(false, msg, null);
     }
 
-    public static <T> ResultEntity error(T data) {
+    public static <T> ResultEntity<T> error(T data) {
         return new ResultEntity<>(false, null, data);
     }
 
-    public static <T> ResultEntity error(String message, T data) {
+    public static <T> ResultEntity<T> error(String message, T data) {
         return new ResultEntity<>(false, message, data);
     }
 
-    public static <T> ResultEntity error(String message, String code, T data) {
+    public static <T> ResultEntity<T> error(String message, String code, T data) {
         return new ResultEntity<>(false, message, code, data);
     }
 

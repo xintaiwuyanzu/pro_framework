@@ -50,14 +50,14 @@ public class PersonController {
     }
 
     @RequestMapping("/delete")
-    public ResultEntity<Person> delete(String id) {
+    public ResultEntity<Long> delete(String id) {
         return ResultEntity.success(organisePersonService.deletePerson(id));
     }
 
     @RequestMapping("/update")
     public ResultEntity<Person> update(Person person) {
         organisePersonService.updatePerson(person);
-        return ResultEntity.success("更新成功");
+        return ResultEntity.success(person);
     }
 
 

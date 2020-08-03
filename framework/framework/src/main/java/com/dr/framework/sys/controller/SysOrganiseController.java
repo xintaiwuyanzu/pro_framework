@@ -1,13 +1,12 @@
 package com.dr.framework.sys.controller;
 
 import com.dr.framework.common.entity.ResultEntity;
+import com.dr.framework.common.entity.TreeNode;
 import com.dr.framework.common.service.CommonService;
 import com.dr.framework.core.organise.entity.Organise;
-import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.organise.query.OrganiseQuery;
 import com.dr.framework.core.organise.service.OrganisePersonService;
 import com.dr.framework.core.util.Constants;
-import com.dr.framework.core.web.annotations.Current;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -16,12 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static com.dr.framework.common.entity.ResultEntity.error;
 import static com.dr.framework.common.entity.ResultEntity.success;
 
 /**
@@ -76,8 +71,7 @@ public class SysOrganiseController {
     @RequestMapping("/delete")
     public ResultEntity<Boolean> delete(String id) {
         Assert.isTrue(!StringUtils.isEmpty(id), "机构id不能为空");
-        organisePersonService.deleteOrganise(id);
-        return ResultEntity.success("删除成功");
+        return ResultEntity.success(organisePersonService.deleteOrganise(id) > 0);
     }
 
     /**
@@ -87,9 +81,9 @@ public class SysOrganiseController {
      * @return
      */
     @RequestMapping("/organiseTree")
-    public ResultEntity organiseTree(boolean all,
-                                     @RequestParam(defaultValue = Constants.DEFAULT) String groupId,
-                                     @RequestParam(defaultValue = Organise.DEFAULT_ROOT_ID) String parentId
+    public ResultEntity<List<TreeNode>> organiseTree(boolean all,
+                                                     @RequestParam(defaultValue = Constants.DEFAULT) String groupId,
+                                                     @RequestParam(defaultValue = Organise.DEFAULT_ROOT_ID) String parentId
 
     ) {
         OrganiseQuery.Builder builder = new OrganiseQuery.Builder()
@@ -108,13 +102,11 @@ public class SysOrganiseController {
      * @return
      */
     @PostMapping(value = "/getAllDepartment")
-    public ResultEntity getAllDepartment() {
+    public ResultEntity<List<Organise>> getAllDepartment() {
         OrganiseQuery organiseQuery = new OrganiseQuery.Builder().build();
         List<Organise> list = organisePersonService.getOrganiseList(organiseQuery);
         return success(list);
     }
-
-
 
 
 }

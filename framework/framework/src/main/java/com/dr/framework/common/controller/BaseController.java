@@ -6,10 +6,12 @@ import com.dr.framework.common.entity.ResultEntity;
 import com.dr.framework.common.page.Page;
 import com.dr.framework.common.service.CommonService;
 import com.dr.framework.common.service.DefaultDataBaseService;
+import com.dr.framework.core.organise.entity.Organise;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
-import com.dr.framework.sys.controller.LoginController;
+import com.dr.framework.core.security.SecurityHolder;
+import com.dr.framework.core.security.bo.ClientInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -30,11 +34,27 @@ import java.util.List;
 public class BaseController<T extends IdEntity> {
     Logger logger = LoggerFactory.getLogger(BaseController.class);
     @Autowired
-    LoginController loginController;
-    @Autowired
     protected CommonService commonService;
     @Autowired
     protected DefaultDataBaseService dataBaseService;
+
+    public static Person getUserLogin(HttpServletRequest request) {
+        RequestAttributes attributes = new ServletRequestAttributes(request);
+        SecurityHolder securityHolder = SecurityHolder.get();
+        return securityHolder == null ? null : securityHolder.currentPerson();
+    }
+
+    public static Organise getOrganise(HttpServletRequest request) {
+        RequestAttributes attributes = new ServletRequestAttributes(request);
+        SecurityHolder securityHolder = SecurityHolder.get();
+        return securityHolder == null ? null : securityHolder.currentOrganise();
+    }
+
+    public static ClientInfo getClientInfo(HttpServletRequest request) {
+        RequestAttributes attributes = new ServletRequestAttributes(request);
+        SecurityHolder securityHolder = SecurityHolder.get();
+        return securityHolder == null ? null : securityHolder.getClientInfo();
+    }
 
     @RequestMapping("/insert")
     public ResultEntity<T> insert(HttpServletRequest request, T entity) {
@@ -134,7 +154,7 @@ public class BaseController<T extends IdEntity> {
         }
         onBeforeDelete(request, sqlQuery, entity);
         if (sqlQuery.hasWhere()) {
-            return ResultEntity.success(commonService.delete(sqlQuery));
+            return ResultEntity.success(commonService.delete(sqlQuery) > 0);
         } else {
             return ResultEntity.error("没有删除条件参数，不执行删除操作！");
         }
@@ -161,8 +181,13 @@ public class BaseController<T extends IdEntity> {
 
     }
 
+    /**
+     * 获取当前登录用户
+     *
+     * @param request
+     * @return
+     */
     protected Person getUserlogin(HttpServletRequest request) {
-        ResultEntity<Person> p = loginController.personInfo(request);
-        return p.isSuccess() ? p.getData() : null;
+        return getUserlogin(request);
     }
 }

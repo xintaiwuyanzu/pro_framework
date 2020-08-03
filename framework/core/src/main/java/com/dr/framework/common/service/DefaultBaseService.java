@@ -101,6 +101,10 @@ public class DefaultBaseService<T extends IdEntity> implements BaseService<T>, I
         return commonService;
     }
 
+    protected CommonMapper getCommonMapper() {
+        return commonMapper;
+    }
+
     @Override
     public void afterPropertiesSet() {
         entityRelation = defaultDataBaseService.getTableInfo(getEntityClass());
