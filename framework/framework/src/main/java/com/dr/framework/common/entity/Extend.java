@@ -3,8 +3,9 @@ package com.dr.framework.common.entity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.ColumnType;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.util.Constants;
 
-@Table(name = "common_extend", comment = "通用扩展字段表", module = "common")
+@Table(name = Constants.COMMON_TABLE_PREFIX + "EXTEND", comment = "通用扩展字段表", module = Constants.COMMON_MODULE_NAME)
 public class Extend extends BaseEntity {
     @Column(name = "ref_table", comment = "主表名称", length = 50)
     private String refTable;

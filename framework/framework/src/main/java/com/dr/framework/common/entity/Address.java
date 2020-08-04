@@ -2,8 +2,9 @@ package com.dr.framework.common.entity;
 
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.util.Constants;
 
-@Table(name = "common_address", comment = "常用地址", module = "common")
+@Table(name = Constants.COMMON_TABLE_PREFIX + "ADDRESS", comment = "常用地址", module = Constants.COMMON_MODULE_NAME)
 public class Address extends BaseEntity {
     //TODO 这里要内置几个常用的坐标系变量
 

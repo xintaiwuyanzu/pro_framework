@@ -853,7 +853,16 @@ public class DefaultSecurityManager
                 person.setOrder(2);
                 addMenu(person);
 
-                addMenuToUser("admin", parent.getId(), sysMenu.getId(), organise.getId(), person.getId());
+
+                SysMenu role = new SysMenu();
+                role.setParentId(rootMenuId);
+                role.setLeaf(true);
+                role.setName("权限管理");
+                role.setUrl("/system/role");
+                role.setOrder(3);
+                addMenu(role);
+
+                addMenuToUser("admin", parent.getId(), sysMenu.getId(), organise.getId(), person.getId(), role.getId());
             }
         }
     }

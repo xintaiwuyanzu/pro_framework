@@ -14,7 +14,7 @@ import java.util.List;
  * @author dr
  */
 public interface CommonConfigService extends BaseService<CommonConfig> {
-    String TableName = Constants.COMMON_TABLE_PREFIX + "config";
+    String TableName = Constants.COMMON_TABLE_PREFIX + "CONFIG";
 
     /**
      * 查询一条数据

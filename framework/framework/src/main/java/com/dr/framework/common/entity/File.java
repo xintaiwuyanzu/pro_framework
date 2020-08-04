@@ -2,8 +2,9 @@ package com.dr.framework.common.entity;
 
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.util.Constants;
 
-@Table(name = "common_file", comment = "通用附件", module = "common")
+@Table(name = Constants.COMMON_TABLE_PREFIX + "FILE", comment = "通用附件", module = Constants.COMMON_MODULE_NAME)
 public class File extends BaseStatusEntity<Integer> {
     @Column(name = "file_length", comment = "文件长度", length = 50)
     private Long length;

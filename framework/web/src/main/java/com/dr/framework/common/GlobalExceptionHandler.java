@@ -3,9 +3,10 @@ package com.dr.framework.common;
 import com.dr.framework.common.entity.ResultEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author dr
  */
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     final static String[] mobileAgents = {"iphone", "android", "ipad", "phone", "mobile", "wap", "netfront", "java", "opera mobi",
@@ -34,7 +35,6 @@ public class GlobalExceptionHandler {
             "Googlebot-Mobile"};
 
     @ExceptionHandler(Exception.class)
-    @ResponseBody
     public ResultEntity<String> handleEmployeeNotFoundException(HttpServletRequest request, Exception ex) {
         logger.error("服务器错误", ex);
         if (judgeIsMoblie(request)) {
@@ -42,6 +42,11 @@ public class GlobalExceptionHandler {
         }
         ex.printStackTrace();
         return ResultEntity.error("服务器错误：" + ex.getMessage());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResultEntity<String> handleEmployeeNotFoundException(HttpServletRequest request, HttpRequestMethodNotSupportedException ex) {
+        return ResultEntity.error("不支持" + ex.getMethod() + "请求");
     }
 
     /**

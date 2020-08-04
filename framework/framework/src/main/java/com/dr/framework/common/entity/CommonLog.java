@@ -10,7 +10,7 @@ import com.dr.framework.util.Constants;
  * @author dr
  */
 @Table(
-        name = Constants.SYS_TABLE_PREFIX + "COMMON_LOG"
+        name = Constants.COMMON_TABLE_PREFIX + "LOG"
         , module = Constants.COMMON_MODULE_NAME
         , comment = "通用日志"
 )
