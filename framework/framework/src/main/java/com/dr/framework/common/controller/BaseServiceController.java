@@ -7,6 +7,7 @@ import com.dr.framework.common.service.BaseService;
 import com.dr.framework.common.service.DefaultDataBaseService;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.orm.module.EntityRelation;
+import com.dr.framework.core.orm.sql.Column;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @param <S>
  * @param <E>
+ * @author dr
  */
 public abstract class BaseServiceController<S extends BaseService<E>, E extends IdEntity> {
     protected final Logger logger = LoggerFactory.getLogger(BaseServiceController.class);
@@ -91,10 +93,11 @@ public abstract class BaseServiceController<S extends BaseService<E>, E extends 
      * @return
      */
     protected SqlQuery<E> buildDeleteQuery(HttpServletRequest request, E entity) {
-        SqlQuery<? extends IdEntity> sqlQuery = SqlQuery.from(entity.getClass());
         EntityRelation relation = dataBaseService.getTableInfo(entity.getClass());
+        SqlQuery<? extends IdEntity> sqlQuery = SqlQuery.from(relation, false);
         Assert.isTrue(!StringUtils.isEmpty(entity.getId()), "删除条件不能为空!");
-        sqlQuery.in(relation.getColumn(IdEntity.ID_COLUMN_NAME), entity.getId().split(IdEntity.MULTI_STR_SPLIT_CHAR));
+        Column idColumn = relation.getColumn(IdEntity.ID_COLUMN_NAME);
+        sqlQuery.column(idColumn).in(idColumn, entity.getId().split(IdEntity.MULTI_STR_SPLIT_CHAR));
         return (SqlQuery<E>) sqlQuery;
     }
 
