@@ -1,5 +1,6 @@
 package com.dr.framework.common.page;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -33,7 +34,7 @@ public class Page<T> {
      * 起始页，每页分页大小，总共几页
      */
     private long start,
-            size = DEFAULT_PAGE_SIZE,
+            size,
             total;
     private List<T> data;
     private Object other;
@@ -57,6 +58,8 @@ public class Page<T> {
         this.total = total;
         if (total > 0) {
             this.data = data.get();
+        } else {
+            this.data = Collections.emptyList();
         }
     }
 
@@ -66,6 +69,8 @@ public class Page<T> {
         this.total = total;
         if (total > 0) {
             this.data = data.apply(start, start + size);
+        } else {
+            this.data = Collections.emptyList();
         }
     }
 
