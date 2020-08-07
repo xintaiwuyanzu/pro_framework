@@ -40,19 +40,19 @@ public class BaseController<T extends IdEntity> {
 
     public static Person getUserLogin(HttpServletRequest request) {
         RequestAttributes attributes = new ServletRequestAttributes(request);
-        SecurityHolder securityHolder = SecurityHolder.get();
+        SecurityHolder securityHolder = SecurityHolder.get(attributes);
         return securityHolder == null ? null : securityHolder.currentPerson();
     }
 
     public static Organise getOrganise(HttpServletRequest request) {
         RequestAttributes attributes = new ServletRequestAttributes(request);
-        SecurityHolder securityHolder = SecurityHolder.get();
+        SecurityHolder securityHolder = SecurityHolder.get(attributes);
         return securityHolder == null ? null : securityHolder.currentOrganise();
     }
 
     public static ClientInfo getClientInfo(HttpServletRequest request) {
         RequestAttributes attributes = new ServletRequestAttributes(request);
-        SecurityHolder securityHolder = SecurityHolder.get();
+        SecurityHolder securityHolder = SecurityHolder.get(attributes);
         return securityHolder == null ? null : securityHolder.getClientInfo();
     }
 
@@ -186,8 +186,9 @@ public class BaseController<T extends IdEntity> {
      *
      * @param request
      * @return
+     * @deprecated 单词拼错了，静态方法就可以获取 {@link #getUserLogin(HttpServletRequest)}
      */
     protected Person getUserlogin(HttpServletRequest request) {
-        return getUserlogin(request);
+        return getUserLogin(request);
     }
 }

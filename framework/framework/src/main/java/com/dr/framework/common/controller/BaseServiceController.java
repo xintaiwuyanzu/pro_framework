@@ -141,7 +141,7 @@ public abstract class BaseServiceController<S extends BaseService<E>, E extends 
     }
 
     //增删改查
-    protected Person getUserlogin(HttpServletRequest request) {
+    protected Person getUserLogin(HttpServletRequest request) {
         return BaseController.getUserLogin(request);
     }
 
