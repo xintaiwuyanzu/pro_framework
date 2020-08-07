@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.dr.framework.core.orm.sql.support.SqlQuery.QUERY_CLASS_SUFFIX;
 import static com.dr.support.codegen.CodeGenProcessor.CHECK_WORDS_OPTION;
@@ -82,6 +83,11 @@ public class CodeGenProcessor extends AbstractProcessor {
             JavaFileObject jfo = filer.createSourceFile(className + QUERY_CLASS_SUFFIX);
             messager.printMessage(Diagnostic.Kind.NOTE, "正在创建TableInfo文件: " + jfo.toUri());
             VelocityContext vc = new VelocityContext();
+            String modify = typeElement.getModifiers().stream().map(m -> m.name().toLowerCase()).collect(Collectors.joining(" "));
+            if (!modify.isEmpty()) {
+                modify += " ";
+            }
+            vc.put("modify", modify);
             vc.put("pkg", ((PackageElement) typeElement.getEnclosingElement()).getQualifiedName().toString());
             vc.put("className", typeElement.getSimpleName() + QUERY_CLASS_SUFFIX);
             vc.put("entityName", typeElement.getSimpleName());

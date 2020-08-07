@@ -8,7 +8,7 @@ import org.apache.ibatis.type.JdbcType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ${className} implements TableInfo {
+${modify}class ${className} implements TableInfo {
     public static final String TABLE = "${tableName}";
 #foreach($col in ${cols})
     public static final Column $col.get("key").toUpperCase() = new Column(TABLE, "$col.get("value")", "$col.get("key")", JdbcType.$col.get("jdbcType"));
@@ -16,7 +16,7 @@ public class ${className} implements TableInfo {
 
     @Override
     public String moudle() {
-        return  "${moudle}";
+        return "${moudle}";
     }
 
     @Override
