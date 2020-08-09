@@ -243,6 +243,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
      */
     public SqlQuery<E> set(Column column, Serializable data) {
         put(column.getAlias(), data);
+        put("$$set" + column.getAlias(), true);
         return this;
     }
 

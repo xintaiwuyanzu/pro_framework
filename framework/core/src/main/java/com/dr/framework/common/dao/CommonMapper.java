@@ -90,9 +90,9 @@ public interface CommonMapper {
      * @return
      */
     @Update({
-            "<default>update", SqlQuery.TABLE, "!!{set}", SqlQuery.WHERE, "</default>"
-            , "<sqlserver>update A", "!!{set}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"
-            , "<postgre>update A", "!!{setNo}", SqlQuery.FROM, SqlQuery.WHERE, "</postgre>"
+            "<default>update", SqlQuery.TABLE, "!!{setByQuery}", SqlQuery.WHERE, "</default>"
+            , "<sqlserver>update A", "!!{setByQuery}", SqlQuery.FROM, SqlQuery.WHERE, "</sqlserver>"
+            , "<postgre>update A", "!!{setNoAliasByQuery}", SqlQuery.FROM, SqlQuery.WHERE, "</postgre>"
     })
     <E> long updateByQuery(SqlQuery<E> sqlQuery);
 
