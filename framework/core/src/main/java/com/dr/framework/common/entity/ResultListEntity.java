@@ -13,11 +13,11 @@ public class ResultListEntity<T> extends ResultEntity<List<T>> {
         return new ResultListEntity(true, null, null);
     }
 
-    public static <T> ResultListEntity success(List<T> data) {
+    public static <T> ResultListEntity<T> success(List<T> data) {
         return new ResultListEntity<>(true, null, data);
     }
 
-    public static <T> ResultListEntity success(String message, List<T> data) {
+    public static <T> ResultListEntity<T> success(String message, List<T> data) {
         return new ResultListEntity<>(true, message, data);
     }
 
@@ -25,15 +25,15 @@ public class ResultListEntity<T> extends ResultEntity<List<T>> {
         return new ResultListEntity(false, msg, null);
     }
 
-    public static <T> ResultListEntity error(List<T> data) {
+    public static <T> ResultListEntity<T> error(List<T> data) {
         return new ResultListEntity<>(false, null, data);
     }
 
-    public static <T> ResultListEntity error(String message, List<T> data) {
+    public static <T> ResultListEntity<T> error(String message, List<T> data) {
         return new ResultListEntity<>(false, message, data);
     }
 
-    public static <T> ResultListEntity error(String message, String code, List<T> data) {
+    public static <T> ResultListEntity<T> error(String message, String code, List<T> data) {
         return new ResultListEntity<>(false, message, code, data);
     }
 
