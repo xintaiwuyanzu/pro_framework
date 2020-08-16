@@ -247,7 +247,7 @@ public class DefaultOrganisePersonService
     protected void addPersonOrganise(String personId, String organiseId) {
         if (!organiseId.equals(DEFAULT_ROOT_ID)) {
             List<Organise> organises = getParentOrganiseList(organiseId);
-            Assert.isTrue(organises.size() > 0, "未查询到指定的机构信息！");
+            Assert.isTrue(!organises.isEmpty(), "未查询到指定的机构信息！");
             //保存人员机构关联树信息
             for (Organise organise : organises) {
                 PersonOrganise personOrganise = new PersonOrganise();

@@ -524,11 +524,13 @@ public abstract class Dialect {
                 return sqls;
             }
             //修改表注释
-            if (!relation.getRemark().equals(jdbcTable.getRemark()) && supportCommentOn()) {
-                //TODO oracle 默认配置获取不到注释信息
-                if (!(this instanceof OracleDialect)) {
-                    String commentTableSql = "comment on table " + convertObjectName(relation.getName()) + " is '" + relation.getRemark() + "'";
-                    sqls.add(new DataBaseChangeInfo(commentTableSql, String.format("表：【%s】，添加注释【%s】", relation.getName(), relation.getRemark())));
+            if (!StringUtils.isEmpty(relation.getRemark())) {
+                if (!relation.getRemark().equals(jdbcTable.getRemark()) && supportCommentOn()) {
+                    //TODO oracle 默认配置获取不到注释信息
+                    if (!(this instanceof OracleDialect)) {
+                        String commentTableSql = "comment on table " + convertObjectName(relation.getName()) + " is '" + relation.getRemark() + "'";
+                        sqls.add(new DataBaseChangeInfo(commentTableSql, String.format("表：【%s】，添加注释【%s】", relation.getName(), relation.getRemark())));
+                    }
                 }
             }
             //遍历列

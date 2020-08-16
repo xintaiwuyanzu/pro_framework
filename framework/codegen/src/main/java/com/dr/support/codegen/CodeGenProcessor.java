@@ -183,11 +183,11 @@ public class CodeGenProcessor extends AbstractProcessor {
     private TypeMirror readType(TypeMirror typeMirror, TypeMirror implace, Types typeUtils) {
         if (typeMirror.getKind().equals(TypeKind.TYPEVAR)) {
             List<? extends TypeMirror> typeMirrors = typeUtils.directSupertypes(implace);
-            if (typeMirrors.size() > 0) {
+            if (!typeMirrors.isEmpty()) {
                 TypeMirror typeMirror12 = typeMirrors.get(0);
                 if (typeMirror12 instanceof DeclaredType) {
                     List<? extends TypeMirror> typeMirrors1 = ((DeclaredType) typeMirror12).getTypeArguments();
-                    if (typeMirrors1.size() > 0) {
+                    if (!typeMirrors1.isEmpty()) {
                         return typeMirrors1.get(0);
                     } else {
                         return readType(typeMirror, typeMirror12, typeUtils);
