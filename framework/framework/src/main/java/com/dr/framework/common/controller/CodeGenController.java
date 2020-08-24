@@ -56,7 +56,7 @@ public class CodeGenController {
      * @return
      */
     @GetMapping("/columns")
-    public ResultListEntity<Column> columns(String dataSource, String tableName) {
+    public ResultListEntity<Map<String, Object>> columns(String dataSource, String tableName) {
         Optional<MybatisConfigurationBean> optional = mybatisConfigurationBeans.stream().
                 filter(mybatisConfigurationBean1 -> mybatisConfigurationBean1.getDatabaseId().equalsIgnoreCase(dataSource))
                 .findFirst();

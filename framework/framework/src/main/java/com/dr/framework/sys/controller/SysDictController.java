@@ -37,9 +37,11 @@ public class SysDictController extends BaseController<SysDict> {
     @Override
     protected void onBeforePageQuery(HttpServletRequest request, SqlQuery<SysDict> sqlQuery, SysDict entity) {
         super.onBeforePageQuery(request, sqlQuery, entity);
-        sqlQuery.orderBy(SysDictInfo.KEYINFO, SysDictInfo.ORDERBY);
-        sqlQuery.equalIfNotNull(SysDictInfo.STATUS);
-        sqlQuery.like(SysDictInfo.KEYINFO, SysDictInfo.VALUE, SysDictInfo.DESCRIPTION);
+        sqlQuery.equal(SysDictInfo.STATUS, entity.getStatus())
+                .like(SysDictInfo.KEYINFO, entity.getKey())
+                .like(SysDictInfo.VALUE, entity.getValue())
+                .like(SysDictInfo.DESCRIPTION, entity.getDescription())
+                .orderBy(SysDictInfo.KEYINFO, SysDictInfo.ORDERBY);
     }
 
     @RequestMapping("/validate")

@@ -815,6 +815,7 @@ public class DefaultSecurityManager
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void initData(DataBaseService dataBaseService) {
         if (dataBaseService.tableExist("SYS_menu", Constants.SYS_MODULE_NAME)) {
             String rootMenuId = SubSystem.DEFAULT_SYSTEM_ID + "main";
