@@ -94,7 +94,7 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
             registerMybatisConfigs(registry, dataSourceProperties, annotationAttributes);
         } else {
             for (AnnotationAttributes database : databases) {
-                registerSpecifyedDataSource(registry, database);
+                registerSpecifiedDataSource(registry, database);
             }
         }
     }
@@ -114,7 +114,7 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
      * @param registry
      * @param database
      */
-    private void registerSpecifyedDataSource(BeanDefinitionRegistry registry, AnnotationAttributes database) {
+    private void registerSpecifiedDataSource(BeanDefinitionRegistry registry, AnnotationAttributes database) {
         MultiDataSourceProperties dataSourceProperties = readDataSourceProties(database.getString(PREFIX_KEY), database.getString("name"));
         registerMybatisConfigs(registry, dataSourceProperties, database);
     }
@@ -134,7 +134,7 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
         if (databaseAttributes != null && databaseAttributes.containsKey("primary")) {
             primary = databaseAttributes.getBoolean("primary");
         }
-        List<String> pkgs = readPackgeList(databaseAttributes);
+        List<String> pkgs = readPackageList(databaseAttributes);
         if (pkgs.isEmpty()) {
             pkgs = AutoConfigurationPackages.get(this.beanFactory);
         }
@@ -157,7 +157,7 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
      * @param attributes
      */
     private List<String> registerMappers(BeanDefinitionRegistry registry, AnnotationAttributes attributes) {
-        List<String> pkgs = readPackgeList(attributes);
+        List<String> pkgs = readPackageList(attributes);
         if (pkgs.isEmpty()) {
             pkgs = AutoConfigurationPackages.get(this.beanFactory);
         }
@@ -224,7 +224,7 @@ public class MapperBeanDefinitionProcessor implements BeanDefinitionRegistryPost
         return typeFilters;
     }
 
-    private List<String> readPackgeList(AnnotationAttributes attributes) {
+    private List<String> readPackageList(AnnotationAttributes attributes) {
         List<String> list = new ArrayList<>();
         if (attributes != null) {
             Collections.addAll(list, attributes.getStringArray("value"));

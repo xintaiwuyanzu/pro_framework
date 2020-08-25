@@ -88,10 +88,6 @@ public class MybatisTest {
         logger.info(testEntityPage.getSize() + "");
     }
 
-    public static class TestEntity111 extends TestEntity {
-        int count;
-    }
-
     @Test
     public void testReturn() {
         SqlQuery<Map> sqlQuery = SqlQuery.from(TestEntity.class)

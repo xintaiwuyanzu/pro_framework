@@ -38,7 +38,7 @@ public abstract class AbstractMapperProxy implements InvocationHandler, Serializ
         MybatisConfigurationBean mybatisConfigurationBean = findConfigBean(method, entityClass);
         Assert.notNull(mybatisConfigurationBean, "没有找到指定的config类，请检查配置是否正确：" + mapperInterface.getName());
         MapperMethod mapperMethod = cachedMapperMethod(method, entityClass, mybatisConfigurationBean);
-        return mapperMethod.execute(mybatisConfigurationBean.getSqlSessionTemplate(), args);
+        return mapperMethod.execute(mybatisConfigurationBean.getSqlSession(), args);
     }
 
     protected abstract MapperMethod cachedMapperMethod(Method method, Class entityClass, MybatisConfigurationBean mybatisConfigurationBean);

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.EnvironmentAware;
@@ -15,6 +14,7 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -38,19 +38,22 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
     public void registerBeanDefinitions(AnnotationMetadata classMetadata, BeanDefinitionRegistry registry) {
         String autoMapperClassName = EnableAutoMapper.class.getName();
         if (classMetadata.hasAnnotation(autoMapperClassName)) {
+            String singleDataSourceName = null;
             AnnotationAttributes annotationAttributes = AnnotationAttributes.fromMap(classMetadata.getAnnotationAttributes(autoMapperClassName));
             AnnotationAttributes[] databases = annotationAttributes.getAnnotationArray("databases");
             if (databases.length == 0) {
                 MultiDataSourceProperties dataSourceProperties = readDataSourceProties(MapperBeanDefinitionProcessor.DEFAULT_PREFIX, null);
                 dataSourceProperties.setUseXa(false);
                 BeanDefinition beanDefinition = buildBeanDefinition(dataSourceProperties, true);
-                registerBeanDefintionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
+                singleDataSourceName = dataSourceProperties.getName();
+                registerBeanDefinitionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
             } else if (databases.length == 1) {
                 AnnotationAttributes annotationAttributes1 = databases[0];
                 MultiDataSourceProperties dataSourceProperties = readDataSourceProties(annotationAttributes1.getString("prefix"), annotationAttributes1.getString("name"));
                 dataSourceProperties.setUseXa(false);
                 BeanDefinition beanDefinition = buildBeanDefinition(dataSourceProperties, true);
-                registerBeanDefintionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
+                singleDataSourceName = dataSourceProperties.getName();
+                registerBeanDefinitionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
             } else {
                 Set<String> includedModules = new HashSet<>();
                 for (AnnotationAttributes database : databases) {
@@ -64,18 +67,26 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
                                     , String.join(",", dataSourceProperties.getIncludeModules())
                             ));
                     BeanDefinition beanDefinition = buildBeanDefinition(dataSourceProperties, primary);
-                    registerBeanDefintionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
+                    registerBeanDefinitionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
                 }
             }
             BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(MapperBeanDefinitionProcessor.class)
-                    .addConstructorArgValue(annotationAttributes)
+                    .addConstructorArgValue(annotationAttributes).setPrimary(true)
                     .getBeanDefinition();
-            beanDefinition.setPrimary(true);
+
             registry.registerBeanDefinition("MapperBeanDefinitionProcessor", beanDefinition);
+            //如果只有一个数据源，则使用默认的事务管理器，多个的时候使用autoconfig
+            if (singleDataSourceName != null) {
+                BeanDefinition transactionBean = BeanDefinitionBuilder.genericBeanDefinition(DataSourceTransactionManager.class)
+                        .addConstructorArgReference(singleDataSourceName)
+                        .setPrimary(true)
+                        .getBeanDefinition();
+                registry.registerBeanDefinition("transactionManager", transactionBean);
+            }
         }
     }
 
-    private void registerBeanDefintionIfNotExist(BeanDefinitionRegistry registry, BeanDefinition beanDefinition, String beanName) {
+    private void registerBeanDefinitionIfNotExist(BeanDefinitionRegistry registry, BeanDefinition beanDefinition, String beanName) {
         if (!registry.containsBeanDefinition(beanName)) {
             registry.registerBeanDefinition(beanName, beanDefinition);
         }
@@ -114,7 +125,7 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
      * @param primary
      * @return
      */
-    private BeanDefinition buildBeanDefinition(DataSourceProperties dataSourceProperties, boolean primary) {
+    private BeanDefinition buildBeanDefinition(MultiDataSourceProperties dataSourceProperties, boolean primary) {
         BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(DataSourceFactory.class)
                 .addPropertyValue("properties", dataSourceProperties)
                 .addPropertyValue("beanName", dataSourceProperties.getName())

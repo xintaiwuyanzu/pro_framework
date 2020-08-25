@@ -12,17 +12,17 @@ import com.dr.framework.core.orm.jdbc.Relation;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.TableInfo;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
-import com.dr.framework.core.orm.support.mybatis.MulitiDataSourceLangDriver;
+import com.dr.framework.core.orm.support.mybatis.MultiDataSourceLangDriver;
 import com.dr.framework.core.orm.support.mybatis.MybatisPlugin;
 import com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure.MultiDataSourceProperties;
-import com.dr.framework.core.orm.support.mybatis.spring.sqlsession.SqlSessionTemplate;
-import com.dr.framework.core.orm.support.mybatis.spring.transaction.SpringManagedTransactionFactory;
 import org.apache.ibatis.binding.MapperRegistry;
 import org.apache.ibatis.logging.slf4j.Slf4jImpl;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
+import org.mybatis.spring.transaction.SpringManagedTransactionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public class MybatisConfigurationBean extends Configuration implements InitializingBean, ApplicationContextAware {
     static final String EXCEPTION_STRING = "mapper 自定义解析，不能执行该方法";
     Logger logger = LoggerFactory.getLogger(MybatisConfigurationBean.class);
-    private SqlSessionTemplate sqlSessionTemplate;
+    private SqlSession sqlSession;
     private MultiDataSourceProperties dataSourceProperties;
     private DefaultDataBaseService dataBaseService;
     private ApplicationContext applicationContext;
@@ -63,7 +63,7 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
         super(environment);
         addInterceptor(new MybatisPlugin());
         setLogImpl(Slf4jImpl.class);
-        getLanguageRegistry().setDefaultDriverClass(MulitiDataSourceLangDriver.class);
+        getLanguageRegistry().setDefaultDriverClass(MultiDataSourceLangDriver.class);
     }
 
     @Override
@@ -117,19 +117,17 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
             }
             Relation<Column> jdbc = dataSourceProperties.getDataBaseMetaData().getTable(entityRelation.getName());
             if (jdbc == null) {
-                if (jdbc == null) {
-                    logger.warn("实体类【{}】对应的表【{}】在数据库【{}】中未创建，请及时更新数据库表结构"
-                            , c
-                            , entityRelation.getName()
-                            , getDatabaseId()
-                    );
-                }
+                logger.warn("实体类【{}】对应的表【{}】在数据库【{}】中未创建，请及时更新数据库表结构"
+                        , c
+                        , entityRelation.getName()
+                        , getDatabaseId()
+                );
             } else {
                 entityRelation.bind(jdbc);
             }
         }
         //在执行sql语句的映射和转换
-        sqlSessionTemplate = new SqlSessionTemplate(new DefaultSqlSessionFactory(this));
+        sqlSession = new SqlSessionTemplate(new DefaultSqlSessionFactory(this));
         for (Class mapperInterface : mapperInterfaces) {
             if (mapperInterface.isAnnotationPresent(Mapper.class)) {
                 Mapper mapper = (Mapper) mapperInterface.getAnnotation(Mapper.class);
@@ -251,8 +249,8 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
         return dataSourceProperties.getDataBaseMetaData().getTableMap();
     }
 
-    public SqlSessionTemplate getSqlSessionTemplate() {
-        return sqlSessionTemplate;
+    public SqlSession getSqlSession() {
+        return sqlSession;
     }
 
     public void setEntityClass(List<Class> entityClass) {

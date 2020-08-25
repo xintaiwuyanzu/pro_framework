@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.dr</groupId>
         <artifactId>parent</artifactId>
-        <version>0.0.5-SNAPSHOT</version>
+        <version>0.0.6-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
     <artifactId>orm</artifactId>
@@ -13,6 +13,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>2.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -25,6 +30,11 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.elasticsearch</groupId>
@@ -57,7 +67,7 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>com.dm.jdbc</groupId>
             <artifactId>oracle-wraper</artifactId>
             <scope>test</scope>
@@ -66,7 +76,7 @@
             <groupId>com.dm.jdbc</groupId>
             <artifactId>driver</artifactId>
             <scope>test</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc6</artifactId>
