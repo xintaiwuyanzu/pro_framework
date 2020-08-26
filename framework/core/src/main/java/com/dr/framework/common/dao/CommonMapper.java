@@ -121,11 +121,23 @@ public interface CommonMapper {
     @Select({"select ", SqlQuery.COLUMNS, SqlQuery.FROM, SqlQuery.WHERE})
     <E> E selectOneByQuery(SqlQuery<E> sqlQuery);
 
+    @Select({
+            "<default> select ", SqlQuery.COLUMNS, SqlQuery.FROM, SqlQuery.WHERE, " for update</default>",
+            "<sqlserver> select ", SqlQuery.COLUMNS, SqlQuery.FROM, SqlQuery.WHERE, " WITH (TABLOCKX)</sqlserver>"
+    })
+    <E> E selectOneByQueryForUpdate(SqlQuery<E> sqlQuery);
+
     @Select("select !!{columns} from !!{table}")
     <E> List<E> selectAll(Class<E> entityClass);
 
     @Select({"select", SqlQuery.COLUMNS, SqlQuery.FROM, SqlQuery.WHERE})
     <E> List<E> selectByQuery(SqlQuery<E> sqlQuery);
+
+    @Select({
+            "<default> select ", SqlQuery.COLUMNS, SqlQuery.FROM, SqlQuery.WHERE, " for update</default>",
+            "<sqlserver> select ", SqlQuery.COLUMNS, SqlQuery.FROM, SqlQuery.WHERE, " WITH (TABLOCKX)</sqlserver>"
+    })
+    <E> List<E> selectByQueryForUpdate(SqlQuery<E> sqlQuery);
 
     @Select({"select", SqlQuery.COLUMNS, SqlQuery.FROM, SqlQuery.WHERE})
     <E> List<E> selectLimitByQuery(SqlQuery<E> sqlQuery, RowBounds rowBounds);
