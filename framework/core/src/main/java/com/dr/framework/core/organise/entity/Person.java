@@ -109,7 +109,13 @@ public class Person extends BaseStatusEntity<String> implements SourceRefEntity 
         这里扩展一下机构相关的属性，供查询展示使用
      ==========
      */
+    /**
+     * 默认机构Id
+     */
     private String defaultOrganiseId;
+    /**
+     * 默认机构名称
+     */
     private String defaultOrganiseName;
 
     @Override

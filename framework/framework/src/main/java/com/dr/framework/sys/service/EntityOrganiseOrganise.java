@@ -1,4 +1,4 @@
-package com.dr.framework.core.organise.entity;
+package com.dr.framework.sys.service;
 
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;
@@ -11,9 +11,8 @@ import com.dr.framework.core.util.Constants;
  */
 @Table(name = Constants.SYS_TABLE_PREFIX + "organise_organise"
         , comment = "机构树关联表"
-        , module = Constants.SYS_MODULE_NAME
-        , genInfo = false)
-public class OrganiseOrganise {
+        , module = Constants.SYS_MODULE_NAME)
+class EntityOrganiseOrganise {
     @Column(name = "parent_id", comment = "父机构id", length = 100)
     private String parentId;
     @Column(name = "organise_id", comment = "机构id", length = 100)

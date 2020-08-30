@@ -164,8 +164,22 @@ public class DefaultLoginService implements LoginService, InitializingBean {
         addLogin(personId, loginType, loginId, password, true);
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    protected long addLogin(String personId, String loginType, String loginId, String password, boolean encryPass) {
+    public void addLoginWithDefaultPassWord(String personId, String loginType, String loginId) {
+        Assert.isTrue(!StringUtils.isEmpty(personId), "人员Id不能为空！");
+        UserLogin userLogin = commonMapper.selectOneByQuery(
+                SqlQuery.from(userLoginRelation)
+                        .equal(userLoginRelation.getColumn("person_id"), personId)
+                        .equal(userLoginRelation.getColumn("user_type"), loginType)
+                        .setReturnClass(UserLogin.class)
+        );
+        Assert.notNull(userLogin, "未查询到默认登陆账户");
+        addLogin(personId, loginType, loginId, userLogin.getPassword(), userLogin.getSalt());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    protected long addLogin(String personId, String loginType, String loginId, String password, String salt) {
         Assert.isTrue(!StringUtils.isEmpty(personId), "人员Id不能为空！");
         Person person = commonMapper.selectById(Person.class, personId);
         Assert.isTrue(person != null, "未查询到指定的人员！");
@@ -175,11 +189,17 @@ public class DefaultLoginService implements LoginService, InitializingBean {
                         .equal(userLoginRelation.getColumn("user_type"), loginType)
                         .equal(userLoginRelation.getColumn("outUser"), person.isOutUser())
         ), "已存在指定类型的登录账户");
+        doAddUserLogin(person, password, salt, loginId, loginType);
+        return 0;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    protected long addLogin(String personId, String loginType, String loginId, String password, boolean encryPass) {
         String salt = genSalt();
         if (encryPass) {
             password = passWordEncrypt.encryptAddLogin(password, salt, loginType);
         }
-        doAddUserLogin(person, password, salt, loginId, loginType);
+        addLogin(personId, loginType, loginId, password, salt);
         return 0;
     }
 
