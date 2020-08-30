@@ -10,7 +10,10 @@ import com.dr.framework.common.service.DataBaseService;
 import com.dr.framework.common.service.DefaultDataBaseService;
 import com.dr.framework.common.util.IDNo;
 import com.dr.framework.core.event.BaseCRUDEvent;
-import com.dr.framework.core.organise.entity.*;
+import com.dr.framework.core.organise.entity.Organise;
+import com.dr.framework.core.organise.entity.Person;
+import com.dr.framework.core.organise.entity.PersonGroup;
+import com.dr.framework.core.organise.entity.UserLogin;
 import com.dr.framework.core.organise.query.OrganiseQuery;
 import com.dr.framework.core.organise.query.PersonQuery;
 import com.dr.framework.core.organise.service.LoginService;
@@ -29,9 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.dr.framework.common.entity.IdEntity.ID_COLUMN_NAME;
@@ -53,16 +54,9 @@ public class DefaultOrganisePersonService
     private DefaultDataBaseService defaultDataBaseService;
     private ApplicationEventPublisher applicationEventPublisher;
 
-
     EntityRelation organiseRelation;
-    EntityRelation organiseOrganiseRelation;
-
-    EntityRelation personOrganiseRelation;
     EntityRelation personRelation;
-
     EntityRelation personGroupRelation;
-    EntityRelation personGroupRelationRelation;
-
     EntityRelation userLoginRelation;
 
     public DefaultOrganisePersonService(CommonMapper commonMapper,
@@ -82,18 +76,11 @@ public class DefaultOrganisePersonService
         Assert.isTrue(!StringUtils.isEmpty(organiseId), "机构编号不能为空！");
         Organise organise = commonMapper.selectById(Organise.class, organiseId);
         Assert.notNull(organise, "未查询到指定的机构信息");
-        SqlQuery sqlQuery = SqlQuery.from(organiseRelation)
-                .join(
-                        organiseRelation.getColumn("id")
-                        , organiseOrganiseRelation.getColumn("parent_id")
-                )
-                .equal(
-                        organiseOrganiseRelation.getColumn("organise_id"),
-                        organiseId
-                ).equal(
-                        organiseOrganiseRelation.getColumn("group_id"),
-                        organise.getGroupId()
-                );
+        SqlQuery<Organise> sqlQuery = SqlQuery.from(organiseRelation)
+                .join(organiseRelation.getColumn("id"), EntityOrganiseOrganiseInfo.PARENTID)
+                .equal(EntityOrganiseOrganiseInfo.ORGANISEID, organiseId)
+                .equal(EntityOrganiseOrganiseInfo.GROUPID, organise.getGroupId())
+                .setReturnClass(Organise.class);
         if (organiseType != null && organiseType.length > 0) {
             sqlQuery.in(organiseRelation.getColumn("organise_type"), organiseType);
         }
@@ -106,18 +93,11 @@ public class DefaultOrganisePersonService
         Assert.isTrue(!StringUtils.isEmpty(organiseId), "机构编号不能为空！");
         Organise organise = commonMapper.selectById(Organise.class, organiseId);
         Assert.notNull(organise, "未查询到指定的机构信息");
-        SqlQuery sqlQuery = SqlQuery.from(organiseRelation)
-                .join(
-                        organiseRelation.getColumn("id")
-                        , organiseOrganiseRelation.getColumn("organise_id")
-                )
-                .equal(
-                        organiseOrganiseRelation.getColumn("parent_id"),
-                        organiseId
-                ).equal(
-                        organiseOrganiseRelation.getColumn("group_id"),
-                        organise.getGroupId()
-                );
+        SqlQuery<Organise> sqlQuery = SqlQuery.from(organiseRelation)
+                .join(organiseRelation.getColumn("id"), EntityOrganiseOrganiseInfo.ORGANISEID)
+                .equal(EntityOrganiseOrganiseInfo.PARENTID, organiseId)
+                .equal(EntityOrganiseOrganiseInfo.GROUPID, organise.getGroupId())
+                .setReturnClass(Organise.class);
         if (organiseType != null && organiseType.length > 0) {
             sqlQuery.in(organiseRelation.getColumn("organise_type"), organiseType);
         }
@@ -188,7 +168,7 @@ public class DefaultOrganisePersonService
             List<Organise> parents = getParentOrganiseList(organise.getParentId());
             if (parents != null) {
                 for (Organise parent : parents) {
-                    OrganiseOrganise organiseOrganise = new OrganiseOrganise();
+                    EntityOrganiseOrganise organiseOrganise = new EntityOrganiseOrganise();
                     organiseOrganise.setOrganiseId(organise.getId());
                     organiseOrganise.setParentId(parent.getId());
                     organiseOrganise.setDefault(false);
@@ -196,7 +176,7 @@ public class DefaultOrganisePersonService
                     commonMapper.insert(organiseOrganise);
                 }
             }
-            OrganiseOrganise organiseOrganise = new OrganiseOrganise();
+            EntityOrganiseOrganise organiseOrganise = new EntityOrganiseOrganise();
             organiseOrganise.setOrganiseId(organise.getId());
             organiseOrganise.setParentId(organise.getParentId());
             organiseOrganise.setDefault(true);
@@ -250,19 +230,19 @@ public class DefaultOrganisePersonService
             Assert.isTrue(!organises.isEmpty(), "未查询到指定的机构信息！");
             //保存人员机构关联树信息
             for (Organise organise : organises) {
-                PersonOrganise personOrganise = new PersonOrganise();
+                EntityPersonOrganise personOrganise = new EntityPersonOrganise();
                 personOrganise.setPersonId(personId);
                 personOrganise.setOrganiseId(organise.getId());
                 personOrganise.setDefault(organise.getId().equalsIgnoreCase(organiseId));
                 commonMapper.insert(personOrganise);
             }
-            PersonOrganise personOrganise = new PersonOrganise();
+            EntityPersonOrganise personOrganise = new EntityPersonOrganise();
             personOrganise.setPersonId(personId);
             personOrganise.setOrganiseId(organiseId);
             personOrganise.setDefault(true);
             commonMapper.insert(personOrganise);
         } else {
-            PersonOrganise personOrganise = new PersonOrganise();
+            EntityPersonOrganise personOrganise = new EntityPersonOrganise();
             personOrganise.setPersonId(personId);
             personOrganise.setOrganiseId(DEFAULT_ROOT_ID);
             personOrganise.setDefault(true);
@@ -303,23 +283,23 @@ public class DefaultOrganisePersonService
                 .in(personRelation.getColumn("group_type"), types);
     }
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addPersonToGroup(String groupId, String... personIds) {
         Assert.isTrue(!StringUtils.isEmpty(groupId), "分组id不能为空！");
         Assert.isTrue(personIds != null && personIds.length > 0, "人员不能为空！");
         Assert.isTrue(commonMapper.exists(PersonGroup.class, groupId), "不存在指定的人员分组！");
-        List<Object> personGroupRelations = commonMapper.selectByQuery(
-                SqlQuery.from(personGroupRelationRelation)
-                        .equal(personGroupRelationRelation.getColumn("groupId"), groupId)
-        );
-        List<String> savedPersons = personGroupRelations.stream()
-                .map(o -> ((PersonGroupRelation) o).getPersonId())
+        List<String> savedPersons = commonMapper.selectByQuery(
+                SqlQuery.from(EntityPersonGroupRelation.class)
+                        .equal(EntityPersonGroupRelationInfo.GROUPID, groupId)
+        ).stream()
+                .map(EntityPersonGroupRelation::getPersonId)
                 .collect(Collectors.toList());
         Arrays.stream(personIds)
                 .filter(savedPersons::contains)
                 .forEach(p -> {
-                    PersonGroupRelation personGroupRelation = new PersonGroupRelation();
+                    EntityPersonGroupRelation personGroupRelation = new EntityPersonGroupRelation();
                     personGroupRelation.setGroupId(groupId);
                     personGroupRelation.setPersonId(p);
                     commonMapper.insert(personGroupRelation);
@@ -358,9 +338,9 @@ public class DefaultOrganisePersonService
         if (!StringUtils.isEmpty(organise.getParentId()) && !old.getParentId().equals(organise.getParentId())) {
             Assert.notNull(getOrganise(new OrganiseQuery.Builder().idEqual(organise.getId()).build()), "未查询到指定的父机构");
             //1、先删除所有的之前的机构关联关系
-            commonMapper.deleteByQuery(SqlQuery.from(organiseOrganiseRelation)
-                    .equal(organiseOrganiseRelation.getColumn("organise_id"), old.getId())
-                    .equal(organiseOrganiseRelation.getColumn("group_id"), old.getGroupId())
+            commonMapper.deleteByQuery(SqlQuery.from(EntityOrganiseOrganise.class)
+                    .equal(EntityOrganiseOrganiseInfo.ORGANISEID, old.getId())
+                    .equal(EntityOrganiseOrganiseInfo.GROUPID, old.getGroupId())
             );
             //2、在添加新的机构关联关系
             addOrganiseRelation(organise);
@@ -372,8 +352,9 @@ public class DefaultOrganisePersonService
             if (people != null && !people.isEmpty()) {
                 for (Person person : people) {
                     //2、逐条删除人员机构关联
-                    commonMapper.deleteByQuery(SqlQuery.from(personOrganiseRelation)
-                            .equal(personOrganiseRelation.getColumn("person_id"), person.getIdNo())
+                    commonMapper.deleteByQuery(
+                            SqlQuery.from(EntityPersonOrganise.class)
+                                    .equal(EntityPersonOrganiseInfo.PERSONID, person.getIdNo())
                     );
                     //3、添加新的人员机构关联
                     addPersonOrganise(person.getId(), organise.getId());
@@ -419,8 +400,8 @@ public class DefaultOrganisePersonService
         commonMapper.deleteByQuery(SqlQuery.from(organiseRelation)
                 .in(organiseRelation.getColumn(IdEntity.ID_COLUMN_NAME), organiseIds));
         //删除机构关联
-        commonMapper.deleteByQuery(SqlQuery.from(organiseOrganiseRelation)
-                .in(organiseOrganiseRelation.getColumn("organise_id"), organiseIds));
+        commonMapper.deleteByQuery(SqlQuery.from(EntityOrganiseOrganise.class)
+                .in(EntityOrganiseOrganiseInfo.ORGANISEID, organiseIds));
         //删除人员
         List<Person> people = getPersonList(new PersonQuery.Builder()
                 .organiseIdEqual(organiseIds)
@@ -438,7 +419,14 @@ public class DefaultOrganisePersonService
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public long updatePerson(Person person) {
+        return updatePerson(person, false);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long updatePerson(Person person, boolean updateLogin) {
         //TODO 这里只是更新基本信息
         Person old = getPerson(new PersonQuery.Builder().idEqual(person.getId()).build());
         Assert.notNull(old, "未查询到指定的用户");
@@ -454,6 +442,11 @@ public class DefaultOrganisePersonService
                 .set(personRelation.getColumn("duty"), person.getDuty())
                 .set(personRelation.getColumn("email"), person.getEmail())
                 .set(personRelation.getColumn("mobile"), person.getMobile())
+                .set(personRelation.getColumn("phone"), person.getPhone())
+                .set(personRelation.getColumn("nation"), person.getNation())
+                .set(personRelation.getColumn("weiChatId"), person.getWeiChatId())
+                .set(personRelation.getColumn("qq"), person.getQq())
+                .set(personRelation.getColumn("address"), person.getAddressId())
                 .set(personRelation.getColumn("status_info"), person.getStatus())
                 .set(personRelation.getColumn("order_info"), person.getOrder())
                 .set(personRelation.getColumn("avatar_file_id"), person.getAvatarFileId())
@@ -462,13 +455,77 @@ public class DefaultOrganisePersonService
         if (!StringUtils.isEmpty(person.getUpdateDate())) {
             sqlQuery.set(personRelation.getColumn("updateDate"), person.getUpdateDate());
         }
-        if (!StringUtils.isEmpty(person.getUpdateDate())) {
+        if (!StringUtils.isEmpty(person.getUpdatePerson())) {
             sqlQuery.set(personRelation.getColumn("updatePerson"), person.getUpdatePerson());
         }
-        commonMapper.updateIgnoreNullByQuery(sqlQuery);
+        commonMapper.updateByQuery(sqlQuery);
+        //查询新的人员信息
         Person nPerson = getPerson(new PersonQuery.Builder().idEqual(person.getId()).build());
+
+        //更新登录账户
+        if (updateLogin) {
+            List<UserLogin> userLogins = loginService.userLogin(old.getId());
+            Map<String, String> oldLoginTypeValues = loginTypeValues(old);
+            Map<String, String> newLoginTypeValues = loginTypeValues(nPerson);
+            Map<String, UserLogin> userLoginMap = userLogins.stream().collect(Collectors.toMap(UserLogin::getUserType, u -> u));
+
+            //TODO 这里的逻辑还不够严谨
+            newLoginTypeValues.entrySet()
+                    .stream()
+                    .forEach(e -> {
+                        String loginType = e.getKey();
+                        String loginId = e.getValue();
+                        String oldLoginId = oldLoginTypeValues.get(loginType);
+
+                        if (StringUtils.isEmpty(loginId)) {
+                            //如果新的loginId为空，删除指定的登录账户
+                            UserLogin userLogin = userLoginMap.get(loginType);
+                            if (userLogin != null) {
+                                loginService.removeLogin(userLogin.getLoginId());
+                            }
+                        } else {
+                            if (StringUtils.isEmpty(oldLoginId)) {
+                                //如果老的login为空，则添加默认的登录账户
+                                loginService.addLoginWithDefaultPassWord(person.getId(), loginType, loginId);
+                            } else {
+                                if (!loginId.equals(oldLoginId)) {
+                                    //如果老的loginId与新的loginId不同，则更新loginId
+                                    UserLogin userLogin = userLoginMap.get(loginType);
+                                    if (userLogin != null) {
+                                        userLogin.setLoginId(loginId);
+                                        Assert.isTrue(!commonMapper.existsByQuery(
+                                                SqlQuery.from(userLoginRelation)
+                                                        .equal(userLoginRelation.getColumn("person_id"), person.getId())
+                                                        .equal(userLoginRelation.getColumn("user_type"), loginType)
+                                                        .equal(userLoginRelation.getColumn("outUser"), person.isOutUser())
+                                        ), "已存在指定类型的登录账户");
+                                        userLogin.setUpdateDate(System.currentTimeMillis());
+                                        Person currentPerson = SecurityHolder.get().currentPerson();
+                                        if (currentPerson != null) {
+                                            userLogin.setUpdatePerson(currentPerson.getId());
+                                        }
+                                        commonMapper.updateById(userLogin);
+                                    }
+                                }
+                            }
+                        }
+                    });
+        }
         applicationEventPublisher.publishEvent(new BaseCRUDEvent(nPerson, old, BaseCRUDEvent.EventType.UPDATE));
         return 0;
+    }
+
+    private Map<String, String> loginTypeValues(Person person) {
+        Map<String, String> map = new HashMap<>(6);
+        if (person != null) {
+            map.put(LoginService.LOGIN_TYPE_DEFAULT, person.getUserCode());
+            map.put(LoginService.LOGIN_TYPE_IDNO, person.getIdNo());
+            map.put(LoginService.LOGIN_TYPE_PHONE, person.getPhone());
+            map.put(LoginService.LOGIN_TYPE_EMAIL, person.getEmail());
+            map.put(LoginService.LOGIN_TYPE_QQ, person.getQq());
+            map.put(LoginService.LOGIN_TYPE_WX, person.getWeiChatId());
+        }
+        return map;
     }
 
     @Override
@@ -485,9 +542,7 @@ public class DefaultOrganisePersonService
         Assert.notNull(person, "未查询到指定用户");
         Assert.isTrue(!organiseId.equals(person.getDefaultOrganiseId()), "新机构与原有机构不能相同");
         //删除机构人员关联
-        commonMapper.deleteByQuery(SqlQuery.from(personOrganiseRelation)
-                .equal(personOrganiseRelation.getColumn("person_id"), personId)
-        );
+        commonMapper.deleteByQuery(SqlQuery.from(EntityPersonOrganise.class).equal(EntityPersonOrganiseInfo.PERSONID, personId));
         //添加到新的机构
         addPersonOrganise(personId, organiseId);
         return 0;
@@ -503,32 +558,32 @@ public class DefaultOrganisePersonService
         //删除登录用户
         loginService.removePersonLogin(personId);
         //删除人员机构关联
-        commonMapper.deleteByQuery(SqlQuery.from(personOrganiseRelation)
-                .equal(personOrganiseRelation.getColumn("person_id"), personId)
+        commonMapper.deleteByQuery(SqlQuery.from(EntityPersonOrganise.class)
+                .equal(EntityPersonOrganiseInfo.PERSONID, personId)
         );
         //  删除人员所属分组
-        commonMapper.deleteByQuery(SqlQuery.from(personGroupRelationRelation)
-                .equal(personGroupRelationRelation.getColumn("personId"), personId)
+        commonMapper.deleteByQuery(SqlQuery.from(EntityPersonGroupRelation.class)
+                .equal(EntityPersonGroupRelationInfo.PERSONID, personId)
         );
         applicationEventPublisher.publishEvent(new BaseCRUDEvent(old, BaseCRUDEvent.EventType.DELETE));
         return 0;
     }
 
-    private SqlQuery buildGroupPersonQuery(String groupId) {
-        SqlQuery query = SqlQuery.from(personRelation)
+    private SqlQuery<Person> buildGroupPersonQuery(String groupId) {
+        SqlQuery<Person> query = SqlQuery.from(personRelation)
                 .in(personRelation.getColumn(IdEntity.ID_COLUMN_NAME)
-                        , SqlQuery.from(personGroupRelationRelation, false)
-                                .column(personGroupRelationRelation.getColumn("personId"))
-                                .equal(personGroupRelationRelation.getColumn("groupId"), groupId)
-                );
+                        , SqlQuery.from(EntityPersonGroupRelation.class, false)
+                                .column(EntityPersonGroupRelationInfo.PERSONID)
+                                .equal(EntityPersonGroupRelationInfo.GROUPID, groupId)
+                ).setReturnClass(Person.class);
         personQueryJoin(query);
         return query;
     }
 
     private SqlQuery personQueryJoin(SqlQuery query) {
-        return query.join(personRelation.getColumn(IdEntity.ID_COLUMN_NAME), personOrganiseRelation.getColumn("person_id"))
-                .join(organiseRelation.getColumn(IdEntity.ID_COLUMN_NAME), personOrganiseRelation.getColumn("organise_id"))
-                .equal(personOrganiseRelation.getColumn("is_default"), true)
+        return query.join(personRelation.getColumn(IdEntity.ID_COLUMN_NAME), EntityPersonOrganiseInfo.PERSONID)
+                .join(organiseRelation.getColumn(IdEntity.ID_COLUMN_NAME), EntityPersonOrganiseInfo.ORGANISEID)
+                .equal(EntityPersonOrganiseInfo.ISDEFAULT, true)
                 .column(
                         organiseRelation.getColumn(IdEntity.ID_COLUMN_NAME).alias("defaultOrganiseId")
                         , organiseRelation.getColumn("organise_name").alias("defaultOrganiseName")
@@ -575,12 +630,9 @@ public class DefaultOrganisePersonService
     @Override
     public void afterPropertiesSet() {
         organiseRelation = defaultDataBaseService.getTableInfo(Organise.class);
-        organiseOrganiseRelation = defaultDataBaseService.getTableInfo(OrganiseOrganise.class);
         personRelation = defaultDataBaseService.getTableInfo(Person.class);
         userLoginRelation = defaultDataBaseService.getTableInfo(UserLogin.class);
-        personOrganiseRelation = defaultDataBaseService.getTableInfo(PersonOrganise.class);
         personGroupRelation = defaultDataBaseService.getTableInfo(PersonGroup.class);
-        personGroupRelationRelation = defaultDataBaseService.getTableInfo(PersonGroupRelation.class);
     }
 
     /**
@@ -616,25 +668,25 @@ public class DefaultOrganisePersonService
         }
         if (organiseQuery.getDirectPersonIds() != null && !organiseQuery.getDirectPersonIds().isEmpty()) {
             query.in(organiseRelation.getColumn(IdEntity.ID_COLUMN_NAME),
-                    SqlQuery.from(personOrganiseRelation, false)
-                            .column(personOrganiseRelation.getColumn("organise_id"))
-                            .equal(personOrganiseRelation.getColumn("is_default"), true)
-                            .in(personOrganiseRelation.getColumn("person_id"), organiseQuery.getDirectPersonIds())
+                    SqlQuery.from(EntityPersonOrganise.class, false)
+                            .column(EntityPersonOrganiseInfo.ORGANISEID)
+                            .equal(EntityPersonOrganiseInfo.ISDEFAULT, true)
+                            .in(EntityPersonOrganiseInfo.PERSONID, organiseQuery.getDirectPersonIds())
             );
         }
         if (organiseQuery.getPersonIds() != null && !organiseQuery.getPersonIds().isEmpty()) {
             query.in(organiseRelation.getColumn(IdEntity.ID_COLUMN_NAME),
-                    SqlQuery.from(personOrganiseRelation, false)
-                            .column(personOrganiseRelation.getColumn("organise_id"))
-                            .in(personOrganiseRelation.getColumn("person_id"), organiseQuery.getPersonIds())
+                    SqlQuery.from(EntityPersonOrganise.class, false)
+                            .column(EntityPersonOrganiseInfo.ORGANISEID)
+                            .in(EntityPersonOrganiseInfo.PERSONID, organiseQuery.getPersonIds())
             );
         }
 
         if (organiseQuery.getTreeParentId() != null && !organiseQuery.getTreeParentId().isEmpty()) {
             query.in(organiseRelation.getColumn(IdEntity.ID_COLUMN_NAME),
-                    SqlQuery.from(organiseOrganiseRelation, false)
-                            .column(organiseOrganiseRelation.getColumn("organise_id"))
-                            .in(organiseOrganiseRelation.getColumn("parent_id"), organiseQuery.getTreeParentId())
+                    SqlQuery.from(EntityOrganiseOrganise.class, false)
+                            .column(EntityOrganiseOrganiseInfo.ORGANISEID)
+                            .in(EntityOrganiseOrganiseInfo.PARENTID, organiseQuery.getTreeParentId())
             );
         }
         if (!StringUtils.isEmpty(organiseQuery.getCodeEqual())) {
@@ -685,17 +737,17 @@ public class DefaultOrganisePersonService
         }
         if (personQuery.getOrganiseId() != null && !personQuery.getOrganiseId().isEmpty()) {
             query.in(personRelation.getColumn(IdEntity.ID_COLUMN_NAME),
-                    SqlQuery.from(personOrganiseRelation, false)
-                            .column(personOrganiseRelation.getColumn("person_id"))
-                            .in(personOrganiseRelation.getColumn("organise_id"), personQuery.getOrganiseId())
+                    SqlQuery.from(EntityPersonOrganise.class, false)
+                            .column(EntityPersonOrganiseInfo.PERSONID)
+                            .in(EntityPersonOrganiseInfo.ORGANISEID, personQuery.getOrganiseId())
             );
         }
         if (personQuery.getDefaultOrganiseId() != null && !personQuery.getDefaultOrganiseId().isEmpty()) {
             query.in(personRelation.getColumn(IdEntity.ID_COLUMN_NAME),
-                    SqlQuery.from(personOrganiseRelation, false)
-                            .column(personOrganiseRelation.getColumn("person_id"))
-                            .in(personOrganiseRelation.getColumn("organise_id"), personQuery.getDefaultOrganiseId())
-                            .equal(personOrganiseRelation.getColumn("is_default"), true)
+                    SqlQuery.from(EntityPersonOrganise.class, false)
+                            .column(EntityPersonOrganiseInfo.PERSONID)
+                            .in(EntityPersonOrganiseInfo.ORGANISEID, personQuery.getDefaultOrganiseId())
+                            .equal(EntityPersonOrganiseInfo.ISDEFAULT, true)
 
             );
         }
@@ -712,7 +764,7 @@ public class DefaultOrganisePersonService
             query.lessThanEqual(personRelation.getColumn("createDate"), personQuery.getCreateDayEnd());
         }
         query.orderBy(personRelation.getColumn("order_info"))
-                .equal(personOrganiseRelation.getColumn("is_default"), true);
+                .equal(EntityPersonOrganiseInfo.ISDEFAULT, true);
         return personQueryJoin(query);
     }
 

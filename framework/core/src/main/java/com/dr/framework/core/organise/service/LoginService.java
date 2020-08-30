@@ -55,12 +55,12 @@ public interface LoginService {
 
     /**
      * 根据历史登录账户的登录密码创建登录用户
-     *  TODO 这个需求不大合理
+     *
      * @param personId
      * @param loginType
      * @param loginId
      */
-    //void addLoginWithExistPassWord(String personId, String loginType, String loginId);
+    void addLoginWithDefaultPassWord(String personId, String loginType, String loginId);
 
     /**
      * 登录验证，并返回人员基本信息

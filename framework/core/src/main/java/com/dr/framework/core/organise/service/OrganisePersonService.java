@@ -223,6 +223,8 @@ public interface OrganisePersonService {
     void addGroup(PersonGroup group, String... personIds);
 
     /**
+     * 获取分组
+     *
      * @param name
      * @param types
      * @return
@@ -233,6 +235,8 @@ public interface OrganisePersonService {
      * 获取分组分页
      *
      * @param name
+     * @param start
+     * @param end
      * @param types
      * @return
      */
@@ -281,12 +285,21 @@ public interface OrganisePersonService {
     long deleteOrganise(String organiseId);
 
     /**
-     * 更新人员
+     * 更新人员，不更新相关登录账户
      *
      * @param person
      * @return 影响数据条数
      */
     long updatePerson(Person person);
+
+    /**
+     * 更新人员
+     *
+     * @param person
+     * @param updateLogin 是否更新相关登录账户
+     * @return 影响数据条数
+     */
+    long updatePerson(Person person, boolean updateLogin);
 
     /**
      * 变更人员编码

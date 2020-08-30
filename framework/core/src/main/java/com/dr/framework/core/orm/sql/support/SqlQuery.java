@@ -119,7 +119,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     public static <R> SqlQuery<R> from(Relation relation, String alias, boolean selectAllColumns) {
         SqlQuery query = new SqlQuery();
         if (relation instanceof EntityRelation) {
-            Class c = ((EntityRelation) relation).getEntityClass();
+            Class<R> c = ((EntityRelation) relation).getEntityClass();
             query.setReturnClass(c).put(ENTITY_CLASS_KEY, c);
         }
         query.fromQuery.from(relation.getName(), alias);

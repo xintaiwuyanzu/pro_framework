@@ -1,4 +1,4 @@
-package com.dr.framework.core.organise.entity;
+package com.dr.framework.sys.service;
 
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Id;
@@ -12,9 +12,8 @@ import com.dr.framework.core.util.Constants;
  */
 @Table(name = Constants.SYS_TABLE_PREFIX + "person_group_r"
         , comment = "人员组关联表"
-        , module = Constants.SYS_MODULE_NAME
-        , genInfo = false)
-public class PersonGroupRelation {
+        , module = Constants.SYS_MODULE_NAME)
+class EntityPersonGroupRelation {
     @Id
     @Column(length = 50)
     private String personId;
