@@ -1,2 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.dr.process.activiti.spring.boot.autoconfigure.ProcessEngineAutoConfiguration
