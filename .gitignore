@@ -4,3 +4,7 @@
 */*/*/transaction-logs/
 /transaction-logs/
 */*/target/
+
+**/node_modules/
+**/package-lock.json
+*/browser/dist/
