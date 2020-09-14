@@ -4,3 +4,8 @@
 */*/*/transaction-logs/
 /transaction-logs/
 */*/target/
+/codegen/target
+/framework/target
+/core/target
+/orm/target
+/web/target

@@ -36,6 +36,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.dr.framework.common.entity.IdEntity.ID_COLUMN_NAME;
+import static com.dr.framework.common.entity.OrderEntity.ORDER_COLUMN_NAME;
 import static com.dr.framework.common.entity.StatusEntity.STATUS_COLUMN_KEY;
 import static com.dr.framework.core.organise.entity.Organise.DEFAULT_ROOT_ID;
 
@@ -375,6 +376,7 @@ public class DefaultOrganisePersonService
                 .set(organiseRelation.getColumn("longitude"), organise.getLongitude())
                 .set(organiseRelation.getColumn("coordinate_type"), organise.getCoordinateType())
                 .set(organiseRelation.getColumn("group_id"), organise.getGroupId())
+                .set(organiseRelation.getColumn(ORDER_COLUMN_NAME), organise.getOrder())
                 .set(organiseRelation.getColumn(STATUS_COLUMN_KEY), organise.getStatus())
                 .equal(organiseRelation.getColumn(ID_COLUMN_NAME), old.getId());
         commonMapper.updateIgnoreNullByQuery(organiseUpdate);
@@ -450,6 +452,7 @@ public class DefaultOrganisePersonService
                 .set(personRelation.getColumn("status_info"), person.getStatus())
                 .set(personRelation.getColumn("order_info"), person.getOrder())
                 .set(personRelation.getColumn("avatar_file_id"), person.getAvatarFileId())
+                .set(personRelation.getColumn(ORDER_COLUMN_NAME), person.getOrder())
                 .equal(personRelation.getColumn(ID_COLUMN_NAME), old.getId());
 
         if (!StringUtils.isEmpty(person.getUpdateDate())) {
@@ -692,8 +695,7 @@ public class DefaultOrganisePersonService
         if (!StringUtils.isEmpty(organiseQuery.getCodeEqual())) {
             query.equal(organiseRelation.getColumn("organise_code"), organiseQuery.getCodeEqual());
         }
-
-
+        query.orderBy(organiseRelation.getColumn(ORDER_COLUMN_NAME));
         return query;
     }
 
@@ -763,7 +765,7 @@ public class DefaultOrganisePersonService
         if (personQuery.getCreateDayStart() != null && personQuery.getCreateDayEnd() >= personQuery.getCreateDayStart() && personQuery.getCreateDayEnd() > 0) {
             query.lessThanEqual(personRelation.getColumn("createDate"), personQuery.getCreateDayEnd());
         }
-        query.orderBy(personRelation.getColumn("order_info"))
+        query.orderBy(personRelation.getColumn(ORDER_COLUMN_NAME))
                 .equal(EntityPersonOrganiseInfo.ISDEFAULT, true);
         return personQueryJoin(query);
     }

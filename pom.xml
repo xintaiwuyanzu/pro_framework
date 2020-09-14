@@ -257,6 +257,22 @@
                 <artifactId>driver</artifactId>
                 <version>8.0</version>
             </dependency>
+            <!--单点登录-->
+            <dependency>
+                <groupId>org.pac4j</groupId>
+                <artifactId>pac4j-oauth</artifactId>
+                <version>${pac4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.pac4j</groupId>
+                <artifactId>pac4j-jwt</artifactId>
+                <version>${pac4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.pac4j</groupId>
+                <artifactId>pac4j-cas</artifactId>
+                <version>${pac4j.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
