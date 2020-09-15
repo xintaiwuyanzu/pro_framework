@@ -7,6 +7,11 @@ import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 
+/**
+ * 拦截国产化数据库定义
+ *
+ * @author dr
+ */
 public class DriverUtils {
 
     public static DataSource buildDataSource(DataSourceProperties properties) {

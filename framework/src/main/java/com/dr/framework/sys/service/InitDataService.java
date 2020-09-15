@@ -1,5 +1,6 @@
 package com.dr.framework.sys.service;
 
+import com.dr.framework.autoconfig.CommonConfig;
 import com.dr.framework.common.service.DataBaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,28 +24,37 @@ public class InitDataService implements InitializingBean {
     List<DataInit> dataInitList;
     @Autowired
     DataBaseService dataBaseService;
+    @Autowired
+    CommonConfig commonConfig;
 
     @Override
     public void afterPropertiesSet() {
-        if (dataInitList != null) {
+        if (dataInitList != null && commonConfig.isAutoInitData()) {
             dataInitList.stream()
                     .sorted(Comparator.comparingInt(DataInit::order))
                     .forEach(dataInit -> {
+                        String name = dataInit.name();
+                        if (StringUtils.isEmpty(name)) {
+                            name = dataInit.getClass().getSimpleName();
+                        }
                         try {
+                            logger.info("正在执行数据初始化:{}", name);
+                            long start = System.currentTimeMillis();
                             dataInit.initData(dataBaseService);
+                            logger.info("数据初始化完成:{}秒，{}", (System.currentTimeMillis() - start) / 1000, name);
                         } catch (Exception e) {
-                            String name = dataInit.name();
-                            if (StringUtils.isEmpty(name)) {
-                                name = dataInit.getClass().getSimpleName();
-                            }
                             logger.error("执行{}数据初始化错误", name, e);
                         }
-
                     });
         }
     }
 
     public interface DataInit {
+        /**
+         * 获取初始化模块的名称
+         *
+         * @return
+         */
         default String name() {
             return "";
         }
