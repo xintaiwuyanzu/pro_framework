@@ -618,7 +618,7 @@ public abstract class Dialect {
                         , newColumnType);
                 //rename 列
                 sqls.add(new DataBaseChangeInfo(
-                        getRenameColumnSql(newColumn, renameColumnName),
+                        getRenameColumnSql(newColumn, oldColumn, renameColumnName),
                         String.format("表【%s】列【%s】重命名为【%s】", oldColumn.getRelation().getName(), oldColumn.getName(), renameColumnName)
                 ));
                 //添加列
@@ -795,7 +795,15 @@ public abstract class Dialect {
         }
     }
 
-    protected String getRenameColumnSql(Column newColumn, String renameColumnName) {
+    /**
+     * 获取重命名列语句
+     *
+     * @param newColumn        新列基本信息
+     * @param oldColumn        旧列基本信息
+     * @param renameColumnName 更新名称
+     * @return
+     */
+    protected String getRenameColumnSql(Column newColumn, Column oldColumn, String renameColumnName) {
         return String.format("%s rename column %s to %s"
                 , getAlterTableString(newColumn.getTableName())
                 , convertObjectName(newColumn.getName())

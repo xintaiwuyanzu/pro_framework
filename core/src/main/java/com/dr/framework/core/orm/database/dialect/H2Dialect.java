@@ -82,7 +82,7 @@ public class H2Dialect extends Dialect {
     }
 
     @Override
-    protected String getRenameColumnSql(Column newColumn, String renameColumnName) {
+    protected String getRenameColumnSql(Column newColumn,Column oldColumn, String renameColumnName) {
         return String.format(" %s alter column %s rename to  %s "
                 , getAlterTableString(newColumn.getTableName())
                 , convertObjectName(newColumn.getName())

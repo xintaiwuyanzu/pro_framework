@@ -109,19 +109,28 @@ public class MysqlDialect extends Dialect {
         return sb.toString();
     }
 
+    /**
+     * alter table tableName change oldName newName type(100) null comment '';
+     *
+     * @param newColumn
+     * @param oldColumn
+     * @param renameColumnName
+     * @return
+     */
     @Override
-    protected String getRenameColumnSql(Column newColumn, String renameColumnName) {
+    protected String getRenameColumnSql(Column newColumn, Column oldColumn, String renameColumnName) {
         StringBuffer sb = new StringBuffer(String.format(" %s  change  %s %s"
-                , getAlterTableString(newColumn.getTableName())
-                , convertObjectName(newColumn.getName())
+                , getAlterTableString(oldColumn.getTableName())
+                , convertObjectName(oldColumn.getName())
                 , convertObjectName(renameColumnName)))
                 .append(' ');
-        sb.append(getColumnType(newColumn));
-        appendColumnBaseInfo(sb, newColumn);
-        if (!StringUtils.isEmpty(newColumn.getRemark())) {
+        sb.append(getColumnType(oldColumn));
+        appendColumnBaseInfo(sb, oldColumn);
+        //baseInfo 中带有备注
+        /*if (!StringUtils.isEmpty(newColumn.getRemark())) {
             sb.append(" comment ")
                     .append(newColumn.getRemark());
-        }
+        }*/
         return sb.toString();
     }
 

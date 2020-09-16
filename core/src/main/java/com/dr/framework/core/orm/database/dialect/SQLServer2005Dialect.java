@@ -127,7 +127,7 @@ public class SQLServer2005Dialect extends Dialect {
     }
 
     @Override
-    protected String getRenameColumnSql(Column newColumn, String renameColumnName) {
+    protected String getRenameColumnSql(Column newColumn,Column oldColumn, String renameColumnName) {
         return String.format("exec sp_rename '%s.%s','%s'"
                 , convertObjectName(newColumn.getTableName())
                 , convertObjectName(newColumn.getName())
