@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 /**
  * 数据库方言处理类
+ * TODO 处理各种数据类型最大长度，如果过长的话，使用最大数据类型
  *
  * @author dr
  */
