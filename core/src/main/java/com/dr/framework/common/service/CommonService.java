@@ -215,19 +215,28 @@ public class CommonService {
                                                                    Function<T, String> labelFunction,
                                                                    Function<T, Boolean> leafFunction,
                                                                    boolean checkEmpty) {
+        return listToTree(treeList, parentId, TreeEntity::getId, TreeEntity::getParentId, TreeEntity::getOrder, labelFunction, leafFunction, checkEmpty);
+    }
+
+    public static <T> List<TreeNode> listToTree(List<T> treeList,
+                                                String parentId,
+                                                Function<T, String> idFunction,
+                                                Function<T, String> parentFunction,
+                                                Function<T, Integer> orderFunction,
+                                                Function<T, String> labelFunction,
+                                                Function<T, Boolean> leafFunction,
+                                                boolean checkEmpty) {
         // 先将list转换成map
         Map<String, List<TreeNode>> pidMaps = new HashMap<>();
         for (T treeEntity : treeList) {
-            TreeNode treeNode = new TreeNode(treeEntity.getId(), labelFunction.apply(treeEntity), treeEntity);
-            String pid = treeEntity.getParentId();
+            TreeNode treeNode = new TreeNode(idFunction.apply(treeEntity), labelFunction.apply(treeEntity), treeEntity);
+            String pid = parentFunction.apply(treeEntity);
             if (StringUtils.isEmpty(pid)) {
                 pid = "$default_parentId";
             }
             treeNode.setParentId(pid);
-            if (treeEntity.getOrder() == null) {
-                treeEntity.setOrder(0);
-            } else {
-                treeNode.setOrder(treeEntity.getOrder());
+            if (orderFunction != null) {
+                treeNode.setOrder(orderFunction.apply(treeEntity));
             }
             if (leafFunction != null) {
                 treeNode.setLeaf(leafFunction.apply(treeEntity));
