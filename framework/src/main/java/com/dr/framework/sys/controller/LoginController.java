@@ -68,7 +68,10 @@ public class LoginController {
             cookie.setMaxAge((int) timeout.getSeconds());
             cookie.setPath(path);
             cookie.setHttpOnly(true);
-            cookie.setDomain(clientInfo.getRemoteIp());
+            if (!StringUtils.isEmpty(clientInfo.getRemoteIp())) {
+                //异常排除
+                cookie.setDomain(clientInfo.getRemoteIp());
+            }
             response.addCookie(cookie);
             return ResultEntity.success(token);
         } catch (Exception e) {

@@ -49,6 +49,7 @@ public class PersonQuery extends IdQuery {
 
     private Long createDayStart;
     private Long createDayEnd;
+    private Boolean dutyNull;
 
 
     public static class Builder extends IdQuery.Builder<PersonQuery, Builder> {
@@ -73,6 +74,11 @@ public class PersonQuery extends IdQuery {
 
         public Builder dutyLike(String duty) {
             query.duty = duty;
+            return this;
+        }
+
+        public Builder dutyNullAble(boolean duty) {
+            query.dutyNull = duty;
             return this;
         }
 
@@ -494,5 +500,9 @@ public class PersonQuery extends IdQuery {
 
     public void setCreateDayEnd(Long createDayEnd) {
         this.createDayEnd = createDayEnd;
+    }
+
+    public Boolean getDutyNull() {
+        return dutyNull;
     }
 }

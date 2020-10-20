@@ -19,6 +19,7 @@ import com.dr.framework.core.organise.query.PersonQuery;
 import com.dr.framework.core.organise.service.LoginService;
 import com.dr.framework.core.organise.service.OrganisePersonService;
 import com.dr.framework.core.orm.module.EntityRelation;
+import com.dr.framework.core.orm.sql.Column;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.SecurityHolder;
 import com.dr.framework.core.security.entity.SubSystem;
@@ -730,6 +731,14 @@ public class DefaultOrganisePersonService
         checkBuildNotInQuery(personRelation, query, "person_type", personQuery.getPersonTypeNotIn());
         checkBuildNotInQuery(personRelation, query, STATUS_COLUMN_KEY, personQuery.getStatusNotIn());
         checkBuildNotInQuery(personRelation, query, "source_ref", personQuery.getSourceRefNotIn());
+        if (personQuery.getDutyNull() != null) {
+            Column duty = personRelation.getColumn("duty");
+            if (personQuery.getDutyNull()) {
+                query.isNull(duty);
+            } else {
+                query.isNotNull(duty);
+            }
+        }
         if (personQuery.getLoginId() != null && !personQuery.getLoginId().isEmpty()) {
             query.in(personRelation.getColumn(IdEntity.ID_COLUMN_NAME),
                     SqlQuery.from(userLoginRelation, false)

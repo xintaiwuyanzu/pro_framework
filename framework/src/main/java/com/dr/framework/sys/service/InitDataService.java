@@ -66,6 +66,11 @@ public class InitDataService implements InitializingBean {
          */
         void initData(DataBaseService dataBaseService);
 
+        /**
+         * 数据初始化顺序
+         *
+         * @return
+         */
         default int order() {
             return 0;
         }
