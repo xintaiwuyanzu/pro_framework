@@ -1,4 +1,4 @@
-package com.dr.framework.core.security.entity;
+package com.dr.framework.sys.service;
 
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;
@@ -9,9 +9,8 @@ import com.dr.framework.core.util.Constants;
  */
 @Table(name = Constants.SYS_TABLE_PREFIX + "role_group"
         , comment = "角色人员组关联表"
-        , module = Constants.SYS_MODULE_NAME
-        , genInfo = false)
-public class RoleGroup extends BaseRoleRelation {
+        , module = Constants.SYS_MODULE_NAME)
+class EntityRoleGroup extends EntityAbstractRoleRelation {
     @Column(length = 50, comment = "人员组id")
     private String groupId;
 

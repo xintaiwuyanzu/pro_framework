@@ -48,8 +48,7 @@ import static com.dr.framework.core.organise.entity.Organise.DEFAULT_ROOT_ID;
  */
 @Service
 public class DefaultOrganisePersonService
-        extends RelationHelper
-        implements OrganisePersonService, InitDataService.DataInit, InitializingBean {
+        implements RelationHelper, OrganisePersonService, InitDataService.DataInit, InitializingBean {
     Logger logger = LoggerFactory.getLogger(OrganisePersonService.class);
     private CommonMapper commonMapper;
     private LoginService loginService;

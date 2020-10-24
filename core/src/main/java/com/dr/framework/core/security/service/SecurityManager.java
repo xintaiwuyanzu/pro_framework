@@ -1,27 +1,21 @@
 package com.dr.framework.core.security.service;
 
-import com.dr.framework.common.entity.TreeNode;
-import com.dr.framework.common.page.Page;
 import com.dr.framework.core.organise.entity.Person;
-import com.dr.framework.core.security.entity.Permission;
+import com.dr.framework.core.security.bo.PermissionHolder;
 import com.dr.framework.core.security.entity.Role;
-import com.dr.framework.core.security.entity.SubSystem;
-import com.dr.framework.core.security.entity.SysMenu;
-import com.dr.framework.core.security.query.PermissionQuery;
-import com.dr.framework.core.security.query.RoleQuery;
-import com.dr.framework.core.security.query.SubSysQuery;
-import com.dr.framework.core.security.query.SysMenuQuery;
+import com.dr.framework.core.util.Constants;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author dr
  */
 public interface SecurityManager {
     String SECURITY_MANAGER_CONTEXT_KEY = "SECURITY_MANAGER_CONTEXT";
-
+    /**
+     * 权限字符串分隔符
+     */
+    String WILDCARD_PERMISSION_SEPARATOR = ":";
     //三员权限三种类型
     /**
      * 系统管理员
@@ -82,28 +76,22 @@ public interface SecurityManager {
     List<Role> userRoles(String userId);
 
     /**
+     * 用户的所有权限组
+     *
+     * @param userId
+     * @param permissionType
+     * @param permissionGroup
+     * @return
+     */
+    List<PermissionHolder> userPermissions(String userId, String permissionType, String permissionGroup);
+
+    /**
      * 指定角色的所有用户
      *
      * @param roleId
      * @return
      */
     List<Person> roleUsers(String roleId);
-
-    /**
-     * 用户权限列表
-     *
-     * @param userId
-     * @return
-     */
-    List<Permission> userPermissions(String userId);
-
-    /**
-     * 指定权限所有的用户
-     *
-     * @param permissionId
-     * @return
-     */
-    List<Person> permissionUsers(String permissionId);
 
     /**
      * 是否有角色
@@ -113,37 +101,6 @@ public interface SecurityManager {
      * @return
      */
     boolean hasRole(String userid, String... roleCodes);
-
-    /**
-     * 指定用户是否有指定的角色
-     *
-     * @param userid
-     * @param roles
-     * @return
-     */
-    default boolean hasRole(String userid, Role... roles) {
-        return hasRole(userid, Arrays.stream(roles).map(role -> role.getCode()).toArray(String[]::new));
-    }
-
-    /**
-     * 是否有权限
-     *
-     * @param userid
-     * @param permissionCodes
-     * @return
-     */
-    boolean hasPermission(String userid, String... permissionCodes);
-
-    /**
-     * 指定用户是否指定的权限
-     *
-     * @param userid
-     * @param permissions
-     * @return
-     */
-    default boolean hasPermission(String userid, Permission... permissions) {
-        return hasPermission(userid, Arrays.stream(permissions).map(permission -> permission.getCode()).toArray(String[]::new));
-    }
 
     /**
      * 给指定用户添加角色
@@ -164,22 +121,27 @@ public interface SecurityManager {
     long removeUserRole(String userId, String... roleIds);
 
     /**
-     * 给指定用户添加权限
+     * 是否有指定的权限
      *
-     * @param userId
-     * @param permissionIds
+     * @param userid
+     * @param permissionType
+     * @param permissionCode
      * @return
      */
-    boolean addPermissionToUser(String userId, String... permissionIds);
+    default boolean hasPermission(String userid, String permissionType, String permissionCode) {
+        return hasPermission(userid, permissionType, Constants.DEFAULT, permissionCode);
+    }
 
     /**
-     * 删除用户的permission
+     * 是否有权限
      *
-     * @param userId
-     * @param permissionIds
+     * @param userid
+     * @param permissionType
+     * @param permissionGroup
+     * @param permissionCode
      * @return
      */
-    long removeUserPermission(String userId, String... permissionIds);
+    boolean hasPermission(String userid, String permissionType, String permissionGroup, String permissionCode);
 
     /**
      * 给指定角色添加权限
@@ -198,125 +160,4 @@ public interface SecurityManager {
      * @return
      */
     long removeRolePermission(String roleId, String... permissionIds);
-
-    /**
-     * 给指定用户添加菜单
-     *
-     * @param userId
-     * @param menuIds
-     * @return
-     */
-    boolean addMenuToUser(String userId, String... menuIds);
-
-    /**
-     * 删除用户菜单
-     *
-     * @param userId
-     * @param menuIds
-     * @return
-     */
-    long removeUserMenu(String userId, String... menuIds);
-
-    /**
-     * 给指定角色添加菜单
-     *
-     * @param roleId
-     * @param menuIds
-     * @return
-     */
-    boolean addMenuToRole(String roleId, String... menuIds);
-
-    /**
-     * 删除角色菜单
-     *
-     * @param roleId
-     * @param menuIds
-     * @return
-     */
-    long removeRoleMenu(String roleId, String... menuIds);
-
-    /**
-     * ====================================================================
-     * 下面是权限本身增删改查相关的方法
-     * =====================================================================
-     */
-
-    Role addRole(Role role);
-
-    long updateRole(Role role);
-
-    long deleteRole(String... roleCode);
-
-    List<Role> selectRoleList(RoleQuery query);
-
-    Page<Role> selectRolePage(RoleQuery query, int start, int end);
-
-    Permission addPermission(Permission permission);
-
-    long updatePermission(Permission permission);
-
-    long deletePermission(String... permissionCode);
-
-    List<Permission> selectPermissionList(PermissionQuery query);
-
-    Page<Permission> selectPermissionPage(PermissionQuery query, int start, int end);
-
-    /**
-     * ================================================================
-     * 菜单本身是权限的一种带有业务逻辑的实现
-     * 也就是说菜单本身也就是权限，与菜单相类似的功能按钮、访问路径、文件、数据权限等等都可以理解为权限
-     * <p>
-     * 暂时将不同的权限放到不同的表中，通过连表查询的方式判断权限。
-     * TODO 这种方法不太好实现分布式
-     * 另外一种办法是将所有类型的权限数据都汇总到权限表中，不过这种办法会导致权限表数量暴增
-     * ================================================================
-     */
-
-    SysMenu addMenu(SysMenu sysMenu);
-
-    long updateMenu(SysMenu sysMenu);
-
-    long deleteMenu(String... id);
-
-    List<SysMenu> selectMenuList(SysMenuQuery query);
-
-    Page<SysMenu> selectMenuPage(SysMenuQuery query, int start, int end);
-
-    List<TreeNode> menuTree(String sysId, String personId, boolean all);
-
-    /**
-     * ================================================================
-     * 子系统，这块暂时归到权限这里
-     * ================================================================
-     *
-     * @return
-     */
-
-    SubSystem addSubSys(SubSystem subSystem);
-
-    long updateSubSys(SubSystem subSystem);
-
-    long deleteSubSys(String id);
-
-    List<SubSystem> selectSubSysList(SubSysQuery query);
-
-    Page<SubSystem> selectSubSysPage(SubSysQuery query, int start, int end);
-
-    /**
-     * 获取角色列表，根据用户ID标注哪些角色已授权给该用户
-     *
-     * @param userId
-     * @return
-     */
-    Map<String, Object> getRoleList(String userId);
-
-    /**
-     * 获取权限列表和菜单列表，根据角色ID标注哪些权限已授权给该角色
-     *
-     * @param sysMenu
-     * @return
-     */
-    List<TreeNode> getPermissionMenuList(Person person, SysMenu sysMenu);
-
-    List<TreeNode> getPermissionMenuListOne(Person person, String roleId, String type);
 }

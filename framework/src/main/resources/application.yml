@@ -1,0 +1,3 @@
+spring:
+  cache:
+    cache-names: core.security.menu,core.security.subsys,core.security.role

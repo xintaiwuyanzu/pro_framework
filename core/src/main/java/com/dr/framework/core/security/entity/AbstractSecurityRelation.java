@@ -6,9 +6,8 @@ import com.dr.framework.core.orm.annotations.Column;
 /**
  * 简单抽象
  */
-class BaseSecurityRelation extends BaseStatusEntity<Integer> {
-    @Column(name = "security_code", length = 100, comment = "角色编码")
-    private String code;
+class AbstractSecurityRelation extends BaseStatusEntity<Integer> {
+
     @Column(length = 100, comment = "角色名称")
     private String name;
     @Column(length = 500, comment = "角色描述")
@@ -17,14 +16,6 @@ class BaseSecurityRelation extends BaseStatusEntity<Integer> {
     private String type;
     @Column(comment = "是否系统权限")
     private boolean isSys;
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
 
     public String getName() {
         return name;

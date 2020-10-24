@@ -1,19 +1,18 @@
 package com.dr.framework.sys.controller;
 
-import com.dr.framework.common.entity.ResultEntity;
+import com.dr.framework.common.controller.BaseServiceController;
 import com.dr.framework.common.entity.ResultListEntity;
 import com.dr.framework.common.entity.TreeNode;
-import com.dr.framework.common.page.Page;
 import com.dr.framework.core.organise.entity.Person;
+import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.entity.SysMenu;
-import com.dr.framework.core.security.query.SysMenuQuery;
-import com.dr.framework.core.security.service.SecurityManager;
 import com.dr.framework.core.web.annotations.Current;
+import com.dr.framework.sys.service.SysMenuService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 系统菜单
@@ -22,12 +21,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("${common.api-path:/api}/sysmenu")
-public class SysMenuController {
-    SecurityManager securityManager;
-
-    public SysMenuController(SecurityManager securityManager) {
-        this.securityManager = securityManager;
-    }
+public class SysMenuController extends BaseServiceController<SysMenuService, SysMenu> {
 
     /**
      * 加载系统菜单
@@ -42,49 +36,13 @@ public class SysMenuController {
             @RequestParam(defaultValue = com.dr.framework.core.util.Constants.DEFAULT) String sysId
             , @Current Person person
             , boolean all) {
-        return ResultListEntity.success(securityManager.menuTree(sysId, person.getId(), all));
+        //TODO
+        return null;
     }
 
-    @RequestMapping("/insert")
-    public ResultEntity<SysMenu> insert(SysMenu entity) {
-        return ResultEntity.success(securityManager.addMenu(entity));
-    }
-
-    @RequestMapping("/update")
-    public ResultEntity<SysMenu> update(SysMenu entity) {
-        securityManager.updateMenu(entity);
-        return ResultEntity.success(entity);
-    }
-
-    @RequestMapping("/delete")
-    public ResultEntity<Boolean> delete(SysMenu entity) {
-        return ResultEntity.success(securityManager.deleteMenu(entity.getId()) > 0);
-    }
-
-    @RequestMapping("/detail")
-    public ResultEntity<SysMenu> detail(String id, SysMenu entity) {
-        List<SysMenu> sysMenus = securityManager.selectMenuList(
-                new SysMenuQuery.Builder()
-                        .idEqual(entity.getId())
-                        .build()
-        );
-        if (sysMenus != null && sysMenus.size() == 1) {
-            return ResultEntity.success(sysMenus.get(0));
-        } else {
-            return ResultEntity.error("未查询到指定数据");
-        }
-    }
-
-    @RequestMapping("/page")
-    public ResultEntity page(SysMenu entity,
-                             @RequestParam(defaultValue = "0") int pageIndex,
-                             @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE_STR) int pageSize,
-                             @RequestParam(defaultValue = "true") boolean page) {
-        SysMenuQuery query = new SysMenuQuery.Builder().sysIdEqual(entity.getSysId()).roleIdIn(entity.getId()).build();
-        if (page) {
-            return ResultEntity.success(securityManager.selectMenuPage(query, pageIndex * pageSize, (pageIndex + 1) * pageSize));
-        } else {
-            return ResultEntity.success(securityManager.selectMenuList(query));
-        }
+    @Override
+    protected SqlQuery<SysMenu> buildPageQuery(HttpServletRequest request, SysMenu entity) {
+        //TODO
+        return null;
     }
 }

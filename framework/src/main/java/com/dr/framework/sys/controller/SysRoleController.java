@@ -1,24 +1,19 @@
 package com.dr.framework.sys.controller;
 
+import com.dr.framework.common.controller.BaseServiceController;
 import com.dr.framework.common.entity.ResultEntity;
-import com.dr.framework.common.page.Page;
-import com.dr.framework.core.organise.entity.Person;
+import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.entity.Role;
-import com.dr.framework.core.security.entity.SysMenu;
-import com.dr.framework.core.security.query.RoleQuery;
 import com.dr.framework.core.security.service.SecurityManager;
-import com.dr.framework.core.web.annotations.Current;
+import com.dr.framework.sys.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import static com.dr.framework.common.entity.ResultEntity.success;
 
@@ -29,84 +24,9 @@ import static com.dr.framework.common.entity.ResultEntity.success;
  */
 @RestController
 @RequestMapping("${common.api-path:/api}/sysrole")
-public class SysRoleController {
-
+public class SysRoleController extends BaseServiceController<RoleService, Role> {
     @Autowired
     SecurityManager securityManager;
-
-    /**
-     * 添加新角色
-     *
-     * @param person
-     * @param order
-     * @param roleName
-     * @param roleCode
-     * @return
-     */
-    @RequestMapping("/addRole")
-    public ResultEntity addRole(@Current Person person, int order, String roleName, String roleCode) {
-        Role role = new Role();
-        role.setCode(roleCode);
-        role.setName(roleName);
-        role.setId(UUID.randomUUID().toString());
-        role.setCreateDate(System.currentTimeMillis());
-        role.setCreatePerson(person.getUserName());
-        role.setOrder(order);
-        role.setStatus(0);
-        securityManager.addRole(role);
-        return success();
-    }
-
-    /**
-     * 修改角色（角色名称等...）
-     *
-     * @param person
-     * @param role
-     * @return
-     */
-    @PostMapping(value = "/updateRole")
-    public ResultEntity updateRole(@Current Person person, Role role) {
-        role.setUpdatePerson(person.getUserName());
-        role.setUpdateDate(System.currentTimeMillis());
-        securityManager.updateRole(role);
-        return success();
-    }
-
-    /**
-     * 删除角色
-     *
-     * @param roleCode
-     * @return
-     */
-    @RequestMapping("/deleteRole")
-    public ResultEntity deleteRole(String roleCode) {
-        securityManager.deleteRole(roleCode);
-        return success();
-    }
-
-    /**
-     * 分页查询角色列表
-     *
-     * @param page
-     * @param pageSize
-     * @return
-     */
-    @RequestMapping(value = "/page")
-    public ResultEntity<Page<Role>> getRolePage(@RequestParam(defaultValue = "1") int page,
-                                                @RequestParam(defaultValue = Page.DEFAULT_PAGE_SIZE_STR) int pageSize) {
-        return success(securityManager.selectRolePage(new RoleQuery.Builder().build(), (page - 1) * pageSize, page * pageSize - 1));
-    }
-
-    /**
-     * 根据角色ID查询角色详情
-     *
-     * @param roleId
-     * @return
-     */
-    @RequestMapping("/getRoleById")
-    public ResultEntity<Role> getRoleById(String roleId) {
-        return success(securityManager.selectRoleList(new RoleQuery.Builder().idEqual(roleId).build()).get(0));
-    }
 
     /**
      * 给角色加权限（多个权限/菜单）
@@ -137,10 +57,10 @@ public class SysRoleController {
             securityManager.removeRolePermission(roleId, delPermissions);
         }
         if (addMenus != null) {
-            securityManager.addMenuToRole(roleId, addMenus);
+            //  securityManager.addMenuToRole(roleId, addMenus);
         }
         if (delMenus != null) {
-            securityManager.removeRoleMenu(roleId, delMenus);
+            //securityManager.removeRoleMenu(roleId, delMenus);
         }
         return success();
     }
@@ -186,37 +106,9 @@ public class SysRoleController {
         return success(securityManager.userRoles(userId));
     }
 
-    /**
-     * 获取角色列表，根据用户ID标注哪些角色已授权给该用户
-     *
-     * @param userId
-     * @return
-     */
-    @RequestMapping("/getRoleList")
-    public ResultEntity<Map> getRoleList(String userId) {
-        return success(securityManager.getRoleList(userId));
+    @Override
+    protected SqlQuery<Role> buildPageQuery(HttpServletRequest request, Role entity) {
+        //TODO
+        return null;
     }
-
-    /**
-     * 获取权限列表和菜单列表，根据角色ID标注哪些权限已授权给该角色
-     *
-     * @param sysMenu
-     * @return
-     */
-    @RequestMapping("/getPermissionMenuList")
-    public ResultEntity<List> getPermissionMenuList(@Current Person person, SysMenu sysMenu) {
-        return success(securityManager.getPermissionMenuList(person, sysMenu));
-    }
-
-    /**
-     * @param person
-     * @param roleId
-     * @param type
-     * @return
-     */
-    @RequestMapping("/getPermissionMenuListOne")
-    public ResultEntity<List> getPermissionMenuListOne(@Current Person person, String roleId, String type) {
-        return success(securityManager.getPermissionMenuListOne(person, roleId, type));
-    }
-
 }

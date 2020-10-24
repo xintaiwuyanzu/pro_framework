@@ -7,6 +7,7 @@ import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.ParameterizedType;
@@ -18,7 +19,7 @@ import java.util.List;
  *
  * @author dr
  */
-public class DefaultBaseService<T extends IdEntity> implements BaseService<T>, InitializingBean {
+public class DefaultBaseService<T extends IdEntity> extends ApplicationObjectSupport implements BaseService<T>, InitializingBean {
     @Autowired
     protected DefaultDataBaseService defaultDataBaseService;
     @Autowired

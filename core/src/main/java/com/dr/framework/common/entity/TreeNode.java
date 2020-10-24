@@ -4,8 +4,10 @@ import java.util.List;
 
 /**
  * 树状结构，用来封装返回数据
+ *
+ * @author dr
  */
-public class TreeNode implements Comparable<TreeNode> {
+public class TreeNode<T> implements Comparable<TreeNode> {
     /**
      * 主建
      */
@@ -33,7 +35,7 @@ public class TreeNode implements Comparable<TreeNode> {
     /**
      * 用来封装数据
      */
-    private Object data;
+    private T data;
     /**
      * 孩子节点数据
      */
@@ -56,20 +58,20 @@ public class TreeNode implements Comparable<TreeNode> {
         this.description = description;
     }
 
-    public TreeNode(String id, String label, Object data) {
+    public TreeNode(String id, String label, T data) {
         this.id = id;
         this.label = label;
         this.data = data;
     }
 
-    public TreeNode(String id, String label, String description, Object data) {
+    public TreeNode(String id, String label, String description, T data) {
         this.id = id;
         this.label = label;
         this.description = description;
         this.data = data;
     }
 
-    public TreeNode(String id, String label, Object data, List<TreeNode> children) {
+    public TreeNode(String id, String label, T data, List<TreeNode> children) {
         this.id = id;
         this.label = label;
         this.data = data;
@@ -122,11 +124,11 @@ public class TreeNode implements Comparable<TreeNode> {
         this.label = label;
     }
 
-    public Object getData() {
+    public T getData() {
         return data;
     }
 
-    public void setData(Object data) {
+    public void setData(T data) {
         this.data = data;
     }
 

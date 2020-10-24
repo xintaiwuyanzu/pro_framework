@@ -1,4 +1,4 @@
-package com.dr.framework.core.security.entity;
+package com.dr.framework.sys.service;
 
 import com.dr.framework.core.orm.annotations.Column;
 
@@ -7,7 +7,7 @@ import com.dr.framework.core.orm.annotations.Column;
  *
  * @author dr
  */
-class BaseRoleRelation {
+class EntityAbstractRoleRelation {
     @Column(length = 50, comment = "角色Id")
     private String roleId;
 

@@ -3,6 +3,7 @@ package com.dr.framework.core.security.entity;
 import com.dr.framework.common.entity.BaseTreeEntity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.util.Constants;
 
 /**
@@ -18,7 +19,7 @@ import com.dr.framework.core.util.Constants;
         , comment = "系统菜单"
         , module = Constants.SYS_MODULE_NAME
         , genInfo = false)
-public class SysMenu extends BaseTreeEntity<String> {
+public class SysMenu extends BaseTreeEntity<String> implements PermissionResource {
     @Column(comment = "图标")
     private String icon;
     @Column(name = "menuName", comment = "显示名称")
@@ -42,6 +43,12 @@ public class SysMenu extends BaseTreeEntity<String> {
         this.icon = icon;
     }
 
+    @Override
+    public String getCode() {
+        return getUrl();
+    }
+
+    @Override
     public String getName() {
         return name;
     }
@@ -57,7 +64,6 @@ public class SysMenu extends BaseTreeEntity<String> {
     public void setUrl(String url) {
         this.url = url;
     }
-
 
     public Boolean getLeaf() {
         return leaf;
@@ -75,6 +81,7 @@ public class SysMenu extends BaseTreeEntity<String> {
         this.permissionId = permissionId;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }

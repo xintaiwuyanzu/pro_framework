@@ -10,26 +10,26 @@ import java.util.List;
 /**
  * 用来辅助构建sqlquery类
  */
-class RelationHelper {
-    protected void checkBuildInQuery(EntityRelation relation, SqlQuery query, String columnName, List values) {
+interface RelationHelper {
+    default void checkBuildInQuery(EntityRelation relation, SqlQuery query, String columnName, List values) {
         if (values != null && !values.isEmpty()) {
             query.in(relation.getColumn(columnName), values);
         }
     }
 
-    protected void checkBuildNotInQuery(EntityRelation relation, SqlQuery<Person> query, String columnName, List values) {
+    default void checkBuildNotInQuery(EntityRelation relation, SqlQuery<Person> query, String columnName, List values) {
         if (values != null && !values.isEmpty()) {
             query.notIn(relation.getColumn(columnName), values);
         }
     }
 
-    protected void checkBuildLikeQuery(EntityRelation relation, SqlQuery query, String columnName, String value) {
+    default void checkBuildLikeQuery(EntityRelation relation, SqlQuery query, String columnName, String value) {
         if (!StringUtils.isEmpty(value)) {
             query.like(relation.getColumn(columnName), value);
         }
     }
 
-    protected void checkBuildNotLikeQuery(EntityRelation relation, SqlQuery query, String columnName, String value) {
+    default void checkBuildNotLikeQuery(EntityRelation relation, SqlQuery query, String columnName, String value) {
         if (!StringUtils.isEmpty(value)) {
             query.notLike(relation.getColumn(columnName), value);
         }
