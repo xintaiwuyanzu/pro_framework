@@ -16,6 +16,7 @@ class FromQuery extends AbstractSqlQuery {
     JoinColumns outerJoin = new JoinColumns();
     JoinColumns leftOuterJoin = new JoinColumns();
     JoinColumns rightOuterJoin = new JoinColumns();
+    //TODO 嵌套子查询别名有问题
     TableAlias tableAlias = new TableAlias();
     String table;
 
@@ -100,8 +101,9 @@ class FromQuery extends AbstractSqlQuery {
 
     public void bindRelation(Relation<? extends Column> relation) {
         if (relation instanceof EntityRelation) {
-            String alias = classStringMap.get(((EntityRelation) relation).getEntityClass());
-            alias(relation.getName(), alias);
+            //TODO
+            //String alias = classStringMap.get(((EntityRelation) relation).getEntityClass());
+            //alias(relation.getName(), alias);
         }
         table = relation.getName();
     }

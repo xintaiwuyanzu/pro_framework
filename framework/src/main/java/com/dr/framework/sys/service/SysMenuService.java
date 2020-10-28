@@ -2,13 +2,17 @@ package com.dr.framework.sys.service;
 
 import com.dr.framework.common.entity.StatusEntity;
 import com.dr.framework.common.page.Page;
-import com.dr.framework.common.service.CacheAbleService;
 import com.dr.framework.common.service.DataBaseService;
+import com.dr.framework.common.service.PermissionResourceService;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
+import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.security.entity.SubSystem;
 import com.dr.framework.core.security.entity.SysMenu;
+import com.dr.framework.core.security.query.SubSysQuery;
 import com.dr.framework.core.security.query.SysMenuQuery;
+import com.dr.framework.core.security.service.ResourceProvider;
 import com.dr.framework.util.Constants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -21,7 +25,13 @@ import java.util.List;
  * @author dr
  */
 @Service
-public class SysMenuService extends CacheAbleService<SysMenu> implements RelationHelper, InitDataService.DataInit {
+public class SysMenuService extends PermissionResourceService<SysMenu> implements RelationHelper, ResourceProvider, InitDataService.DataInit {
+    /**
+     * 资源类型
+     */
+    public static final String RESOURCE_TYPE = "sysmenu";
+    @Autowired
+    protected SubSysService subSysService;
 
     public List<SysMenu> selectMenuList(SysMenuQuery query) {
         return selectList(sysMenuQueryToSqlQuery(query));
@@ -29,19 +39,6 @@ public class SysMenuService extends CacheAbleService<SysMenu> implements Relatio
 
     public Page<SysMenu> selectMenuPage(SysMenuQuery query, int start, int end) {
         return selectPage(sysMenuQueryToSqlQuery(query), start, end);
-    }
-
-    /**
-     * 根据主键删除菜单
-     * TODO
-     *
-     * @return
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public long deleteByIds(String... ids) {
-        //删除菜单
-        //删除菜单角色关联
-        return 0;
     }
 
     @Override
@@ -83,6 +80,7 @@ public class SysMenuService extends CacheAbleService<SysMenu> implements Relatio
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void initData(DataBaseService dataBaseService) {
         //初始化系统菜单
         if (dataBaseService.tableExist("SYS_menu", Constants.SYS_MODULE_NAME)) {
@@ -95,7 +93,7 @@ public class SysMenuService extends CacheAbleService<SysMenu> implements Relatio
                 parent.setIcon("grid");
                 parent.setOrder(1);
                 parent.setId(rootMenuId);
-                //addMenu(parent);
+                insert(parent);
                 SysMenu sysMenu = new SysMenu();
                 sysMenu.setId("sysMenu");
                 sysMenu.setName("菜单管理");
@@ -103,41 +101,86 @@ public class SysMenuService extends CacheAbleService<SysMenu> implements Relatio
                 sysMenu.setLeaf(true);
                 sysMenu.setOrder(0);
                 sysMenu.setIcon("align-justify");
-                sysMenu.setUrl("/main/sysMenu");
-                //addMenu(sysMenu);
+                sysMenu.setUrl("/system/menu");
+                insert(sysMenu);
 
                 SysMenu organise = new SysMenu();
                 organise.setParentId(rootMenuId);
                 organise.setLeaf(true);
                 organise.setName("机构管理");
-                organise.setUrl("/main/organise");
+                organise.setUrl("/system/organise");
                 organise.setOrder(1);
-                //addMenu(organise);
-
+                insert(organise);
                 SysMenu person = new SysMenu();
                 person.setParentId(rootMenuId);
                 person.setLeaf(true);
                 person.setName("人员管理");
-                person.setUrl("/main/person");
+                person.setUrl("/system/person");
                 person.setOrder(2);
-               // addMenu(person);
+                insert(person);
 
 
                 SysMenu role = new SysMenu();
                 role.setParentId(rootMenuId);
                 role.setLeaf(true);
-                role.setName("权限管理");
+                role.setName("角色管理");
                 role.setUrl("/system/role");
                 role.setOrder(3);
-               // addMenu(role);
+                insert(role);
 
-                //addMenuToUser("admin", parent.getId(), sysMenu.getId(), organise.getId(), person.getId(), role.getId());
+                SysMenu permission = new SysMenu();
+                permission.setParentId(rootMenuId);
+                permission.setLeaf(true);
+                permission.setName("权限管理");
+                permission.setUrl("/system/permission");
+                permission.setOrder(4);
+                insert(permission);
+
+                SysMenu sys = new SysMenu();
+                sys.setParentId(rootMenuId);
+                sys.setLeaf(true);
+                sys.setName("子系统管理");
+                sys.setUrl("/system/sys");
+                sys.setOrder(5);
+
+                SysMenu dict = new SysMenu();
+                dict.setParentId(rootMenuId);
+                dict.setLeaf(true);
+                dict.setName("字典管理");
+                dict.setUrl("/system/dict");
+                dict.setOrder(6);
+                insert(dict);
             }
         }
     }
 
     @Override
+    public int order() {
+        return 20;
+    }
+
+    @Override
     protected String getCacheName() {
         return "core.security.menu";
+    }
+
+    @Override
+    public List<? extends PermissionResource> getGroupResource() {
+        return subSysService.selectSubSysList(new SubSysQuery.Builder().build());
+    }
+
+    @Override
+    public List<? extends PermissionResource> getResources(String groupId) {
+        return selectMenuList(new SysMenuQuery.Builder().build());
+    }
+
+    @Override
+    public String getType() {
+        return RESOURCE_TYPE;
+    }
+
+    @Override
+    public String getName() {
+        return "系统菜单";
     }
 }

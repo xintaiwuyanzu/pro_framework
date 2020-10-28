@@ -3,8 +3,8 @@ package com.dr.framework.core.security.service;
 import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.security.bo.PermissionResourcePart;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * 动态提供权限资源数据
@@ -19,7 +19,7 @@ public interface ResourceProvider {
      *
      * @return
      */
-    default Collection<PermissionResource> getGroupResource() {
+    default List<? extends PermissionResource> getGroupResource() {
         return Collections.emptyList();
     }
 
@@ -29,7 +29,7 @@ public interface ResourceProvider {
      * @param groupId
      * @return
      */
-    Collection<PermissionResource> getResources(String groupId);
+    List<? extends PermissionResource> getResources(String groupId);
 
     /**
      * 根据主键获取一条资源
@@ -46,7 +46,7 @@ public interface ResourceProvider {
      *
      * @return
      */
-    default Collection<PermissionResourcePart> getParts() {
+    default List<PermissionResourcePart> getParts() {
         return Collections.emptyList();
     }
 
@@ -69,7 +69,9 @@ public interface ResourceProvider {
      *
      * @return
      */
-    String getDescription();
+    default String getDescription() {
+        return "";
+    }
 
     /**
      * 获取排序

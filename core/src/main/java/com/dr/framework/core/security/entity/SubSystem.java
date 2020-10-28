@@ -3,6 +3,7 @@ package com.dr.framework.core.security.entity;
 import com.dr.framework.common.entity.BaseStatusEntity;
 import com.dr.framework.core.orm.annotations.Column;
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.util.Constants;
 
 /**
@@ -14,7 +15,7 @@ import com.dr.framework.core.util.Constants;
         , module = Constants.SYS_MODULE_NAME
         , comment = "子系统基本信息"
         , genInfo = false)
-public class SubSystem extends BaseStatusEntity<String> {
+public class SubSystem extends BaseStatusEntity<String> implements PermissionResource {
     /**
      * 默认系统id
      */
@@ -150,5 +151,15 @@ public class SubSystem extends BaseStatusEntity<String> {
 
     public void setPermissionId(String permissionId) {
         this.permissionId = permissionId;
+    }
+
+    @Override
+    public String getName() {
+        return getSysName();
+    }
+
+    @Override
+    public String getDescription() {
+        return getSysName();
     }
 }

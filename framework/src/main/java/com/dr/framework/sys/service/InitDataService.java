@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Comparator;
@@ -28,6 +29,7 @@ public class InitDataService implements InitializingBean {
     CommonConfig commonConfig;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void afterPropertiesSet() {
         if (dataInitList != null && commonConfig.isAutoInitData()) {
             dataInitList.stream()

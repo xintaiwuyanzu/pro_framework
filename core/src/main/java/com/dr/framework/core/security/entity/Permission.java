@@ -22,9 +22,8 @@ import com.dr.framework.core.util.Constants;
 public class Permission extends AbstractSecurityRelation {
     @Column(name = "security_code", length = 5000, comment = "权限编码")
     private String code;
-    @Column(length = 100, comment = "分组Id")
-    private String group;
-
+    @Column(name = "security_group", length = 100, comment = "分组Id")
+    private String groupId;
 
     public String getCode() {
         return code;
@@ -34,11 +33,11 @@ public class Permission extends AbstractSecurityRelation {
         this.code = code;
     }
 
-    public String getGroup() {
-        return group;
+    public String getGroupId() {
+        return groupId;
     }
 
-    public void setGroup(String group) {
-        this.group = group;
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 }

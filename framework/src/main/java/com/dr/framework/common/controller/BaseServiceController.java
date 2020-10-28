@@ -129,13 +129,10 @@ public abstract class BaseServiceController<S extends BaseService<E>, E extends 
      */
     protected SqlQuery<E> buildDetailQuery(HttpServletRequest request, E entity, String id) {
         if (!StringUtils.isEmpty(id)) {
-            return (SqlQuery<E>) SqlQuery.from(entity.getClass())
-                    .equal(
-                            dataBaseService.getTableInfo(entity.getClass())
-                                    .getColumn(IdEntity.ID_COLUMN_NAME),
-                            id
-                    )
-                    ;
+            EntityRelation entityRelation = dataBaseService.getTableInfo(entity.getClass());
+            SqlQuery<E> sqlQuery = SqlQuery.from(entityRelation);
+            sqlQuery.equal(entityRelation.getColumn(IdEntity.ID_COLUMN_NAME), id);
+            return sqlQuery;
         }
         return null;
     }

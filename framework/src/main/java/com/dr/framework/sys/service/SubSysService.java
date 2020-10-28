@@ -2,8 +2,9 @@ package com.dr.framework.sys.service;
 
 import com.dr.framework.common.entity.StatusEntity;
 import com.dr.framework.common.page.Page;
-import com.dr.framework.common.service.CacheAbleService;
+import com.dr.framework.common.service.PermissionResourceService;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
+import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.security.entity.SubSystem;
 import com.dr.framework.core.security.query.SubSysQuery;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.List;
  * @author dr
  */
 @Service
-public class SubSysService extends CacheAbleService<SubSystem> implements RelationHelper {
+public class SubSysService extends PermissionResourceService<SubSystem> implements RelationHelper {
 
     @Transactional(rollbackFor = Exception.class)
     public long deleteById(String id) {
@@ -78,5 +79,21 @@ public class SubSysService extends CacheAbleService<SubSystem> implements Relati
     @Override
     protected String getCacheName() {
         return "core.security.subsys";
+    }
+
+
+    @Override
+    public List<? extends PermissionResource> getResources(String groupId) {
+        return selectSubSysList(new SubSysQuery.Builder().build());
+    }
+
+    @Override
+    public String getType() {
+        return "subsys";
+    }
+
+    @Override
+    public String getName() {
+        return "子系统";
     }
 }

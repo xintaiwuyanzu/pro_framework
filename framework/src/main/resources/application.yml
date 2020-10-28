@@ -1,3 +1,10 @@
 spring:
   cache:
-    cache-names: core.security.menu,core.security.subsys,core.security.role
+    cache-names:
+      - core.security.menu
+      - core.security.subsys
+      - core.security.role
+      - core.security.permission
+      - core.security.personResource
+  main:
+    banner-mode: off

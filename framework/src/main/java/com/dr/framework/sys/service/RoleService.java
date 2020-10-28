@@ -4,10 +4,15 @@ import com.dr.framework.common.entity.IdEntity;
 import com.dr.framework.common.entity.StatusEntity;
 import com.dr.framework.common.page.Page;
 import com.dr.framework.common.service.CacheAbleService;
+import com.dr.framework.common.service.DataBaseService;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.entity.Role;
 import com.dr.framework.core.security.query.RoleQuery;
+import com.dr.framework.core.security.service.SecurityManager;
+import com.dr.framework.util.Constants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -20,7 +25,12 @@ import java.util.stream.Collectors;
  *
  * @author dr
  */
-public class RoleService extends CacheAbleService<Role> implements RelationHelper {
+@Service
+public class RoleService extends CacheAbleService<Role> implements RelationHelper, InitDataService.DataInit {
+    public static final String adminRoleId = com.dr.framework.core.util.Constants.DEFAULT + "admin";
+    @Autowired
+    SecurityManager securityManager;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long insert(Role entity) {
@@ -29,7 +39,7 @@ public class RoleService extends CacheAbleService<Role> implements RelationHelpe
         }
         //判断指定的编码是否存在
         Assert.isTrue(!StringUtils.isEmpty(entity.getCode()), "权限编码不能为空");
-        Assert.isTrue(!commonMapper.existsByQuery(SqlQuery.from(Role.class)
+        Assert.isTrue(!commonMapper.existsByQuery(SqlQuery.from(getEntityRelation())
                 .equal(getEntityRelation().getColumn("security_code"), entity.getCode())
         ), "已存在指定的权限编码");
         return super.insert(entity);
@@ -116,5 +126,29 @@ public class RoleService extends CacheAbleService<Role> implements RelationHelpe
     @Override
     protected String getCacheName() {
         return "core.security.role";
+    }
+
+    @Override
+    public void initData(DataBaseService dataBaseService) {
+        //给admin添加超级用户
+        if (dataBaseService.tableExist("SYS_role", Constants.SYS_MODULE_NAME)) {
+            if (!commonMapper.exists(Role.class, adminRoleId)) {
+                //添加超级管理员角色
+                Role role = new Role();
+                role.setCode("admin");
+                role.setDescription("超级管理员");
+                role.setName("超级管理员");
+                role.setId(adminRoleId);
+                role.setSys(true);
+                insert(role);
+                //给admin用户添加超级管理员角色
+                securityManager.addRoleToUser("admin", role.getId());
+            }
+        }
+    }
+
+    @Override
+    public int order() {
+        return 10;
     }
 }

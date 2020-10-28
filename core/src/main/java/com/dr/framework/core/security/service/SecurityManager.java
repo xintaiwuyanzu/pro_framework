@@ -1,7 +1,8 @@
 package com.dr.framework.core.security.service;
 
 import com.dr.framework.core.organise.entity.Person;
-import com.dr.framework.core.security.bo.PermissionHolder;
+import com.dr.framework.core.security.bo.PermissionMatcher;
+import com.dr.framework.core.security.entity.Permission;
 import com.dr.framework.core.security.entity.Role;
 import com.dr.framework.core.util.Constants;
 
@@ -12,10 +13,13 @@ import java.util.List;
  */
 public interface SecurityManager {
     String SECURITY_MANAGER_CONTEXT_KEY = "SECURITY_MANAGER_CONTEXT";
+    String defaultMatcher = "*";
     /**
      * 权限字符串分隔符
      */
     String WILDCARD_PERMISSION_SEPARATOR = ":";
+
+    String groupSplit = ";";
     //三员权限三种类型
     /**
      * 系统管理员
@@ -76,6 +80,32 @@ public interface SecurityManager {
     List<Role> userRoles(String userId);
 
     /**
+     * 角色的权限
+     *
+     * @param roleId 角色Id
+     * @return
+     */
+    List<Permission> rolePermissions(String roleId);
+
+    /**
+     * 绑定权限到角色
+     *
+     * @param roleId
+     * @param permissions
+     * @return
+     */
+    long bindRolePermissions(String roleId, String permissions);
+
+    /**
+     * 绑定角色和指定的用户
+     *
+     * @param roleId
+     * @param personIds
+     * @return
+     */
+    long bindRoleUsers(String roleId, String personIds);
+
+    /**
      * 用户的所有权限组
      *
      * @param userId
@@ -83,7 +113,7 @@ public interface SecurityManager {
      * @param permissionGroup
      * @return
      */
-    List<PermissionHolder> userPermissions(String userId, String permissionType, String permissionGroup);
+    List<PermissionMatcher> userPermissions(String userId, String permissionType, String permissionGroup);
 
     /**
      * 指定角色的所有用户
@@ -109,7 +139,7 @@ public interface SecurityManager {
      * @param roleIds
      * @return
      */
-    boolean addRoleToUser(String userId, String... roleIds);
+    long addRoleToUser(String userId, String... roleIds);
 
     /**
      * 删除用户的角色
@@ -150,7 +180,7 @@ public interface SecurityManager {
      * @param permissionIds
      * @return
      */
-    boolean addPermissionToRole(String roleId, String... permissionIds);
+    long addPermissionToRole(String roleId, String... permissionIds);
 
     /**
      * 删除角色的权限
@@ -160,4 +190,6 @@ public interface SecurityManager {
      * @return
      */
     long removeRolePermission(String roleId, String... permissionIds);
+
+
 }

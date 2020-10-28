@@ -32,7 +32,7 @@ public abstract class CacheAbleService<T extends IdEntity> extends DefaultBaseSe
     @Transactional(rollbackFor = Exception.class)
     public long updateById(T entity) {
         long result = super.updateById(entity);
-        if (result == 0) {
+        if (result > 0) {
             //更新删除缓存
             cache.evictIfPresent(entity.getId());
         }

@@ -1,9 +1,15 @@
 package com.dr.framework.sys.service;
 
-import com.dr.framework.core.security.bo.PermissionHolder;
+import com.dr.framework.common.entity.TreeNode;
+import com.dr.framework.common.service.CommonService;
+import com.dr.framework.common.service.DataBaseService;
+import com.dr.framework.core.security.bo.PermissionMatcher;
 import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.security.bo.PermissionResourcePart;
 import com.dr.framework.core.security.bo.ResourceProviderInfo;
+import com.dr.framework.core.security.entity.Permission;
+import com.dr.framework.core.security.event.PermissionResourceChangeEvent;
+import com.dr.framework.core.security.event.SecurityEvent;
 import com.dr.framework.core.security.service.ResourceManager;
 import com.dr.framework.core.security.service.ResourceProvider;
 import com.dr.framework.core.security.service.SecurityManager;
@@ -11,8 +17,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.event.EventListener;
 import org.springframework.context.support.ApplicationObjectSupport;
+import org.springframework.core.Ordered;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,19 +32,33 @@ import java.util.stream.Collectors;
  *
  * @author dr
  */
-public class DefaultResourceManager extends ApplicationObjectSupport implements ResourceManager, InitializingBean {
+@Service
+public class DefaultResourceManager extends ApplicationObjectSupport implements ResourceManager, InitDataService.DataInit, InitializingBean {
     private Map<String, ResourceProvider> resourceProviderMap = Collections.synchronizedMap(new HashMap<>());
+    /**
+     * 缓存计算出来的资源，只需计算一次即可
+     * key是 人员Id+资源类型+资源分组
+     * <p>
+     * 资源变更需要清空缓存
+     * <p>
+     * 角色权限变更需要清空缓存
+     */
     Cache personResourceCache;
+    /**
+     * 资源类型和缓存集合map
+     */
+    Map<String, Set<String>> typeKeyMap = Collections.synchronizedMap(new HashMap<>());
+
     @Autowired
     protected SecurityManager securityManager;
 
     @Override
-    public Collection<ResourceProviderInfo> getResourceProviders() {
+    public List<ResourceProviderInfo> getResourceProviders() {
         return resourceProviderMap.values().stream().map(ResourceProviderInfo::new).collect(Collectors.toList());
     }
 
     @Override
-    public Collection<PermissionResource> getResourceGroup(String resourceType) {
+    public List<? extends PermissionResource> getResourceGroup(String resourceType) {
         if (resourceProviderMap.containsKey(resourceType)) {
             return resourceProviderMap.get(resourceType).getGroupResource();
         }
@@ -42,7 +66,7 @@ public class DefaultResourceManager extends ApplicationObjectSupport implements 
     }
 
     @Override
-    public Collection<PermissionResourcePart> getResourceParts(String resourceType) {
+    public List<PermissionResourcePart> getResourceParts(String resourceType) {
         if (resourceProviderMap.containsKey(resourceType)) {
             return resourceProviderMap.get(resourceType).getParts();
         }
@@ -58,12 +82,17 @@ public class DefaultResourceManager extends ApplicationObjectSupport implements 
      */
     @Override
     @Transactional(readOnly = true)
-    public Collection<PermissionResource> getResources(String resourceType, String groupId) {
+    public List<? extends PermissionResource> getResources(String resourceType, String groupId) {
         ResourceProvider resourceProvider = resourceProviderMap.get(resourceType);
         if (resourceProvider != null) {
             return resourceProvider.getResources(groupId);
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public List<TreeNode<? extends PermissionResource>> getResourcesTree(String resourceType, String groupId) {
+        return listToTree(getResources(resourceType, groupId), groupId);
     }
 
     /**
@@ -76,11 +105,38 @@ public class DefaultResourceManager extends ApplicationObjectSupport implements 
      */
     @Override
     @Transactional(readOnly = true)
-    public Collection<PermissionResource> getPersonResources(String userId, String resourceType, String groupId) {
+    public List<? extends PermissionResource> getPersonResources(String userId, String resourceType, String groupId) {
         //先从缓存读取
         String cacheKey = String.join("-", userId, resourceType, groupId);
+        //缓存key
+        typeKeyMap.computeIfAbsent(resourceType, k -> Collections.synchronizedSet(new HashSet<>()))
+                .add(cacheKey);
         //缓存没有则在计算
         return personResourceCache.get(cacheKey, () -> doGetResources(userId, resourceType, groupId));
+    }
+
+    @Override
+    public List<TreeNode<? extends PermissionResource>> getPersonResourceTree(String userId, String resourceType, String groupId) {
+        return listToTree(getPersonResources(userId, resourceType, groupId), groupId);
+    }
+
+
+    List<TreeNode<? extends PermissionResource>> listToTree(List<? extends PermissionResource> treeNodes, String groupId) {
+        if (treeNodes == null || treeNodes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return CommonService.listToTree(
+                treeNodes,
+                groupId,
+                PermissionResource::getId,
+                PermissionResource::getParentId,
+                PermissionResource::getOrder,
+                PermissionResource::getName,
+                null,
+                false)
+                .stream().map(
+                        t -> (TreeNode<PermissionResource>) t
+                ).collect(Collectors.toList());
     }
 
     /**
@@ -91,14 +147,14 @@ public class DefaultResourceManager extends ApplicationObjectSupport implements 
      * @param groupId
      * @return
      */
-    private Collection<PermissionResource> doGetResources(String personId, String type, String groupId) {
+    private List<? extends PermissionResource> doGetResources(String personId, String type, String groupId) {
         //先获取特定类型所有的资源
-        Collection<PermissionResource> resources = getResources(type, groupId);
+        List<? extends PermissionResource> resources = getResources(type, groupId);
         if (resources.isEmpty()) {
             return resources;
         }
         //在获取用户所有的权限资源
-        List<PermissionHolder> rolePermissions = securityManager.userPermissions(personId, type, groupId);
+        List<PermissionMatcher> rolePermissions = securityManager.userPermissions(personId, type, groupId);
         if (rolePermissions.isEmpty()) {
             return Collections.emptyList();
         }
@@ -112,8 +168,8 @@ public class DefaultResourceManager extends ApplicationObjectSupport implements 
      * @param rolePermissions
      * @return
      */
-    private boolean hasPermission(PermissionResource resource, List<PermissionHolder> rolePermissions) {
-        for (PermissionHolder holder : rolePermissions) {
+    private boolean hasPermission(PermissionResource resource, List<PermissionMatcher> rolePermissions) {
+        for (PermissionMatcher holder : rolePermissions) {
             if (holder.match(resource.getCode())) {
                 return true;
             }
@@ -128,5 +184,68 @@ public class DefaultResourceManager extends ApplicationObjectSupport implements 
                 .forEach(r -> resourceProviderMap.put(r.getType(), r));
         CacheManager cacheManager = getApplicationContext().getBean(CacheManager.class);
         personResourceCache = cacheManager.getCache("core.security.personResource");
+    }
+
+    /**
+     * 监听权限资源变化，删除缓存
+     *
+     * @param event
+     */
+    @EventListener
+    public synchronized void listenResourceChange(SecurityEvent event) {
+        if (event instanceof PermissionResourceChangeEvent) {
+            String type = (String) event.getSource();
+            if (!StringUtils.isEmpty(type) && typeKeyMap.containsKey(type)) {
+                Set<String> cacheKeySet = typeKeyMap.get(type);
+                cacheKeySet.forEach(k -> personResourceCache.evictIfPresent(k));
+                typeKeyMap.remove(type);
+            }
+        } else {
+            clearCache();
+        }
+    }
+
+    /**
+     * 清空缓存
+     */
+    private void clearCache() {
+        personResourceCache.clear();
+        typeKeyMap.clear();
+    }
+
+    @Autowired
+    protected PermissionService permissionService;
+
+    /**
+     * 添加所有资源的所有权限，并将权限赋给超级管理员
+     *
+     * @param dataBaseService
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void initData(DataBaseService dataBaseService) {
+        resourceProviderMap.values().forEach(
+                p -> {
+                    String permissionId = p.getType();
+                    if (!permissionService.exists(permissionId)) {
+                        //添加菜单超级管理员权限
+                        Permission permission = new Permission();
+                        permission.setId(permissionId);
+                        permission.setCode(SecurityManager.defaultMatcher);
+                        permission.setSys(true);
+                        permission.setGroupId(SecurityManager.defaultMatcher);
+                        permission.setType(p.getType());
+                        permission.setName(p.getName() + "所有权限");
+                        permissionService.insert(permission);
+                        //将权限赋给超级管理员角色
+                        securityManager.addPermissionToRole(RoleService.adminRoleId, permission.getId());
+                    }
+                }
+        );
+    }
+
+    @Override
+    public int order() {
+        return Ordered.LOWEST_PRECEDENCE;
     }
 }

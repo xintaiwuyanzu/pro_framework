@@ -1,10 +1,12 @@
 package com.dr.framework.core.security.service;
 
+import com.dr.framework.common.entity.TreeNode;
 import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.security.bo.PermissionResourcePart;
 import com.dr.framework.core.security.bo.ResourceProviderInfo;
+import com.dr.framework.core.util.Constants;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * 统管没有权限判断的所有资源
@@ -17,7 +19,7 @@ public interface ResourceAdmin {
      *
      * @return
      */
-    Collection<ResourceProviderInfo> getResourceProviders();
+    List<ResourceProviderInfo> getResourceProviders();
 
     /**
      * 根据资源类型获取资源分组
@@ -26,7 +28,7 @@ public interface ResourceAdmin {
      * @param resourceType
      * @return
      */
-    Collection<PermissionResource> getResourceGroup(String resourceType);
+    List<? extends PermissionResource> getResourceGroup(String resourceType);
 
     /**
      * 获取资源功能项
@@ -34,7 +36,17 @@ public interface ResourceAdmin {
      * @param resourceType
      * @return
      */
-    Collection<PermissionResourcePart> getResourceParts(String resourceType);
+    List<PermissionResourcePart> getResourceParts(String resourceType);
+
+    /**
+     * 获取指定类型的资源列表
+     *
+     * @param resourceType
+     * @return
+     */
+    default List<? extends PermissionResource> getResources(String resourceType) {
+        return getResources(resourceType, Constants.DEFAULT);
+    }
 
     /**
      * 获取所有资源列表
@@ -43,5 +55,24 @@ public interface ResourceAdmin {
      * @param groupId
      * @return
      */
-    Collection<PermissionResource> getResources(String resourceType, String groupId);
+    List<? extends PermissionResource> getResources(String resourceType, String groupId);
+
+    /**
+     * 获取资源树
+     *
+     * @param resourceType
+     * @return
+     */
+    default List<TreeNode<? extends PermissionResource>> getResourcesTree(String resourceType) {
+        return getResourcesTree(resourceType, Constants.DEFAULT);
+    }
+
+    /**
+     * 获取资源树
+     *
+     * @param resourceType
+     * @param groupId
+     * @return
+     */
+    List<TreeNode<? extends PermissionResource>> getResourcesTree(String resourceType, String groupId);
 }

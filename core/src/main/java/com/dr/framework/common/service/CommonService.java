@@ -283,6 +283,6 @@ public class CommonService {
                     .collect(Collectors.toList());
             return treeNodes;
         }
-        return null;
+        return Collections.EMPTY_LIST;
     }
 }

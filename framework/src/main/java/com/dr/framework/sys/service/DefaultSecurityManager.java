@@ -4,14 +4,14 @@ package com.dr.framework.sys.service;
 import com.dr.framework.common.dao.CommonMapper;
 import com.dr.framework.common.entity.BaseEntity;
 import com.dr.framework.common.entity.IdEntity;
+import com.dr.framework.common.entity.StatusEntity;
 import com.dr.framework.common.service.CommonService;
 import com.dr.framework.common.service.DefaultDataBaseService;
 import com.dr.framework.core.organise.entity.Person;
-import com.dr.framework.core.organise.query.PersonQuery;
 import com.dr.framework.core.organise.service.OrganisePersonService;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
-import com.dr.framework.core.security.bo.PermissionHolder;
+import com.dr.framework.core.security.bo.PermissionMatcher;
 import com.dr.framework.core.security.entity.Permission;
 import com.dr.framework.core.security.entity.Role;
 import com.dr.framework.core.security.query.RoleQuery;
@@ -64,25 +64,73 @@ public class DefaultSecurityManager extends ApplicationObjectSupport implements 
                 .column(EntityRolePersonInfo.ROLEID)
                 .equal(EntityRolePersonInfo.PERSONID, userId);
         //角色查询
-        SqlQuery<Role> sqlQuery = SqlQuery.from(Role.class)
+        SqlQuery sqlQuery = SqlQuery.from(roleRelation)
                 .in(roleRelation.getColumn(IdEntity.ID_COLUMN_NAME), rolePersonSubQuery);
         return roleService.selectList(sqlQuery);
     }
 
     @Override
-    public List<PermissionHolder> userPermissions(String userId, String permissionType, String permissionGroup) {
+    public List<Permission> rolePermissions(String roleId) {
+        Assert.isTrue(!StringUtils.isEmpty(roleId), "角色Id不能为空！");
+        SqlQuery<EntityRolePermission> rolePermissionSqlQuery = SqlQuery.from(EntityRolePermission.class, "rpm", false)
+                .column(EntityRolePermissionInfo.PERMISSIONID)
+                .equal(EntityRolePermissionInfo.ROLEID, roleId);
+        SqlQuery<Permission> sqlQuery = SqlQuery.from(permissionRelation, "p")
+                .in(permissionRelation.getColumn(IdEntity.ID_COLUMN_NAME), rolePermissionSqlQuery)
+                .equal(permissionRelation.getColumn(StatusEntity.STATUS_COLUMN_KEY), StatusEntity.STATUS_ENABLE)
+                .setReturnClass(Permission.class);
+        return commonMapper.selectByQuery(sqlQuery);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long bindRolePermissions(String roleId, String permissions) {
+        //删除角色所有的权限
+        Assert.isTrue(!StringUtils.isEmpty(roleId), "角色Id不能为空！");
+        long result = commonMapper.deleteByQuery(SqlQuery.from(EntityRolePermission.class).equal(EntityRolePermissionInfo.ROLEID, roleId));
+        //重新添加关联数据
+        if (!StringUtils.isEmpty(permissions)) {
+            result += addPermissionToRole(roleId, permissions.split(","));
+        }
+        return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public long bindRoleUsers(String roleId, String personIds) {
+        //删除角色所有的用户
+        Assert.isTrue(!StringUtils.isEmpty(roleId), "角色Id不能为空！");
+        long result = commonMapper.deleteByQuery(SqlQuery.from(EntityRolePerson.class).equal(EntityRolePersonInfo.ROLEID, roleId));
+        //重新添加关联数据
+        if (!StringUtils.isEmpty(personIds)) {
+            for (String p : personIds.split(",")) {
+                result += addRoleToUser(p, roleId);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<PermissionMatcher> userPermissions(String userId, String permissionType, String permissionGroup) {
         checkUser(userId);
-        SqlQuery<EntityRolePerson> rolePersonSqlQuery = SqlQuery.from(EntityRolePerson.class, false)
+        SqlQuery<EntityRolePerson> rolePersonSqlQuery = SqlQuery.from(EntityRolePerson.class, "rpe", false)
                 .column(EntityRolePersonInfo.ROLEID)
                 .equal(EntityRolePersonInfo.PERSONID, userId);
-        SqlQuery<EntityRolePermission> rolePermissionSqlQuery = SqlQuery.from(EntityRolePermission.class, false)
+        SqlQuery<EntityRolePermission> rolePermissionSqlQuery = SqlQuery.from(EntityRolePermission.class, "rpm", false)
                 .column(EntityRolePermissionInfo.PERMISSIONID)
                 .in(EntityRolePermissionInfo.ROLEID, rolePersonSqlQuery);
-        SqlQuery<Permission> sqlQuery = SqlQuery.from(Permission.class)
+        SqlQuery<Permission> sqlQuery = SqlQuery.from(permissionRelation, "p")
                 .in(permissionRelation.getColumn(IdEntity.ID_COLUMN_NAME), rolePermissionSqlQuery)
                 .equal(permissionRelation.getColumn("security_type"), permissionType)
-                .equal(permissionRelation.getColumn("group"), permissionGroup);
-        return commonMapper.selectByQuery(sqlQuery).stream().map(PermissionHolder::new).sorted().collect(Collectors.toList());
+                .equal(permissionRelation.getColumn(StatusEntity.STATUS_COLUMN_KEY), StatusEntity.STATUS_ENABLE)
+                .setReturnClass(Permission.class);
+
+        return commonMapper.selectByQuery(sqlQuery)
+                .stream()
+                .filter(p -> new PermissionMatcher(p.getGroupId()).match(permissionGroup))
+                .map(p -> new PermissionMatcher(p.getCode()))
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -120,8 +168,8 @@ public class DefaultSecurityManager extends ApplicationObjectSupport implements 
     @Override
     public boolean hasPermission(String userid, String permissionType, String permissionGroup, String permissionCode) {
         Assert.isTrue(!StringUtils.isEmpty(permissionCode), "权限编码不能为空！");
-        List<PermissionHolder> permissionHolders = userPermissions(userid, permissionType, permissionGroup);
-        for (PermissionHolder permissionHolder : permissionHolders) {
+        List<PermissionMatcher> permissionHolders = userPermissions(userid, permissionType, permissionGroup);
+        for (PermissionMatcher permissionHolder : permissionHolders) {
             if (permissionHolder.match(permissionCode)) {
                 return true;
             }
@@ -131,20 +179,21 @@ public class DefaultSecurityManager extends ApplicationObjectSupport implements 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean addRoleToUser(String userId, String... role) {
+    public long addRoleToUser(String userId, String... role) {
         checkUser(userId);
         //查出来该用户已经有的角色
         List<String> roles = userRoles(userId).stream().map(BaseEntity::getId).collect(Collectors.toList());
         //TODO 过滤没有的角色id
+        long result = 0;
         for (String r : role) {
             if (!roles.contains(r)) {
                 EntityRolePerson rolePerson = new EntityRolePerson();
                 rolePerson.setPersonId(userId);
                 rolePerson.setRoleId(r);
-                commonMapper.insert(rolePerson);
+                result += commonMapper.insert(rolePerson);
             }
         }
-        return true;
+        return result;
     }
 
     @Override
@@ -160,7 +209,7 @@ public class DefaultSecurityManager extends ApplicationObjectSupport implements 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean addPermissionToRole(String roleId, String... permission) {
+    public long addPermissionToRole(String roleId, String... permission) {
         List<Role> roles = roleService.selectList(new RoleQuery.Builder().idEqual(roleId).build());
         Assert.isTrue(roles.size() == 1, "未查询到指定的角色");
 
@@ -176,15 +225,16 @@ public class DefaultSecurityManager extends ApplicationObjectSupport implements 
                 .map(BaseEntity::getId)
                 .collect(Collectors.toList());
         //添加新的权限
+        long result = 0;
         for (String p : permission) {
             if (!oldPermission.contains(p)) {
                 EntityRolePermission rolePermission = new EntityRolePermission();
                 rolePermission.setPermissionId(p);
                 rolePermission.setRoleId(roleId);
-                commonMapper.insert(rolePermission);
+                result += commonMapper.insert(rolePermission);
             }
         }
-        return true;
+        return result;
     }
 
     @Override
@@ -205,11 +255,12 @@ public class DefaultSecurityManager extends ApplicationObjectSupport implements 
     }
 
     @Autowired
-    OrganisePersonService organisePersonService;
+    protected OrganisePersonService organisePersonService;
 
     Person checkUser(String userId) {
-        Person person = organisePersonService.getPerson(new PersonQuery.Builder().idEqual(userId).build());
+        Person person = organisePersonService.getPersonById(userId);
         Assert.notNull(person, "未查询到指定的用户");
         return person;
     }
+
 }
