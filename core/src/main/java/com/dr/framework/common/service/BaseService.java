@@ -46,6 +46,14 @@ public interface BaseService<T extends IdEntity> {
     T selectOne(SqlQuery<T> sqlQuery);
 
     /**
+     * 根据主键查询数据
+     *
+     * @param id
+     * @return
+     */
+    T selectById(String id);
+
+    /**
      * 查询列表
      *
      * @param sqlQuery
@@ -86,5 +94,13 @@ public interface BaseService<T extends IdEntity> {
      * @return
      */
     long delete(SqlQuery<T> sqlQuery);
+
+    /**
+     * 根据主键删除数据
+     *
+     * @param ids
+     * @return
+     */
+    long deleteById(String... ids);
 
 }

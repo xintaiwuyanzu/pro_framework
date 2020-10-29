@@ -8,7 +8,6 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
  * @param <T>
  * @author dr
  */
-public abstract class CacheAbleService<T extends IdEntity> extends DefaultBaseService<T> implements BaseService<T> {
+public abstract class CacheAbleService<T extends IdEntity> extends DefaultBaseService<T> {
     @Autowired
     protected CacheManager cacheManager;
     /**
@@ -117,9 +116,9 @@ public abstract class CacheAbleService<T extends IdEntity> extends DefaultBaseSe
         return super.selectPage(makeOnlyId(sqlQuery), pageIndex, pageSize);
     }
 
-    protected T selectById(String id) {
-        Assert.isTrue(!StringUtils.isEmpty(id), "主键不能为空！");
-        return cache.get(id, () -> commonMapper.selectById(getEntityClass(), id));
+    @Override
+    public T selectById(String id) {
+        return cache.get(id, () -> super.selectById(id));
     }
 
     @Override

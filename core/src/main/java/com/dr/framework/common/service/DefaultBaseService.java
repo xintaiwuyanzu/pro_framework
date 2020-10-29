@@ -9,6 +9,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -57,6 +59,15 @@ public class DefaultBaseService<T extends IdEntity> extends ApplicationObjectSup
 
     @Override
     @Transactional(readOnly = true, rollbackFor = Exception.class)
+    public T selectById(String id) {
+        Assert.isTrue(!StringUtils.isEmpty(id), "主键不能为空！");
+        SqlQuery<T> sqlQuery = SqlQuery.from(getEntityClass());
+        sqlQuery.equal(getEntityRelation().getColumn(IdEntity.ID_COLUMN_NAME), id);
+        return selectOne(sqlQuery);
+    }
+
+    @Override
+    @Transactional(readOnly = true, rollbackFor = Exception.class)
     public List<T> selectList(SqlQuery<T> sqlQuery) {
         return commonService.selectList(sqlQuery);
     }
@@ -84,6 +95,12 @@ public class DefaultBaseService<T extends IdEntity> extends ApplicationObjectSup
         return commonService.delete(sqlQuery);
     }
 
+    @Override
+    public long deleteById(String... ids) {
+        Assert.isTrue(ids.length > 0, "主键不能为空！");
+        return delete(SqlQuery.from(getEntityClass()).in(getEntityRelation().getColumn(IdEntity.ID_COLUMN_NAME), ids));
+    }
+
     /**
      * 获取泛型的实际类型
      *
@@ -106,10 +123,6 @@ public class DefaultBaseService<T extends IdEntity> extends ApplicationObjectSup
 
     public CommonService getCommonService() {
         return commonService;
-    }
-
-    protected CommonMapper getCommonMapper() {
-        return commonMapper;
     }
 
     @Override
