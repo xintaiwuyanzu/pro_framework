@@ -61,7 +61,7 @@ public class DefaultBaseService<T extends IdEntity> extends ApplicationObjectSup
     @Transactional(readOnly = true, rollbackFor = Exception.class)
     public T selectById(String id) {
         Assert.isTrue(!StringUtils.isEmpty(id), "主键不能为空！");
-        SqlQuery<T> sqlQuery = SqlQuery.from(getEntityClass());
+        SqlQuery<T> sqlQuery = SqlQuery.from(getEntityRelation());
         sqlQuery.equal(getEntityRelation().getColumn(IdEntity.ID_COLUMN_NAME), id);
         return selectOne(sqlQuery);
     }
@@ -98,7 +98,9 @@ public class DefaultBaseService<T extends IdEntity> extends ApplicationObjectSup
     @Override
     public long deleteById(String... ids) {
         Assert.isTrue(ids.length > 0, "主键不能为空！");
-        return delete(SqlQuery.from(getEntityClass()).in(getEntityRelation().getColumn(IdEntity.ID_COLUMN_NAME), ids));
+        SqlQuery<T> sqlQuery = SqlQuery.from(getEntityRelation());
+        sqlQuery.in(getEntityRelation().getColumn(IdEntity.ID_COLUMN_NAME), ids);
+        return delete(sqlQuery);
     }
 
     /**

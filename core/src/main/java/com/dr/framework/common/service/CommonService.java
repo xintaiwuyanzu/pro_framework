@@ -10,6 +10,7 @@ import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.SecurityHolder;
 import com.dr.framework.core.security.service.SecurityManager;
+import com.dr.framework.core.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -232,11 +233,17 @@ public class CommonService {
             TreeNode treeNode = new TreeNode(idFunction.apply(treeEntity), labelFunction.apply(treeEntity), treeEntity);
             String pid = parentFunction.apply(treeEntity);
             if (StringUtils.isEmpty(pid)) {
-                pid = "$default_parentId";
+                //pid = "$default_parentId";
+                pid = Constants.DEFAULT;
             }
             treeNode.setParentId(pid);
             if (orderFunction != null) {
-                treeNode.setOrder(orderFunction.apply(treeEntity));
+                Integer order = orderFunction.apply(treeEntity);
+                if (order == null) {
+                    //这里会报空指针
+                    order = 0;
+                }
+                treeNode.setOrder(order);
             }
             if (leafFunction != null) {
                 treeNode.setLeaf(leafFunction.apply(treeEntity));

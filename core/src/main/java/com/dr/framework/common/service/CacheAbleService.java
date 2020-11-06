@@ -118,7 +118,7 @@ public abstract class CacheAbleService<T extends IdEntity> extends DefaultBaseSe
 
     @Override
     public T selectById(String id) {
-        return cache.get(id, () -> super.selectById(id));
+        return cache.get(id, () -> commonMapper.selectById(getEntityClass(), id));
     }
 
     @Override

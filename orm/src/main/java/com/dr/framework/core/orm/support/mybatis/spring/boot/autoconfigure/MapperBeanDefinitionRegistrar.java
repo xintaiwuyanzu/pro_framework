@@ -32,6 +32,7 @@ import static com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigur
 public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware, BeanClassLoaderAware {
     private ClassLoader classLoader;
     private Environment environment;
+    private Binder binder;
     private Logger logger = LoggerFactory.getLogger(MapperBeanDefinitionProcessor.class);
 
     @Override
@@ -110,8 +111,9 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
             MultiDataSourceProperties multiDataSourceProperties = new MultiDataSourceProperties();
             multiDataSourceProperties.setBeanClassLoader(classLoader);
             multiDataSourceProperties.setName(beanName);
+            multiDataSourceProperties.setPrefix(prefix);
             //multiDataSourceProperties.afterPropertiesSet();
-            return Binder.get(environment).bind(prefix, Bindable.ofInstance(multiDataSourceProperties)).get();
+            return binder.bind(prefix, Bindable.ofInstance(multiDataSourceProperties)).get();
         } catch (Exception e) {
             logger.error("没找到指定的jdbc配置信息{},尝试使用内存数据库", prefix);
         }
@@ -137,6 +139,7 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;
+        this.binder = Binder.get(environment);
     }
 
     @Override

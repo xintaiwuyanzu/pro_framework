@@ -37,6 +37,8 @@ public class MultiDataSourceProperties extends DataSourceProperties {
     /**
      * 是否包含被xa事物管理
      */
+
+    private String prefix;
     private boolean useXa = true;
     private DataSource selfManagedDatasource;
     private DataBaseMetaData dataBaseMetaData;
@@ -120,5 +122,13 @@ public class MultiDataSourceProperties extends DataSourceProperties {
 
     public DataBaseMetaData getDataBaseMetaData() {
         return dataBaseMetaData;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 }

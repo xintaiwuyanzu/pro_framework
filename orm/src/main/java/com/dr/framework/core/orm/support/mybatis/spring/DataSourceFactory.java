@@ -15,6 +15,8 @@ import org.springframework.boot.context.properties.source.ConfigurationPropertyS
 import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 import org.springframework.boot.jdbc.XADataSourceWrapper;
 import org.springframework.boot.jta.atomikos.AtomikosDataSourceBean;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -27,16 +29,19 @@ import javax.sql.XADataSource;
  *
  * @author dr
  */
-public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean {
+public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoaderAware, BeanFactoryAware, InitializingBean, DisposableBean, EnvironmentAware {
     private MultiDataSourceProperties properties;
     private ClassLoader classLoader;
     private BeanFactory beanFactory;
     private String beanName;
     private DataSource dataSource;
+    private Environment environment;
     Logger logger = LoggerFactory.getLogger(DataSourceFactory.class);
+    private Binder binder;
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        binder = Binder.get(environment);
         if (properties.isUseXa()) {
             try {
                 XADataSource xaDataSource = createXaDataSource();
@@ -50,6 +55,8 @@ public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoad
             }
         } else {
             dataSource = DriverUtils.buildDataSource(properties);
+            //绑定数据库其他的属性
+            binder.bind(properties.getPrefix(), Bindable.ofInstance(dataSource));
         }
         if (dataSource instanceof BeanNameAware) {
             ((BeanNameAware) dataSource).setBeanName(beanName);
@@ -142,5 +149,10 @@ public class DataSourceFactory implements FactoryBean<DataSource>, BeanClassLoad
 
     public String getBeanName() {
         return beanName;
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 }

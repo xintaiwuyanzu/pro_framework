@@ -89,7 +89,7 @@ public class MysqlDialect extends Dialect {
 
     @Override
     protected String getTableRemark(String remark) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(" default charset=utf8 ");
         if (!StringUtils.isEmpty(remark)) {
             sb.append(" comment='")
                     .append(remark)
