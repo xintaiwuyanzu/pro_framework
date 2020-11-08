@@ -18,7 +18,6 @@ import com.dr.framework.core.security.query.RoleQuery;
 import com.dr.framework.core.security.service.SecurityManager;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -40,7 +39,7 @@ import java.util.stream.Collectors;
  * @author dr
  */
 @Service
-public class DefaultSecurityManager extends ApplicationObjectSupport implements RelationHelper, SecurityManager, InitializingBean {
+public class DefaultSecurityManager implements RelationHelper, SecurityManager, InitializingBean {
     @Autowired
     CommonMapper commonMapper;
     @Autowired

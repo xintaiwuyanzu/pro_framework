@@ -17,8 +17,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.EventListener;
-import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
  * @author dr
  */
 @Service
-public class DefaultResourceManager extends ApplicationObjectSupport implements ResourceManager, InitDataService.DataInit, InitializingBean {
+public class DefaultResourceManager implements ResourceManager, InitDataService.DataInit, InitializingBean, ApplicationContextAware {
     private Map<String, ResourceProvider> resourceProviderMap = Collections.synchronizedMap(new HashMap<>());
     /**
      * 缓存计算出来的资源，只需计算一次即可
@@ -51,6 +52,7 @@ public class DefaultResourceManager extends ApplicationObjectSupport implements 
 
     @Autowired
     protected SecurityManager securityManager;
+    protected ApplicationContext applicationContext;
 
     @Override
     public List<ResourceProviderInfo> getResourceProviders() {
@@ -247,5 +249,14 @@ public class DefaultResourceManager extends ApplicationObjectSupport implements 
     @Override
     public int order() {
         return Ordered.LOWEST_PRECEDENCE;
+    }
+
+    public ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 }
