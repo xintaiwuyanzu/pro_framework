@@ -61,6 +61,10 @@ public class DataBaseMetaData {
     private Dialect dialect;
     private DataSource dataSource;
 
+
+    private String host, userName, password;
+    private Integer port;
+
     public DataBaseMetaData(DataSource dataSource, String name) {
         this.name = name;
         this.dataSource = dataSource;
@@ -307,5 +311,37 @@ public class DataBaseMetaData {
 
     public String getName() {
         return name;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
     }
 }

@@ -11,6 +11,8 @@ import javax.sql.DataSource;
 import java.io.Closeable;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 配置多数据源使用，多了几个属性
@@ -42,6 +44,7 @@ public class MultiDataSourceProperties extends DataSourceProperties {
     private boolean useXa = true;
     private DataSource selfManagedDatasource;
     private DataBaseMetaData dataBaseMetaData;
+    Pattern p = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+)\\:(\\d+)");
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -53,6 +56,18 @@ public class MultiDataSourceProperties extends DataSourceProperties {
             ((HikariDataSource) selfManagedDatasource).getDataSourceProperties().setProperty("remarksReporting", "true");
         }
         dataBaseMetaData = new DataBaseMetaData(selfManagedDatasource, getName());
+        dataBaseMetaData.setUserName(getUsername());
+        dataBaseMetaData.setPassword(getPassword());
+        try {
+            //TODO 正则解析host和ip
+            Matcher matcher = p.matcher(getUrl());
+            while (matcher.find()) {
+                dataBaseMetaData.setHost(matcher.group(1));
+                dataBaseMetaData.setPort(Integer.parseInt(matcher.group(2)));
+            }
+        } catch (Exception e) {
+
+        }
     }
 
     /**
