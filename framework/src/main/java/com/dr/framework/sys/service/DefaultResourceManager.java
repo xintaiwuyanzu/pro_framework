@@ -8,6 +8,7 @@ import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.security.bo.PermissionResourcePart;
 import com.dr.framework.core.security.bo.ResourceProviderInfo;
 import com.dr.framework.core.security.entity.Permission;
+import com.dr.framework.core.security.entity.SysMenu;
 import com.dr.framework.core.security.event.PermissionResourceChangeEvent;
 import com.dr.framework.core.security.event.SecurityEvent;
 import com.dr.framework.core.security.service.ResourceManager;
@@ -172,8 +173,13 @@ public class DefaultResourceManager implements ResourceManager, InitDataService.
      */
     private boolean hasPermission(PermissionResource resource, List<PermissionMatcher> rolePermissions) {
         for (PermissionMatcher holder : rolePermissions) {
-            if (holder.match(resource.getCode())) {
+            if (holder.match(resource.getId())) {
                 return true;
+            }
+            if (!(resource instanceof SysMenu)) {
+                if (holder.match(resource.getCode())) {
+                    return true;
+                }
             }
         }
         return false;

@@ -8,10 +8,12 @@ import com.dr.framework.common.service.DataBaseService;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.entity.Role;
+import com.dr.framework.core.security.event.SecurityEvent;
 import com.dr.framework.core.security.query.RoleQuery;
 import com.dr.framework.core.security.service.SecurityManager;
 import com.dr.framework.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -30,6 +32,8 @@ public class RoleService extends CacheAbleService<Role> implements RelationHelpe
     public static final String adminRoleId = com.dr.framework.core.util.Constants.DEFAULT + "admin";
     @Autowired
     SecurityManager securityManager;
+    @Autowired
+    ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -42,6 +46,7 @@ public class RoleService extends CacheAbleService<Role> implements RelationHelpe
         Assert.isTrue(!commonMapper.existsByQuery(SqlQuery.from(getEntityRelation())
                 .equal(getEntityRelation().getColumn("security_code"), entity.getCode())
         ), "已存在指定的权限编码");
+        eventPublisher.publishEvent(new SecurityEvent<>(entity));
         return super.insert(entity);
     }
 
@@ -71,6 +76,7 @@ public class RoleService extends CacheAbleService<Role> implements RelationHelpe
                 .equal(roleRelation.getColumn(Role.ID_COLUMN_NAME), old.getId())
         );
         cache.evictIfPresent(role.getId());
+        eventPublisher.publishEvent(new SecurityEvent<>(role));
         return 1;
     }
 
@@ -101,6 +107,7 @@ public class RoleService extends CacheAbleService<Role> implements RelationHelpe
         count += commonMapper.deleteByQuery(SqlQuery.from(EntityRoleGroup.class).
                 in(EntityRoleGroupInfo.ROLEID, roleCode)
         );
+        eventPublisher.publishEvent(new SecurityEvent<>(""));
         return count;
     }
 

@@ -2,11 +2,11 @@ package com.dr.framework.sys.controller;
 
 import com.dr.framework.common.controller.BaseServiceController;
 import com.dr.framework.common.entity.ResultListEntity;
-import com.dr.framework.common.entity.TreeNode;
+import com.dr.framework.common.service.CommonService;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
-import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.security.entity.SysMenu;
+import com.dr.framework.core.security.query.SysMenuQuery;
 import com.dr.framework.core.security.service.ResourceManager;
 import com.dr.framework.core.web.annotations.Current;
 import com.dr.framework.sys.service.SysMenuService;
@@ -39,17 +39,16 @@ public class SysMenuController extends BaseServiceController<SysMenuService, Sys
      * @return
      */
     @RequestMapping("/menutree")
-    public ResultListEntity<TreeNode<? extends PermissionResource>> menutree(
+    public ResultListEntity menutree(
             @RequestParam(defaultValue = com.dr.framework.core.util.Constants.DEFAULT) String sysId
             , @Current Person person
             , boolean all) {
-        List<TreeNode<? extends PermissionResource>> treeNodes;
         if (all) {
-            treeNodes = resourceManager.getResourcesTree(SysMenuService.RESOURCE_TYPE, sysId);
+            List<SysMenu> sysMenus = service.selectMenuList(new SysMenuQuery.Builder().sysIdEqual(sysId).build());
+            return ResultListEntity.success(CommonService.listToTree(sysMenus, sysId, SysMenu::getName));
         } else {
-            treeNodes = resourceManager.getPersonResourceTree(person.getId(), SysMenuService.RESOURCE_TYPE, sysId);
+            return ResultListEntity.success(resourceManager.getPersonResourceTree(person.getId(), SysMenuService.RESOURCE_TYPE, sysId));
         }
-        return ResultListEntity.success(treeNodes);
     }
 
     @Override

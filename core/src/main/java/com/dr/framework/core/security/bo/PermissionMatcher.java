@@ -62,9 +62,12 @@ public class PermissionMatcher implements Comparable<PermissionMatcher> {
                     firstStr = arr[0];
                 }
                 if (length == 2) {
+                    firstStr = arr[0];
                     secondStr = arr[1];
                 }
                 if (length == 3) {
+                    firstStr = arr[0];
+                    secondStr = arr[1];
                     thirdStr = arr[2];
                 }
             }

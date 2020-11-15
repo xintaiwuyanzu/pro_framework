@@ -14,6 +14,7 @@ import java.util.List;
 public class SysMenuQuery extends IdQuery {
     private String sysId;
     private List<String> roleIdIn;
+    private boolean enable;
     private String personId;
 
     private SysMenuQuery() {
@@ -30,6 +31,11 @@ public class SysMenuQuery extends IdQuery {
 
         public Builder personIdEqual(String personId) {
             query.setPersonId(personId);
+            return this;
+        }
+
+        public Builder statusEnable() {
+            query.enable = true;
             return this;
         }
 
@@ -71,5 +77,13 @@ public class SysMenuQuery extends IdQuery {
 
     public void setRoleIdIn(List<String> roleIdIn) {
         this.roleIdIn = roleIdIn;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }

@@ -75,6 +75,9 @@ public class SysMenuService extends PermissionResourceService<SysMenu> implement
                             )
             );
         }
+        if (query.isEnable()) {
+            sysMenuSqlQuery.equal(entityRelation.getColumn(StatusEntity.STATUS_COLUMN_KEY), StatusEntity.STATUS_ENABLE);
+        }
         sysMenuSqlQuery.orderBy(entityRelation.getColumn(SysMenu.ORDER_COLUMN_NAME));
         return sysMenuSqlQuery;
     }
@@ -171,7 +174,7 @@ public class SysMenuService extends PermissionResourceService<SysMenu> implement
 
     @Override
     public List<? extends PermissionResource> getResources(String groupId) {
-        return selectMenuList(new SysMenuQuery.Builder().build());
+        return selectMenuList(new SysMenuQuery.Builder().statusEnable().build());
     }
 
     @Override

@@ -308,9 +308,7 @@ public abstract class Dialect {
             createTable.append(')');
             //表注释
             String remark = relation.getRemark();
-            if (!StringUtils.isEmpty(remark)) {
-                createTable.append(' ').append(getTableRemark(remark));
-            }
+            createTable.append(' ').append(getTableRemark(remark));
             sqls.add(new DataBaseChangeInfo(createTable.toString(), "新建表：" + relation.getName()));
             //注释sql
             if (supportCommentOn()) {
