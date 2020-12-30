@@ -156,9 +156,22 @@ public interface CommonMapper {
     @Select("select !!{columns} from !!{table} where !!{pk} !!{in#coll}")
     <E> List<E> selectBatchIds(Class<E> entityClass, @Param("coll") Serializable... idList);
 
+    /**
+     * 判断指定的id是否存在
+     *
+     * @param entityClass
+     * @param id
+     * @return
+     */
     @Select("select count(!!{pk}) from !!{table} where !!{pk}=#{id}")
     boolean exists(Class entityClass, @Param("id") Serializable id);
 
+    /**
+     * 根据查询条件判断是否存在
+     *
+     * @param query
+     * @return
+     */
     default boolean existsByQuery(SqlQuery query) {
         return countByQuery(query) > 0;
     }
@@ -167,11 +180,27 @@ public interface CommonMapper {
      * 查询所有的数据条数
      * count(*)会统计值为 NULL 的行，而 count(列名)不会统计此列为 NULL 值的行。
      *
+     * @param entityClass
      * @return
      */
     @Select("select count(*) from !!{table}")
     long count(Class entityClass);
 
+    /**
+     * 根据主键统计数量
+     *
+     * @param sqlQuery
+     * @return
+     */
+    @Select({"select count(!!{pk})", SqlQuery.FROM, SqlQuery.WHERE_NO_ORERY_BY})
+    long countByIdWithQuery(SqlQuery sqlQuery);
+
+    /**
+     * 根据所有统计
+     *
+     * @param sqlQuery
+     * @return
+     */
     @Select({"select count(*)", SqlQuery.FROM, SqlQuery.WHERE_NO_ORERY_BY})
     long countByQuery(SqlQuery sqlQuery);
 

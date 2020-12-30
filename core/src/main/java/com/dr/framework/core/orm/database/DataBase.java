@@ -14,7 +14,7 @@ public enum DataBase {
     MY_SQL {
         @Override
         public Class<? extends Dialect> lastestDialect() {
-            return Mysql57Dialect.class;
+            return Mysql8Dialect.class;
         }
 
         @Override
@@ -23,7 +23,10 @@ public enum DataBase {
                 if (dataBaseMetaData.getDatabaseMajorVersion() < 5) {
                     return MysqlDialect.class;
                 } else {
-                    if (dataBaseMetaData.getDatabaseMinorVersion() >= 7) {
+                    if (dataBaseMetaData.getDatabaseMajorVersion() >= 8) {
+                        return Mysql8Dialect.class;
+                    }
+                    if (dataBaseMetaData.getDatabaseMajorVersion() >= 5) {
                         return Mysql57Dialect.class;
                     }
                 }

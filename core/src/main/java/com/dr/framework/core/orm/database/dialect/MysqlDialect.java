@@ -87,6 +87,7 @@ public class MysqlDialect extends Dialect {
         return NAME;
     }
 
+    //TODO mysql8
     @Override
     protected String getTableRemark(String remark) {
         StringBuilder sb = new StringBuilder(" default charset=utf8 ");
