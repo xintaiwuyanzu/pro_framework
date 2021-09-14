@@ -27,7 +27,7 @@ public class TableInfoProperties extends Properties {
     private static final String SET_BY_QUERY = "setbyquery";
 
     private static final String SET_NO_ALIAS_TEST_KEY = "setnotest";
-    private static final String SET_NO_ALIAS_BY_QUERY = "setnoaliasbyquery";
+    private static final String SET_NO_ALIAS_BY_QUERY = "setNoAliasByQuery";
 
     private static final String IN_KEY = "in";
     private static final String QUERY = "query";
@@ -119,14 +119,13 @@ public class TableInfoProperties extends Properties {
                                             "<if test=\"$$set%2$s\">%3$s.%1$s=#{%2$s,jdbcType=%4$s},</if>"
                                     , ""));
                     break;
-                case SET_NO_ALIAS_BY_QUERY:
+                case "setnoaliasbyquery":
                     value = String.format("<set><if test=\"$set!=null\">${$set},</if>%s</set>"
                             , join(true
-                                    , column ->
-                                            "<if test=\"$$set%2$s\">%1$s=#{%2$s,jdbcType=%4$s},</if>"
+                                    , column -> "<if test=\"$$set%2$s\">%1$s=#{%2$s,jdbcType=%4$s},</if>"
                                     , ""));
                     break;
-                case SET_NO_ALIAS_KEY:
+                case "setno":
                     value = " set " + join(true, "%1$s = #{%2$s,jdbcType=%4$s}", ",");
                     break;
                 case SET_TEST_KEY:
@@ -141,7 +140,7 @@ public class TableInfoProperties extends Properties {
                                                     : "<if test=\"%2$s!=null and %2$s!='' or %2$s==0\">%3$s.%1$s=#{%2$s,jdbcType=%4$s},</if>"
                                     , ""));
                     break;
-                case SET_NO_ALIAS_TEST_KEY:
+                case "setnotest":
                     value = String.format(
                             hasSqlQuery ?
                                     "<set><if test=\"$set!=null\">${$set},</if>%s</set>"

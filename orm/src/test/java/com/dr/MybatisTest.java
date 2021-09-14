@@ -100,7 +100,7 @@ public class MybatisTest {
     @Test
     public void afterPropertiesSet() {
         TestEntity testEntity = new TestEntity();
-        testEntity.setBlobCol("BlobCo111111");
+        // testEntity.setBlobCol("BlobCo111111");
         testEntity.setClobCol("ClobCol");
         testEntity.setDateCol(2222222);
         testEntity.setDoubleCol(0.000);
@@ -112,6 +112,17 @@ public class MybatisTest {
         testMapper.insertIgnoreNull(testEntity);
         TestEntity testEntity1 = testMapper.selectById(TestEntity.class, testEntity.getId());
         System.out.println(testEntity1.getBlobCol());
+
+        testMapper.updateById(testEntity);
+        testMapper.updateIgnoreNullById(testEntity);
+        SqlQuery<TestEntity> sqlQuery = SqlQuery.from(TestEntity.class)
+                .equal(TestEntityInfo.ID, testEntity.getId())
+                .set(TestEntityInfo.NAME, "aaaaaaa");
+
+        testMapper.updateByQuery(sqlQuery);
+        logger.error("这里打断一下！");
+        testMapper.updateIgnoreNullByQuery(sqlQuery);
+
         testMapper.selectBatchIds(TestEntity.class, "7c06a865-170a-447b-a567-34776cb4086c", "8a3e6a21-7626-4991-b828-514121ac0250", "bafd0e72-e884-4295-a493-40bed6d8611e", "ed0b1580-33b0-42cd-8989-2a601c8307d7");
 
         TestEntity testEntity2 = new TestEntity();

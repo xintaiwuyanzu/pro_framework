@@ -1,6 +1,7 @@
 package com.dr.framework.core.orm.database.dialect;
 
 import com.dr.framework.core.orm.database.Dialect;
+import com.dr.framework.core.orm.jdbc.Column;
 import com.dr.framework.core.orm.jdbc.Relation;
 
 import java.sql.*;
@@ -10,6 +11,8 @@ import java.sql.*;
  */
 public class PostgreSQLDialect extends Dialect {
     public static final String NAME = "postgre";
+
+    public static final String LARGE_OBJECT_TYPE_NAME = "oid";
 
     public PostgreSQLDialect() {
         //字符串
@@ -42,7 +45,7 @@ public class PostgreSQLDialect extends Dialect {
         registerClass(java.util.Date.class).registerType(Types.TIMESTAMP, "timestamp");
         //blob
         registerClass(Blob.class, Byte[].class, byte[].class)
-                .registerType(Types.BLOB, "oid")
+                .registerType(Types.BLOB, LARGE_OBJECT_TYPE_NAME)
                 .registerType(Types.BINARY, "bytea")
                 .registerType(Types.VARBINARY, 255, "bytea")
                 .registerType(Types.LONGVARBINARY, 16777215, "bytea");
@@ -59,6 +62,15 @@ public class PostgreSQLDialect extends Dialect {
         StringBuilder builder = new StringBuilder(sqlSource);
         builder.append(" limit ").append(limit).append(" offset ").append(offset);
         return builder.toString();
+    }
+
+    @Override
+    protected boolean typeChanged(Column newColumn, Column oldColumn) {
+        if (newColumn.getType() == Types.BLOB && LARGE_OBJECT_TYPE_NAME.equals(oldColumn.getTypeName())) {
+            return false;
+        }
+
+        return super.typeChanged(newColumn, oldColumn);
     }
 
     @Override

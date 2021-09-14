@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 /*
         @EnableAutoMapper.DataBase(name = "three", primary = true)
 */
-        @EnableAutoMapper.DataBase(name = "one"),
-        @EnableAutoMapper.DataBase(name = "two")
+        @EnableAutoMapper.DataBase(name = "pg"),
+        /* @EnableAutoMapper.DataBase(name = "two")*/
 })
 public class TestApplication {
     MultiDataSourceProperties dataSourceProperties(Environment environment) {
