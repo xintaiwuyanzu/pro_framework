@@ -76,7 +76,7 @@ public class SysMenuService extends PermissionResourceService<SysMenu> implement
             );
         }
         if (query.isEnable()) {
-            sysMenuSqlQuery.equal(entityRelation.getColumn(StatusEntity.STATUS_COLUMN_KEY), StatusEntity.STATUS_ENABLE);
+            sysMenuSqlQuery.equal(entityRelation.getColumn(StatusEntity.STATUS_COLUMN_KEY), StatusEntity.STATUS_ENABLE_STR);
         }
         sysMenuSqlQuery.orderBy(entityRelation.getColumn(SysMenu.ORDER_COLUMN_NAME));
         return sysMenuSqlQuery;
