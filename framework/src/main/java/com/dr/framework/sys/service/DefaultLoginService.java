@@ -284,6 +284,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
                 SqlQuery.from(userLoginRelation)
                         .equal(userLoginRelation.getColumn("person_id"), personId)
         );
+        Assert.isTrue(!userLogins.isEmpty(), "未找到指定的登录账户！");
         Set<String> notTypes = new HashSet<>(Arrays.asList(notIncludeLoginTypes));
         for (Object o : userLogins) {
             UserLogin userLogin = (UserLogin) o;
@@ -295,6 +296,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
             userLogin.setPassword(passWordEncrypt.encryptChangeLogin(newPassword, salt, userLogin.getUserType()));
             userLogin.setSalt(salt);
             userLogin.setLastChangePwdDate(System.currentTimeMillis());
+            //TODO 用户锁
             commonMapper.updateIgnoreNullById(userLogin);
         }
     }

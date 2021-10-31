@@ -17,6 +17,10 @@ public class CommonConfig {
      * 是否调用{@link com.dr.framework.sys.service.InitDataService} 自动初始化数据
      */
     private boolean autoInitData = false;
+    /**
+     * 全局登陆账户默认登录密码
+     */
+    private String defaultPassWord = "A123456";
 
     public String getApiPath() {
         return apiPath;
@@ -32,5 +36,13 @@ public class CommonConfig {
 
     public void setAutoInitData(boolean autoInitData) {
         this.autoInitData = autoInitData;
+    }
+
+    public String getDefaultPassWord() {
+        return defaultPassWord;
+    }
+
+    public void setDefaultPassWord(String defaultPassWord) {
+        this.defaultPassWord = defaultPassWord;
     }
 }

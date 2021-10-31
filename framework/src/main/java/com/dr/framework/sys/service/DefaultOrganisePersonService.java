@@ -1,5 +1,6 @@
 package com.dr.framework.sys.service;
 
+import com.dr.framework.autoconfig.CommonConfig;
 import com.dr.framework.common.dao.CommonMapper;
 import com.dr.framework.common.entity.BaseEntity;
 import com.dr.framework.common.entity.IdEntity;
@@ -18,6 +19,7 @@ import com.dr.framework.core.organise.query.OrganiseQuery;
 import com.dr.framework.core.organise.query.PersonQuery;
 import com.dr.framework.core.organise.service.LoginService;
 import com.dr.framework.core.organise.service.OrganisePersonService;
+import com.dr.framework.core.organise.service.PassWordEncrypt;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.Column;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
@@ -27,7 +29,9 @@ import com.dr.framework.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -54,20 +58,26 @@ public class DefaultOrganisePersonService
     private LoginService loginService;
     private DefaultDataBaseService defaultDataBaseService;
     private ApplicationEventPublisher applicationEventPublisher;
-
+    private CommonConfig commonConfig;
+    @Autowired
+    @Lazy
+    private PassWordEncrypt passWordEncrypt;
     EntityRelation organiseRelation;
     EntityRelation personRelation;
     EntityRelation personGroupRelation;
     EntityRelation userLoginRelation;
 
+
     public DefaultOrganisePersonService(CommonMapper commonMapper,
                                         LoginService loginService,
                                         DefaultDataBaseService defaultDataBaseService,
-                                        ApplicationEventPublisher applicationEventPublisher) {
+                                        ApplicationEventPublisher applicationEventPublisher,
+                                        CommonConfig commonConfig) {
         this.commonMapper = commonMapper;
         this.loginService = loginService;
         this.defaultDataBaseService = defaultDataBaseService;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.commonConfig = commonConfig;
     }
 
 
@@ -292,9 +302,9 @@ public class DefaultOrganisePersonService
         Assert.isTrue(personIds != null && personIds.length > 0, "人员不能为空！");
         Assert.isTrue(commonMapper.exists(PersonGroup.class, groupId), "不存在指定的人员分组！");
         List<String> savedPersons = commonMapper.selectByQuery(
-                SqlQuery.from(EntityPersonGroupRelation.class)
-                        .equal(EntityPersonGroupRelationInfo.GROUPID, groupId)
-        ).stream()
+                        SqlQuery.from(EntityPersonGroupRelation.class)
+                                .equal(EntityPersonGroupRelationInfo.GROUPID, groupId)
+                ).stream()
                 .map(EntityPersonGroupRelation::getPersonId)
                 .collect(Collectors.toList());
         Arrays.stream(personIds)
@@ -625,7 +635,11 @@ public class DefaultOrganisePersonService
             person.setUserCode("admin");
             person.setUserName("超级管理员");
             if (!commonMapper.exists(Person.class, person.getId())) {
-                addPerson(person, DEFAULT_ROOT_ID, true, "MTIzNA==");
+                addPerson(person,
+                        DEFAULT_ROOT_ID,
+                        true,
+                        passWordEncrypt.encodePassword(commonConfig.getDefaultPassWord())
+                );
             }
         }
     }

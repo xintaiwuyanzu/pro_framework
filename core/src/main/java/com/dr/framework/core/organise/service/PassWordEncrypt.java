@@ -1,5 +1,9 @@
 package com.dr.framework.core.organise.service;
 
+import org.springframework.util.Base64Utils;
+
+import java.nio.charset.Charset;
+
 /**
  * @author dr
  */
@@ -36,4 +40,30 @@ public interface PassWordEncrypt {
         return encryptAddLogin(password, salt, loginType);
     }
 
+    /**
+     * 可逆加密密码
+     *
+     * @param passWord
+     * @return
+     */
+    default String encodePassword(String passWord) {
+        return Base64Utils.encodeToString(passWord.getBytes(getEncodingCharset()));
+    }
+
+    /**
+     * 可逆解密密码
+     *
+     * @param passWord
+     * @return
+     */
+    default String decodePassword(String passWord) {
+        return new String(Base64Utils.decodeFromString(passWord), getEncodingCharset());
+    }
+
+    /**
+     * 获取字符串编码
+     *
+     * @return
+     */
+    Charset getEncodingCharset();
 }

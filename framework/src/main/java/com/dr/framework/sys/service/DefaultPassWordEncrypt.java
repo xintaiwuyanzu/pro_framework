@@ -14,10 +14,10 @@ import java.nio.charset.Charset;
  * @author dr
  */
 public class DefaultPassWordEncrypt implements PassWordEncrypt {
-    private String encoding;
+    private Charset encoding;
 
     public DefaultPassWordEncrypt(String encoding) {
-        this.encoding = encoding;
+        this.encoding = Charset.forName(encoding);
     }
 
     @Override
@@ -29,17 +29,20 @@ public class DefaultPassWordEncrypt implements PassWordEncrypt {
     public String encryptValidateLogin(String password, String salt, String loginType) {
         Assert.isTrue(!StringUtils.isEmpty(password), "密码不能为空！");
         Assert.isTrue(!StringUtils.isEmpty(salt), "加密盐不能为空！");
-        Charset charset = Charset.forName(encoding);
-        //
-        password = new String(Base64Utils.decodeFromString(password), charset);
-
+        //解码密码
+        password = decodePassword(password);
         //3、MD5加密
         return DigestUtils.md5DigestAsHex(
                 //2、base64编码
                 Base64Utils.encode(
                         //1、拼接密码和加密盐
-                        (password + salt).getBytes(charset)
+                        (password + salt).getBytes(getEncodingCharset())
                 )
         );
+    }
+
+    @Override
+    public Charset getEncodingCharset() {
+        return encoding;
     }
 }

@@ -1,15 +1,19 @@
 package com.dr.framework.sys.controller;
 
+import com.dr.framework.autoconfig.CommonConfig;
 import com.dr.framework.common.controller.BaseController;
 import com.dr.framework.common.entity.ResultEntity;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.organise.service.LoginService;
+import com.dr.framework.core.organise.service.PassWordEncrypt;
 import com.dr.framework.core.security.SecurityHolder;
 import com.dr.framework.core.security.bo.ClientInfo;
 import com.dr.framework.core.web.annotations.Current;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,12 +35,16 @@ public class LoginController {
 
     @Autowired
     LoginService loginService;
-
+    @Autowired
+    CommonConfig commonConfig;
     /**
      * 默认登录超时时间为30分钟
      */
     @Value("${server.session.timeout:30m}")
     Duration timeout;
+    @Autowired
+    @Lazy
+    PassWordEncrypt passWordEncrypt;
 
     /**
      * 登录校验
@@ -95,4 +103,23 @@ public class LoginController {
             return ResultEntity.error("用户未登录！");
         }
     }
+
+    /**
+     * 重置密码
+     *
+     * @param personId
+     * @return
+     */
+    @PostMapping("/resetPassword")
+    public ResultEntity<String> resetPassword(String personId) {
+        //TODO 操作用户权限
+        try {
+            loginService.changePassword(personId, passWordEncrypt.encodePassword(commonConfig.getDefaultPassWord()));
+            return ResultEntity.success("重置成功，新密码为【" + commonConfig.getDefaultPassWord() + "】");
+        } catch (Exception e) {
+            return ResultEntity.error(e.getMessage());
+        }
+    }
+
+
 }
