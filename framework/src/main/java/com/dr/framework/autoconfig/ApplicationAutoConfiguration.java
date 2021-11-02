@@ -14,7 +14,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
@@ -25,11 +24,11 @@ import java.util.List;
  *
  * @author dr
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
 @ComponentScan(Constants.PACKAGE_NAME)
 @EnableConfigurationProperties(CommonConfig.class)
-public class ApplicationAutoConfiguration extends WebMvcConfigurationSupport {
+public class ApplicationAutoConfiguration {
     @Autowired
     CurrentParamResolver currentParamResolver;
     @Autowired
