@@ -7,6 +7,7 @@ import com.dr.framework.core.orm.sql.Column;
 import com.dr.framework.core.orm.sql.TableInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cglib.core.ReflectUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -47,17 +48,18 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
      * @param <T>
      * @return
      */
-    public static <T extends TableInfo> T getTableInfo(Class modelClass) {
+    public static synchronized <T extends TableInfo> T getTableInfo(Class modelClass) {
         if (!sqlQueryMap.containsKey(modelClass)) {
             loadTableInfo(modelClass);
         }
         if (sqlQueryMap.containsKey(modelClass)) {
             try {
-                return (T) sqlQueryMap.get(modelClass).newInstance();
+                return (T) ReflectUtils.newInstance(sqlQueryMap.get(modelClass));
             } catch (Exception e) {
                 logger.error("获取" + modelClass.getName() + "表基本信息失败,请检查" + modelClass.getName() + "TableInfo是否生成！", modelClass);
             }
         }
+        //TODO 有的没有生成info类
         return null;
     }
 

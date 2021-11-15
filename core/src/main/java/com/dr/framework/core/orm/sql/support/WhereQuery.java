@@ -144,6 +144,7 @@ class WhereQuery extends AbstractSqlQuery {
     private List<String> groupByParts(TableAlias tableAlias) {
         return groupBys.stream().map(column -> {
             StringBuilder sb = new StringBuilder();
+            //TODO 函数和别名的问题，TODO还有order by和having
             if (!StringUtils.isEmpty(column.getTable())) {
                 sb.append(tableAlias.alias(column.getTable()));
                 sb.append(".");

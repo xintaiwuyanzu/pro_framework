@@ -14,7 +14,6 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,11 +54,16 @@ public class CodeGenController {
      * @param tableName
      * @return
      */
-    @GetMapping("/columns")
+    @PostMapping("/columns")
     public ResultListEntity<Map<String, Object>> columns(String dataSource, String tableName) {
-        Optional<MybatisConfigurationBean> optional = mybatisConfigurationBeans.stream().
-                filter(mybatisConfigurationBean1 -> mybatisConfigurationBean1.getDatabaseId().equalsIgnoreCase(dataSource))
-                .findFirst();
+        Optional<MybatisConfigurationBean> optional;
+        if (mybatisConfigurationBeans.size() == 1) {
+            optional = Optional.of(mybatisConfigurationBeans.get(0));
+        } else {
+            optional = mybatisConfigurationBeans.stream().
+                    filter(mybatisConfigurationBean1 -> mybatisConfigurationBean1.getDatabaseId().equalsIgnoreCase(dataSource))
+                    .findFirst();
+        }
         if (optional.isPresent()) {
             Relation<Column> table = optional.get().getTableMap().get(tableName.toUpperCase());
             return ResultListEntity.success(

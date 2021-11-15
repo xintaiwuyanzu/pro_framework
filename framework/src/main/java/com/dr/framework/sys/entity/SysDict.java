@@ -22,6 +22,13 @@ public class SysDict extends BaseStatusEntity<Integer> {
     private String keyInfo;
     @Column(name = "value_info", type = ColumnType.CLOB)
     private String value;
+    /**
+     * 字典显示类型
+     * primary / success / warning / danger / info / text
+     */
+    @Column
+    private String showType;
+
     @Column(name = "description", length = 1000)
     private String description;
 
@@ -57,4 +64,11 @@ public class SysDict extends BaseStatusEntity<Integer> {
         this.description = description;
     }
 
+    public String getShowType() {
+        return showType;
+    }
+
+    public void setShowType(String showType) {
+        this.showType = showType;
+    }
 }
