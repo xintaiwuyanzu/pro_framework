@@ -2,8 +2,10 @@ package com.dr.framework.sys.controller;
 
 import com.dr.framework.common.controller.BaseServiceController;
 import com.dr.framework.common.entity.BaseEntity;
+import com.dr.framework.common.entity.OrderEntity;
 import com.dr.framework.common.entity.ResultEntity;
 import com.dr.framework.common.entity.ResultListEntity;
+import com.dr.framework.core.orm.jdbc.Relation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.entity.Role;
 import com.dr.framework.core.security.service.SecurityManager;
@@ -64,7 +66,14 @@ public class SysRoleController extends BaseServiceController<RoleService, Role> 
 
     @Override
     protected SqlQuery<Role> buildPageQuery(HttpServletRequest request, Role entity) {
-        SqlQuery<Role> sqlQuery = SqlQuery.from(service.getEntityRelation());
+        Relation relation = service.getEntityRelation();
+        SqlQuery<Role> sqlQuery = SqlQuery.from(relation);
+        sqlQuery.like(relation.getColumn("security_code"), entity.getCode())
+                .like(relation.getColumn("name"), entity.getName())
+                .orderBy(
+                        relation.getColumn(OrderEntity.ORDER_COLUMN_NAME),
+                        relation.getColumn("security_code")
+                );
         return sqlQuery;
     }
 
