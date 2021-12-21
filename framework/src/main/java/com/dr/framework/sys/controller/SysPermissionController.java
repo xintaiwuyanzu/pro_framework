@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static com.dr.framework.common.entity.OrderEntity.ORDER_COLUMN_NAME;
+
 /**
  * 权限管理controller
  *
@@ -22,7 +24,11 @@ public class SysPermissionController extends BaseServiceController<PermissionSer
     protected SqlQuery<Permission> buildPageQuery(HttpServletRequest request, Permission entity) {
         EntityRelation relation = service.getEntityRelation();
         SqlQuery<Permission> sqlQuery = SqlQuery.from(relation);
-        sqlQuery.like(relation.getColumn("name"), entity.getName());
+        sqlQuery.like(relation.getColumn("name"), entity.getName())
+                .orderBy(
+                        relation.getColumn(ORDER_COLUMN_NAME),
+                        relation.getColumn(ORDER_COLUMN_NAME)
+                );
         return sqlQuery;
     }
 }
