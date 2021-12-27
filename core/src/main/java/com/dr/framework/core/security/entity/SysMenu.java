@@ -2,6 +2,7 @@ package com.dr.framework.core.security.entity;
 
 import com.dr.framework.common.entity.BaseTreeEntity;
 import com.dr.framework.core.orm.annotations.Column;
+import com.dr.framework.core.orm.annotations.ColumnType;
 import com.dr.framework.core.orm.annotations.Table;
 import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.util.Constants;
@@ -32,6 +33,8 @@ public class SysMenu extends BaseTreeEntity<String> implements PermissionResourc
     private boolean leaf;
     @Column(comment = "权限ID")
     private String permissionId;
+    @Column(type = ColumnType.CLOB, comment = "额外请求参数")
+    private String params;
     @Column(comment = "描述")
     private String description;
 
@@ -79,6 +82,14 @@ public class SysMenu extends BaseTreeEntity<String> implements PermissionResourc
 
     public void setPermissionId(String permissionId) {
         this.permissionId = permissionId;
+    }
+
+    public String getParams() {
+        return params;
+    }
+
+    public void setParams(String params) {
+        this.params = params;
     }
 
     @Override
