@@ -1,5 +1,8 @@
 package com.dr.framework.sys.controller;
 
+import cn.dustlight.captcha.annotations.CodeValue;
+import cn.dustlight.captcha.annotations.SendCode;
+import cn.dustlight.captcha.annotations.VerifyCode;
 import com.dr.framework.autoconfig.CommonConfig;
 import com.dr.framework.common.controller.BaseController;
 import com.dr.framework.common.entity.ResultEntity;
@@ -13,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -57,10 +57,12 @@ public class LoginController {
      * @return
      */
     @RequestMapping("/validate")
+    @VerifyCode
     public ResultEntity<String> validate(@RequestParam String username
             , @RequestParam String password
             , @RequestParam(defaultValue = LoginService.LOGIN_TYPE_DEFAULT) String loginType
             , @Current ClientInfo clientInfo
+            , @CodeValue String code
             , HttpServletRequest request
             , HttpServletResponse response) {
         try {
@@ -121,5 +123,16 @@ public class LoginController {
         }
     }
 
+    /**
+     * 前端直接访问这个路径就能直接生成验证码图片文件
+     *
+     * @param code
+     */
+    @RequestMapping("/captcha/{time}")
+    @SendCode
+    public void captcha(@CodeValue String code, @PathVariable String time) {
+        // 在此处进行自定义的业务，验证码的生成、发送与储存已由注解 '@SendCode' 完成。
+        //TODO 这里还需要扩展
+    }
 
 }

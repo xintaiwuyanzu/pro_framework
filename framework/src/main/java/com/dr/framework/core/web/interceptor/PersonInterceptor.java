@@ -8,6 +8,7 @@ import com.dr.framework.core.security.SecurityHolder;
 import com.dr.framework.core.security.bo.ClientInfo;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -27,8 +28,10 @@ import static com.dr.framework.core.security.SecurityHolder.*;
 public class PersonInterceptor implements HandlerInterceptor, InitializingBean {
     public static final int ORDER = 1;
     @Autowired
+    @Lazy
     LoginService loginService;
     @Autowired
+    @Lazy
     OrganisePersonService organisePersonService;
 
     @Override

@@ -21,6 +21,15 @@ public class CommonConfig {
      * 全局登陆账户默认登录密码
      */
     private String defaultPassWord = "A123456";
+    /**
+     * 是否启用验证码登录验证
+     */
+    private boolean enableCaptcha = false;
+    /**
+     * 是否使用sessionId作为token
+     */
+    private boolean sessionAuth = true;
+
 
     public String getApiPath() {
         return apiPath;
@@ -44,5 +53,21 @@ public class CommonConfig {
 
     public void setDefaultPassWord(String defaultPassWord) {
         this.defaultPassWord = defaultPassWord;
+    }
+
+    public boolean isEnableCaptcha() {
+        return enableCaptcha;
+    }
+
+    public void setEnableCaptcha(boolean enableCaptcha) {
+        this.enableCaptcha = enableCaptcha;
+    }
+
+    public boolean isSessionAuth() {
+        return sessionAuth;
+    }
+
+    public void setSessionAuth(boolean sessionAuth) {
+        this.sessionAuth = sessionAuth;
     }
 }

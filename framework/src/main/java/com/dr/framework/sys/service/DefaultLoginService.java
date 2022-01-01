@@ -45,6 +45,8 @@ public class DefaultLoginService implements LoginService, InitializingBean {
 
     @Value("${sys.login.retryCount:5}")
     Integer retryCount;
+    @Autowired
+    LoginTokenHandler loginTokenHandler;
 
 
     EntityRelation userLoginRelation;
@@ -258,21 +260,17 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     }
 
     /**
-     * oauth 返回数据，正常应该带着用户id，名称，编码之类的信息
-     * TODO 这里暂时直接返回用户id 计划使用rsa非对称加密解密
-     *
      * @param person
      * @return
      */
     @Override
     public String auth(Person person) {
-        return person.getId();
+        return loginTokenHandler.auth(person);
     }
 
     @Override
     public Person deAuth(String token) {
-        Assert.isTrue(!StringUtils.isEmpty(token), "token不能为空！");
-        return commonMapper.selectById(Person.class, token);
+        return loginTokenHandler.deAuth(token);
     }
 
     @Override

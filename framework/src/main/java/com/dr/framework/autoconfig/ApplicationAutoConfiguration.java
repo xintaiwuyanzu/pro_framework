@@ -1,12 +1,16 @@
 package com.dr.framework.autoconfig;
 
+import cn.dustlight.captcha.annotations.EnableCaptcha;
 import com.dr.framework.core.organise.service.PassWordEncrypt;
 import com.dr.framework.core.web.interceptor.PersonInterceptor;
 import com.dr.framework.core.web.resolver.CurrentParamResolver;
+import com.dr.framework.sys.service.DefaultLoginTokenHandler;
 import com.dr.framework.sys.service.DefaultPassWordEncrypt;
+import com.dr.framework.sys.service.LoginTokenHandler;
 import com.dr.framework.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +37,17 @@ public class ApplicationAutoConfiguration {
     CurrentParamResolver currentParamResolver;
     @Autowired
     PersonInterceptor personInterceptor;
+
+    /**
+     * 注入默认的token拦截实现
+     *
+     * @return
+     */
+    @Bean
+    @ConditionalOnMissingBean(LoginTokenHandler.class)
+    LoginTokenHandler DefaultLoginTokenHandler() {
+        return new DefaultLoginTokenHandler();
+    }
 
     /**
      * 如果项目没有加上密码加密的实现类，则使用默认的实现类
@@ -70,4 +85,14 @@ public class ApplicationAutoConfiguration {
         };
     }
 
+    /**
+     * 验证码自动配置
+     *
+     * @author dr
+     */
+    @Configuration(proxyBeanMethods = false)
+    @EnableCaptcha
+    @ConditionalOnProperty(prefix = "common", name = "enable-captcha", havingValue = "true")
+    static class CaptchaAutoConfig {
+    }
 }
