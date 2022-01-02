@@ -2,6 +2,7 @@ package com.dr.framework.autoconfig;
 
 import cn.dustlight.captcha.annotations.EnableCaptcha;
 import com.dr.framework.core.organise.service.PassWordEncrypt;
+import com.dr.framework.core.web.interceptor.CommonFileInterceptor;
 import com.dr.framework.core.web.interceptor.PersonInterceptor;
 import com.dr.framework.core.web.resolver.CurrentParamResolver;
 import com.dr.framework.sys.service.DefaultLoginTokenHandler;
@@ -20,7 +21,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -37,6 +40,10 @@ public class ApplicationAutoConfiguration {
     CurrentParamResolver currentParamResolver;
     @Autowired
     PersonInterceptor personInterceptor;
+    @Autowired
+    CommonFileInterceptor commonFileInterceptor;
+    @Autowired
+    CommonConfig commonConfig;
 
     /**
      * 注入默认的token拦截实现
@@ -81,6 +88,11 @@ public class ApplicationAutoConfiguration {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {
                 registry.addInterceptor(personInterceptor).order(PersonInterceptor.ORDER);
+                if (!commonConfig.getFileUploadUrls().isEmpty()) {
+                    //如果配置了文件上传路径，启用文件上传拦截
+                    registry.addInterceptor(commonFileInterceptor).order(CommonFileInterceptor.ORDER)
+                            .addPathPatterns(new ArrayList<>(commonConfig.getFileUploadUrls()));
+                }
             }
         };
     }

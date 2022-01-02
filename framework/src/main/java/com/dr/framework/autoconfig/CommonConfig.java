@@ -2,6 +2,9 @@ package com.dr.framework.autoconfig;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * 配置默认常用属性
  *
@@ -29,7 +32,10 @@ public class CommonConfig {
      * 是否使用sessionId作为token
      */
     private boolean sessionAuth = true;
-
+    /**
+     * 系统支持的文件上传路径
+     */
+    private Set<String> fileUploadUrls = new HashSet<>();
 
     public String getApiPath() {
         return apiPath;
@@ -69,5 +75,15 @@ public class CommonConfig {
 
     public void setSessionAuth(boolean sessionAuth) {
         this.sessionAuth = sessionAuth;
+    }
+
+    public void setFileUploadUrls(Set<String> fileUploadUrls) {
+        if (fileUploadUrls != null) {
+            this.fileUploadUrls.addAll(fileUploadUrls);
+        }
+    }
+
+    public Set<String> getFileUploadUrls() {
+        return fileUploadUrls;
     }
 }
