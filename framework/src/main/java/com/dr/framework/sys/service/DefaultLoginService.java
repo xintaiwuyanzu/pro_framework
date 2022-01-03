@@ -209,6 +209,8 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     public Person login(String loginId, String password, String loginType, String loginSource, boolean outUser) {
         Assert.isTrue(!StringUtils.isEmpty(loginId), "登录账户不能为空！");
         Assert.isTrue(!StringUtils.isEmpty(loginType), "登录类型不能为空！");
+        //解密登录账户
+        loginId=passWordEncrypt.decodeLoginId(loginId,loginType,loginSource);
         UserLogin userLogin = (UserLogin) commonMapper.selectOneByQuery(
                 SqlQuery.from(userLoginRelation)
                         .equal(userLoginRelation.getColumn("login_id"), loginId)

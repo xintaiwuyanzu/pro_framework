@@ -41,6 +41,18 @@ public interface PassWordEncrypt {
     }
 
     /**
+     * 不同等保要求不同，登陆账户信息也可能要求加密
+     *
+     * @param loginId
+     * @param loginType
+     * @param loginSource
+     * @return
+     */
+    default String decodeLoginId(String loginId, String loginType, String loginSource) {
+        return loginId;
+    }
+
+    /**
      * 可逆加密密码
      *
      * @param passWord
@@ -66,4 +78,5 @@ public interface PassWordEncrypt {
      * @return
      */
     Charset getEncodingCharset();
+
 }
