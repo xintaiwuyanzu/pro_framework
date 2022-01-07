@@ -1,11 +1,11 @@
 package com.dr.framework.common;
 
 import com.dr.framework.common.entity.ResultEntity;
+import com.dr.framework.common.exception.NeedLoginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +40,9 @@ public class GlobalExceptionHandler {
         if (judgeIsMoblie(request)) {
             return ResultEntity.error("服务器链接超时。");
         }
-        ex.printStackTrace();
+        if (ex instanceof NeedLoginException) {
+            return ResultEntity.error(ex.getMessage(), "403", null);
+        }
         return ResultEntity.error("服务器错误：" + ex.getMessage());
     }
 

@@ -1,5 +1,6 @@
 package com.dr.framework.core.web.resolver;
 
+import com.dr.framework.common.exception.NeedLoginException;
 import com.dr.framework.core.organise.entity.Organise;
 import com.dr.framework.core.organise.entity.Person;
 import com.dr.framework.core.organise.service.OrganisePersonService;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
@@ -47,8 +47,8 @@ public class CurrentParamResolver implements HandlerMethodArgumentResolver {
         } else {
             String key = type.equals(Person.class) ? SecurityHolder.CURRENT_PERSON_KEY : SecurityHolder.CURRENT_ORGANISE_KEY;
             Object value = webRequest.getAttribute(key, RequestAttributes.SCOPE_REQUEST);
-            if (current.required()) {
-                Assert.notNull(value, "用户未登录！");
+            if (current.required() && value == null) {
+                throw new NeedLoginException("用户未登录！");
             }
             return value;
         }

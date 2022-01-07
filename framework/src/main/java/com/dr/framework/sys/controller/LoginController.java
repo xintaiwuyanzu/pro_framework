@@ -102,7 +102,7 @@ public class LoginController {
         if (person != null) {
             return ResultEntity.success(person);
         } else {
-            return ResultEntity.error("用户未登录！");
+            return ResultEntity.error("用户未登录！", "403", null);
         }
     }
 
