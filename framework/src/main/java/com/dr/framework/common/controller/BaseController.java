@@ -3,6 +3,7 @@ package com.dr.framework.common.controller;
 import com.dr.framework.common.entity.CreateInfoEntity;
 import com.dr.framework.common.entity.IdEntity;
 import com.dr.framework.common.entity.ResultEntity;
+import com.dr.framework.common.exception.NeedLoginException;
 import com.dr.framework.common.page.Page;
 import com.dr.framework.common.service.CommonService;
 import com.dr.framework.common.service.DefaultDataBaseService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -38,16 +40,59 @@ public class BaseController<T extends IdEntity> {
     @Autowired
     protected DefaultDataBaseService dataBaseService;
 
+    /**
+     * 获取当前登录用户，默认认为用户已经登录
+     *
+     * @param request
+     * @return
+     */
     public static Person getUserLogin(HttpServletRequest request) {
-        RequestAttributes attributes = new ServletRequestAttributes(request);
-        SecurityHolder securityHolder = SecurityHolder.get(attributes);
-        return securityHolder == null ? null : securityHolder.currentPerson();
+        return getUserLogin(request, true);
     }
 
-    public static Organise getOrganise(HttpServletRequest request) {
+    /**
+     * 获取登录用户
+     *
+     * @param request
+     * @param required
+     * @return
+     */
+    @Nullable
+    public static Person getUserLogin(HttpServletRequest request, boolean required) {
         RequestAttributes attributes = new ServletRequestAttributes(request);
         SecurityHolder securityHolder = SecurityHolder.get(attributes);
-        return securityHolder == null ? null : securityHolder.currentOrganise();
+        Person person = securityHolder == null ? null : securityHolder.currentPerson();
+        if (person == null && required) {
+            throw new NeedLoginException("用户未登录");
+        }
+        return person;
+    }
+
+    /**
+     * 获取当前登录用户所属机构，默认用户已登录
+     *
+     * @param request
+     * @return
+     */
+    public static Organise getOrganise(HttpServletRequest request) {
+        return getOrganise(request, true);
+    }
+
+    /**
+     * 获取当前登录用户所属机构，用户为空的时候，查询到的数据也是空
+     *
+     * @param request
+     * @return
+     */
+    @Nullable
+    public static Organise getOrganise(HttpServletRequest request, boolean required) {
+        RequestAttributes attributes = new ServletRequestAttributes(request);
+        SecurityHolder securityHolder = SecurityHolder.get(attributes);
+        Organise organise = securityHolder == null ? null : securityHolder.currentOrganise();
+        if (organise == null && required) {
+            throw new NeedLoginException("用户未登录");
+        }
+        return organise;
     }
 
     public static ClientInfo getClientInfo(HttpServletRequest request) {

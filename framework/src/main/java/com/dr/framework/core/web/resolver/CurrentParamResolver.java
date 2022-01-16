@@ -3,14 +3,10 @@ package com.dr.framework.core.web.resolver;
 import com.dr.framework.common.exception.NeedLoginException;
 import com.dr.framework.core.organise.entity.Organise;
 import com.dr.framework.core.organise.entity.Person;
-import com.dr.framework.core.organise.service.OrganisePersonService;
 import com.dr.framework.core.security.SecurityHolder;
 import com.dr.framework.core.security.bo.ClientInfo;
 import com.dr.framework.core.web.annotations.Current;
 import com.dr.framework.core.web.interceptor.PersonInterceptor;
-import com.dr.framework.sys.controller.LoginController;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -32,11 +28,6 @@ import java.util.List;
 @Component
 public class CurrentParamResolver implements HandlerMethodArgumentResolver {
     List<Class> supportClass = Arrays.asList(Person.class, Organise.class, ClientInfo.class);
-    @Autowired
-    LoginController loginController;
-    @Autowired
-    @Lazy
-    OrganisePersonService organisePersonService;
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {

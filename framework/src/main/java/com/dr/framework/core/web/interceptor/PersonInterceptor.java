@@ -21,6 +21,7 @@ import static com.dr.framework.core.security.SecurityHolder.*;
 
 /**
  * 登录人员拦截器
+ * TODO 这里需要优化一下，可以结合组织机构从缓存中取数据的
  *
  * @author dr
  */
