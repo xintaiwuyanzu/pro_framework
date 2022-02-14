@@ -36,13 +36,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResultEntity<String> handleEmployeeNotFoundException(HttpServletRequest request, Exception ex) {
-        logger.error("服务器错误", ex);
         if (judgeIsMoblie(request)) {
             return ResultEntity.error("服务器链接超时。");
         }
         if (ex instanceof NeedLoginException) {
+            logger.warn(ex.getMessage());
             return ResultEntity.error(ex.getMessage(), "403", null);
         }
+        logger.error("服务器错误", ex);
         return ResultEntity.error("服务器错误：" + ex.getMessage());
     }
 
