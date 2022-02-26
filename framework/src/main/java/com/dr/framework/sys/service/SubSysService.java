@@ -59,6 +59,14 @@ public class SubSysService extends PermissionResourceService<SubSystem> implemen
         return super.insert(entity);
     }
 
+    @Override
+    public long updateById(SubSystem entity) {
+        if (!exists(entity.getId())) {
+            return insert(entity);
+        }
+        return super.updateById(entity);
+    }
+
     @Transactional(readOnly = true, rollbackFor = Exception.class)
     public List<SubSystem> selectSubSysList(SubSysQuery query) {
         return commonMapper.selectByQuery(subSysQueryToSqlQuery(query));

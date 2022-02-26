@@ -11,6 +11,7 @@ import com.dr.framework.core.security.entity.Role;
 import com.dr.framework.core.security.service.SecurityManager;
 import com.dr.framework.sys.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,6 +50,20 @@ public class SysRoleController extends BaseServiceController<RoleService, Role> 
     @PostMapping("roleUser")
     public ResultListEntity<String> roleUser(String id) {
         return ResultListEntity.success(securityManager.roleUsers(id).stream().map(BaseEntity::getId).collect(Collectors.toList()));
+    }
+
+    /**
+     * 查询指定用户的所有角色
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping("userRole")
+    public ResultListEntity<Role> userRole(HttpServletRequest request, String id) {
+        if (!StringUtils.hasText(id)) {
+            id = getUserLogin(request).getId();
+        }
+        return ResultListEntity.success(securityManager.userRoles(id));
     }
 
     /**
