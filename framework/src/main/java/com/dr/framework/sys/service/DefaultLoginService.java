@@ -62,7 +62,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     public void bindLogin(Person person, String password) {
         Assert.isTrue(commonMapper.exists(Person.class, person.getId()), "未查询到指定的人员！");
         String salt = genSalt();
-        if (!StringUtils.isEmpty(person.getUserCode())) {
+        if (StringUtils.hasText(person.getUserCode())) {
             doAddUserLogin(
                     person,
                     passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_DEFAULT),
@@ -71,7 +71,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
                     LOGIN_TYPE_DEFAULT
             );
         }
-        if (!StringUtils.isEmpty(person.getIdNo())) {
+        if (StringUtils.hasText(person.getIdNo())) {
             doAddUserLogin(
                     person,
                     passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_IDNO),
@@ -80,7 +80,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
                     LOGIN_TYPE_IDNO
             );
         }
-        if (!StringUtils.isEmpty(person.getPhone())) {
+        if (StringUtils.hasText(person.getPhone())) {
             doAddUserLogin(
                     person,
                     passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_PHONE),
@@ -89,7 +89,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
                     LOGIN_TYPE_PHONE
             );
         }
-        if (!StringUtils.isEmpty(person.getEmail())) {
+        if (StringUtils.hasText(person.getEmail())) {
             doAddUserLogin(
                     person,
                     passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_EMAIL),
@@ -98,7 +98,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
                     LOGIN_TYPE_EMAIL
             );
         }
-        if (!StringUtils.isEmpty(person.getQq())) {
+        if (StringUtils.hasText(person.getQq())) {
             doAddUserLogin(
                     person,
                     passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_QQ),
@@ -107,7 +107,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
                     LOGIN_TYPE_QQ
             );
         }
-        if (!StringUtils.isEmpty(person.getWeiChatId())) {
+        if (StringUtils.hasText(person.getWeiChatId())) {
             doAddUserLogin(
                     person,
                     passWordEncrypt.encryptAddLogin(password, salt, LOGIN_TYPE_WX),
@@ -169,7 +169,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addLoginWithDefaultPassWord(String personId, String loginType, String loginId) {
-        Assert.isTrue(!StringUtils.isEmpty(personId), "人员Id不能为空！");
+        Assert.isTrue(StringUtils.hasText(personId), "人员Id不能为空！");
         UserLogin userLogin = commonMapper.selectOneByQuery(
                 SqlQuery.from(userLoginRelation)
                         .equal(userLoginRelation.getColumn("person_id"), personId)
@@ -182,7 +182,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
 
     @Transactional(rollbackFor = Exception.class)
     protected long addLogin(String personId, String loginType, String loginId, String password, String salt) {
-        Assert.isTrue(!StringUtils.isEmpty(personId), "人员Id不能为空！");
+        Assert.isTrue(StringUtils.hasText(personId), "人员Id不能为空！");
         Person person = commonMapper.selectById(Person.class, personId);
         Assert.isTrue(person != null, "未查询到指定的人员！");
         Assert.isTrue(!commonMapper.existsByQuery(
@@ -207,8 +207,8 @@ public class DefaultLoginService implements LoginService, InitializingBean {
 
     @Override
     public Person login(String loginId, String password, String loginType, String loginSource, boolean outUser) {
-        Assert.isTrue(!StringUtils.isEmpty(loginId), "登录账户不能为空！");
-        Assert.isTrue(!StringUtils.isEmpty(loginType), "登录类型不能为空！");
+        Assert.isTrue(StringUtils.hasText(loginId), "登录账户不能为空！");
+        Assert.isTrue(StringUtils.hasText(loginType), "登录类型不能为空！");
         //解密登录账户
         loginId=passWordEncrypt.decodeLoginId(loginId,loginType,loginSource);
         UserLogin userLogin = (UserLogin) commonMapper.selectOneByQuery(
@@ -224,7 +224,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
 
         boolean success = password.equals(userLogin.getPassword());
 
-        if (!StringUtils.isEmpty(loginSource)) {
+        if (StringUtils.hasText(loginSource)) {
             userLogin.setLastLoginIp(loginSource);
         }
         userLogin.setLastLoginDate(System.currentTimeMillis());
@@ -255,7 +255,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
 
     @Override
     public List<UserLogin> userLogin(String personId) {
-        Assert.isTrue(!StringUtils.isEmpty(personId), "人员Id不能为空");
+        Assert.isTrue(StringUtils.hasText(personId), "人员Id不能为空");
         SqlQuery<UserLogin> userLoginSqlQuery = SqlQuery.from(userLoginRelation);
         userLoginSqlQuery.equal(userLoginRelation.getColumn("person_id"), personId);
         return commonMapper.selectByQuery(userLoginSqlQuery);
@@ -278,8 +278,8 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void changePassword(String personId, String newPassword, String... notIncludeLoginTypes) {
-        Assert.isTrue(!StringUtils.isEmpty(personId), "人员id不能为空！");
-        Assert.isTrue(!StringUtils.isEmpty(newPassword), "新密码不能为空！");
+        Assert.isTrue(StringUtils.hasText(personId), "人员id不能为空！");
+        Assert.isTrue(StringUtils.hasText(newPassword), "新密码不能为空！");
         List<Object> userLogins = commonMapper.selectByQuery(
                 SqlQuery.from(userLoginRelation)
                         .equal(userLoginRelation.getColumn("person_id"), personId)
@@ -320,14 +320,14 @@ public class DefaultLoginService implements LoginService, InitializingBean {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long removeLogin(String loginId) {
-        Assert.isTrue(!StringUtils.isEmpty(loginId), "登录账号不能为空");
+        Assert.isTrue(StringUtils.hasText(loginId), "登录账号不能为空");
         return commonMapper.deleteByQuery(SqlQuery.from(userLoginRelation).equal(userLoginRelation.getColumn("login_id"), loginId));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long removePersonLogin(String personId) {
-        Assert.isTrue(!StringUtils.isEmpty(personId), "人员Id不能为空！");
+        Assert.isTrue(StringUtils.hasText(personId), "人员Id不能为空！");
         return commonMapper.deleteByQuery(SqlQuery.from(userLoginRelation).equal(userLoginRelation.getColumn("person_id"), personId));
     }
 
@@ -339,7 +339,7 @@ public class DefaultLoginService implements LoginService, InitializingBean {
      */
     @Transactional(rollbackFor = Exception.class)
     protected void changeLoginStatus(String personId, int status) {
-        Assert.isTrue(!StringUtils.isEmpty(personId), "人员id不能为空！");
+        Assert.isTrue(StringUtils.hasText(personId), "人员id不能为空！");
         List<Object> userLogins = commonMapper.selectByQuery(
                 SqlQuery.from(userLoginRelation)
                         .equal(userLoginRelation.getColumn("person_id"), personId)

@@ -12,8 +12,10 @@ import com.dr.framework.core.security.SecurityHolder;
 import com.dr.framework.core.security.service.SecurityManager;
 import com.dr.framework.core.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -27,12 +29,13 @@ import java.util.stream.Collectors;
 public class CommonService {
     @Autowired
     CommonMapper commonMapper;
+    @Lazy
     @Autowired(required = false)
     SecurityManager securityManager;
 
     @Transactional(rollbackFor = Exception.class)
     public <T extends IdEntity> long insert(T entity) {
-        if (StringUtils.isEmpty(entity.getId())) {
+        if (!StringUtils.hasText(entity.getId())) {
             entity.setId(UUID.randomUUID().toString());
         }
         //保存创建人相关信息
@@ -43,21 +46,21 @@ public class CommonService {
     }
 
     public static void bindCreateInfo(BaseCreateInfoEntity entity) {
-        if (StringUtils.isEmpty(entity.getId())) {
+        if (!StringUtils.hasText(entity.getId())) {
             entity.setId(UUID.randomUUID().toString());
         }
         SecurityHolder securityHolder = SecurityHolder.get();
         Person currentPerson = securityHolder.currentPerson();
-        if (StringUtils.isEmpty(entity.getCreatePerson())) {
+        if (!StringUtils.hasText(entity.getCreatePerson())) {
             if (currentPerson != null) {
                 entity.setCreatePerson(currentPerson.getId());
             }
-            if (StringUtils.isEmpty(entity.getCreateDate())) {
+            if (ObjectUtils.isEmpty(entity.getCreateDate())) {
                 entity.setCreateDate(System.currentTimeMillis());
             }
         }
         entity.setUpdateDate(System.currentTimeMillis());
-        if (StringUtils.isEmpty(entity.getUpdatePerson()) && currentPerson != null) {
+        if (!StringUtils.hasText(entity.getUpdatePerson()) && currentPerson != null) {
             entity.setUpdatePerson(entity.getCreatePerson());
         }
     }
@@ -71,7 +74,7 @@ public class CommonService {
     @Transactional(rollbackFor = Exception.class)
     public <T extends IdEntity> void insertIfNotExist(T... entitys) {
         for (T entity : entitys) {
-            if (StringUtils.isEmpty(entity.getId())) {
+            if (!StringUtils.hasText(entity.getId())) {
                 insert(entity);
             } else {
                 if (!exists(entity)) {
@@ -86,7 +89,7 @@ public class CommonService {
         //保存创建人相关信息
         if (entity instanceof BaseCreateInfoEntity) {
             BaseCreateInfoEntity createInfoEntity = (BaseCreateInfoEntity) entity;
-            if (StringUtils.isEmpty(createInfoEntity.getCreatePerson())) {
+            if (!StringUtils.hasText(createInfoEntity.getCreatePerson())) {
                 Person person = SecurityHolder.get().currentPerson();
                 if (person != null) {
                     createInfoEntity.setUpdateDate(System.currentTimeMillis());
@@ -160,7 +163,7 @@ public class CommonService {
     @Transactional(readOnly = true, rollbackFor = Exception.class)
     public boolean exists(IdEntity entity) {
         String id = entity.getId();
-        if (StringUtils.isEmpty(id)) {
+        if (!StringUtils.hasText(id)) {
             return false;
         }
         return exists(entity.getClass(), id);
@@ -232,7 +235,7 @@ public class CommonService {
         for (T treeEntity : treeList) {
             TreeNode treeNode = new TreeNode(idFunction.apply(treeEntity), labelFunction.apply(treeEntity), treeEntity);
             String pid = parentFunction.apply(treeEntity);
-            if (StringUtils.isEmpty(pid)) {
+            if (!StringUtils.hasText(pid)) {
                 //pid = "$default_parentId";
                 pid = Constants.DEFAULT;
             }

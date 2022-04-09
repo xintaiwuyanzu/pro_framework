@@ -346,7 +346,7 @@ public class MybatisPlugin implements Interceptor {
 
                 builder.timeout(ms.getTimeout())
                         .parameterMap(parameterMap)
-                        .resultMaps(Arrays.asList(
+                        .resultMaps(Collections.singletonList(
                                 new ResultMap.Builder(ms.getConfiguration()
                                         , ms.getId()
                                         , paramHolder.returnClass
@@ -371,7 +371,7 @@ public class MybatisPlugin implements Interceptor {
 
     private String parseSql(String organalSql) {
         String newSql = organalSql;
-        if (!StringUtils.isEmpty(newSql)) {
+        if (StringUtils.hasText(newSql)) {
             newSql = newSql.trim();
             if (newSql.endsWith("where") || newSql.endsWith("WHERE")) {
                 newSql = newSql.substring(0, newSql.length() - 5).trim();

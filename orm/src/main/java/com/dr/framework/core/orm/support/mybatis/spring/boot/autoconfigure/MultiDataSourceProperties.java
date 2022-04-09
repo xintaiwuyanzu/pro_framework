@@ -44,7 +44,7 @@ public class MultiDataSourceProperties extends DataSourceProperties {
     private boolean useXa = true;
     private DataSource selfManagedDatasource;
     private DataBaseMetaData dataBaseMetaData;
-    Pattern p = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+)\\:(\\d+)");
+    Pattern p = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)");
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -65,7 +65,7 @@ public class MultiDataSourceProperties extends DataSourceProperties {
                 dataBaseMetaData.setHost(matcher.group(1));
                 dataBaseMetaData.setPort(Integer.parseInt(matcher.group(2)));
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
     }

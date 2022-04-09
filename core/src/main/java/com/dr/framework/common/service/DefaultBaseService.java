@@ -62,7 +62,7 @@ public class DefaultBaseService<T extends IdEntity> implements BaseService<T>, I
     @Override
     @Transactional(readOnly = true, rollbackFor = Exception.class)
     public T selectById(String id) {
-        Assert.isTrue(!StringUtils.isEmpty(id), "主键不能为空！");
+        Assert.isTrue(StringUtils.hasText(id), "主键不能为空！");
         SqlQuery<T> sqlQuery = SqlQuery.from(getEntityRelation());
         sqlQuery.equal(getEntityRelation().getColumn(IdEntity.ID_COLUMN_NAME), id);
         return selectOne(sqlQuery);

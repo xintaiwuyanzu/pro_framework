@@ -98,7 +98,7 @@ public class IDNo {
     }
 
     public static IDNo from(String idNo) {
-        Assert.isTrue(!StringUtils.isEmpty(idNo), "身份证号不能为空");
+        Assert.isTrue(StringUtils.hasText(idNo), "身份证号不能为空");
         idNo = idNo.trim();
         boolean is15 = idNo.length() == 15;
         boolean is18 = idNo.length() == 18;
@@ -211,7 +211,7 @@ public class IDNo {
 
 
     private static boolean isNum(String val) {
-        return !StringUtils.isEmpty(val) && val.matches("^[0-9]*{1}");
+        return StringUtils.hasText(val) && val.matches("^[0-9]*{1}");
     }
 
     private IDNo() {

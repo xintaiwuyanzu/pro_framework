@@ -110,7 +110,7 @@ public class AnnotationTableReaderUtil {
             //这里主键加上非空   这里不加上非空可能有主键的修改列非空的bug
             fieldColumn.setNullAble(TrueOrFalse.FALSE);
             String name = id.value();
-            if (StringUtils.isEmpty(name)) {
+            if (!StringUtils.hasText(name)) {
                 name = id.name();
             }
             primaryKeyHolders.add(new PrimaryKeyHolder(fieldColumn, columnSortHolder.classLevel, id.order(), columnSortHolder.fieldOrder, name));
@@ -120,7 +120,7 @@ public class AnnotationTableReaderUtil {
         if (field.isAnnotationPresent(Index.class) && dialect.canIndex(fieldColumn)) {
             Index index = field.getAnnotation(Index.class);
             String indexName = index.value();
-            if (StringUtils.isEmpty(indexName)) {
+            if (!StringUtils.hasText(indexName)) {
                 indexName = index.name();
             }
             TrueOrFalse trueOrFalse;

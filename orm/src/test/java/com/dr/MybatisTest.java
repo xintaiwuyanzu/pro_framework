@@ -10,21 +10,21 @@ import com.dr.framework.common.service.DataBaseService;
 import com.dr.framework.core.orm.jdbc.Column;
 import com.dr.framework.core.orm.jdbc.Relation;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.util.Assert;
 
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TestApplication.class)
 public class MybatisTest {
     Logger logger = LoggerFactory.getLogger(MybatisTest.class);
@@ -60,7 +60,7 @@ public class MybatisTest {
 
     @Test
     public void testfanxing() {
-        Assert.assertNotNull(testMapper);
+        Assert.notNull(testMapper, "mapper不能为空");
         logger.info(testMapper.toString());
     }
 

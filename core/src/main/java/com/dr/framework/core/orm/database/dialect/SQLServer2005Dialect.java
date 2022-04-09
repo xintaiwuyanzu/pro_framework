@@ -81,7 +81,7 @@ public class SQLServer2005Dialect extends Dialect {
             sqlPartString = sqlPartString.substring(index);
         }
         pagingBuilder.append(sqlPartString);
-        if (StringUtils.isEmpty(orderby)) {
+        if (!StringUtils.hasText(orderby)) {
             orderby = "ORDER BY CURRENT_TIMESTAMP";
         }
         long firstParam = offset + 1;

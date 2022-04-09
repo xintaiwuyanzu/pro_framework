@@ -28,7 +28,7 @@ public class CacheManagerWrapper implements CacheManager {
 
     public List<CacheStats> listCacheStats(String cacheNameParam) {
         Stream<String> stringStream = getCacheNames().stream();
-        if (!StringUtils.isEmpty(cacheNameParam)) {
+        if (StringUtils.hasText(cacheNameParam)) {
             stringStream = stringStream.filter(c -> c.startsWith(cacheNameParam));
         }
         return stringStream.map(c -> getCache(c).getStats()).collect(Collectors.toList());

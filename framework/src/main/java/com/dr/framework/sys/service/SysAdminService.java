@@ -28,9 +28,9 @@ public class SysAdminService {
      * 管理员修改密码
      */
     public void changePassword(String personId, String oldPwd, String newPwd) {
-        Assert.isTrue(!StringUtils.isEmpty(personId), "管理员记录号不能为空！");
-        Assert.isTrue(!StringUtils.isEmpty(oldPwd), "管理员密码不能为空！");
-        Assert.isTrue(!StringUtils.isEmpty(newPwd), "新密码不能为空！");
+        Assert.isTrue(StringUtils.hasText(personId), "管理员记录号不能为空！");
+        Assert.isTrue(StringUtils.hasText(oldPwd), "管理员密码不能为空！");
+        Assert.isTrue(StringUtils.hasText(newPwd), "新密码不能为空！");
         Person person = organisePersonService.getPerson(new PersonQuery.Builder().idEqual(personId).build());
         Assert.notNull(person, "该管理员不存在");
         loginService.login(person.getUserCode(), oldPwd);

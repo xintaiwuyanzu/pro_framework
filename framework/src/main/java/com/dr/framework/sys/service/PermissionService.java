@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -25,10 +26,10 @@ public class PermissionService extends CacheAbleService<Permission> {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long insert(Permission entity) {
-        if (StringUtils.isEmpty(entity.getStatus())) {
+        if (ObjectUtils.isEmpty(entity.getStatus())) {
             entity.setStatus(StatusEntity.STATUS_ENABLE);
         }
-        if (StringUtils.isEmpty(entity.getGroupId())) {
+        if (!StringUtils.hasText(entity.getGroupId())) {
             entity.setGroupId(Constants.DEFAULT);
         }
         eventPublisher.publishEvent(new SecurityEvent<>(entity));

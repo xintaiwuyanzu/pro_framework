@@ -54,23 +54,23 @@ abstract class AbstractSqlQuery {
 
     static String formatSql(Column column, TableAlias tableAlias, boolean withAlias) {
         StringBuilder sb = new StringBuilder();
-        boolean hasFunction = !StringUtils.isEmpty(column.getFunction());
+        boolean hasFunction = StringUtils.hasText(column.getFunction());
         if (hasFunction) {
             String columnStr = "";
-            if (!StringUtils.isEmpty(column.getTable())) {
+            if (StringUtils.hasText(column.getTable())) {
                 columnStr += tableAlias.alias(column.getTable()) + ".";
             }
             columnStr += column.getName();
             String template = column.getFunction().indexOf('(') > -1 ? column.getFunction() : column.getFunction() + "(%s)";
             sb.append(String.format(template, columnStr));
         } else {
-            if (!StringUtils.isEmpty(column.getTable())) {
+            if (StringUtils.hasText(column.getTable())) {
                 sb.append(tableAlias.alias(column.getTable()));
                 sb.append(".");
             }
             sb.append(column.getName());
         }
-        if (withAlias && !StringUtils.isEmpty(column.getAlias())) {
+        if (withAlias && StringUtils.hasText(column.getAlias())) {
             sb.append(" as ");
             sb.append(column.getAlias());
         }

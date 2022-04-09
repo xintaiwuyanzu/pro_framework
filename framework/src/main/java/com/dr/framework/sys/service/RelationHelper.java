@@ -24,13 +24,13 @@ interface RelationHelper {
     }
 
     default void checkBuildLikeQuery(EntityRelation relation, SqlQuery query, String columnName, String value) {
-        if (!StringUtils.isEmpty(value)) {
+        if (StringUtils.hasText(value)) {
             query.like(relation.getColumn(columnName), value);
         }
     }
 
     default void checkBuildNotLikeQuery(EntityRelation relation, SqlQuery query, String columnName, String value) {
-        if (!StringUtils.isEmpty(value)) {
+        if (StringUtils.hasText(value)) {
             query.notLike(relation.getColumn(columnName), value);
         }
     }

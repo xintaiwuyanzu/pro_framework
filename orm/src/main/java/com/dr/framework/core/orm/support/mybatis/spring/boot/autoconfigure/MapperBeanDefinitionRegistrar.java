@@ -102,7 +102,7 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
      */
     private MultiDataSourceProperties readDataSourceProties(String prefix, String name) {
         String beanName = name;
-        if (StringUtils.isEmpty(name)) {
+        if (!StringUtils.hasText(name)) {
             beanName = MapperBeanDefinitionProcessor.DEFAULT_DATASOURCE_NAME;
         } else {
             prefix = prefix + "." + name;

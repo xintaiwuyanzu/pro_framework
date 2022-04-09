@@ -45,7 +45,7 @@ public class DefaultLoginTokenHandler implements LoginTokenHandler {
             }
             return null;
         } else {
-            Assert.isTrue(!StringUtils.isEmpty(token), "token不能为空！");
+            Assert.isTrue(StringUtils.hasText(token), "token不能为空！");
             return commonMapper.selectById(Person.class, token);
         }
     }

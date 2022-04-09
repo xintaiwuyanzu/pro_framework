@@ -44,10 +44,10 @@ public class SysMenuService extends PermissionResourceService<SysMenu> implement
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long insert(SysMenu sysMenu) {
-        if (StringUtils.isEmpty(sysMenu.getStatus())) {
+        if (!StringUtils.hasText(sysMenu.getStatus())) {
             sysMenu.setStatus(StatusEntity.STATUS_ENABLE_STR);
         }
-        if (StringUtils.isEmpty(sysMenu.getSysId())) {
+        if (!StringUtils.hasText(sysMenu.getSysId())) {
             sysMenu.setSysId(SubSystem.DEFAULT_SYSTEM_ID);
         }
         return super.insert(sysMenu);
@@ -56,7 +56,7 @@ public class SysMenuService extends PermissionResourceService<SysMenu> implement
     protected SqlQuery<SysMenu> sysMenuQueryToSqlQuery(SysMenuQuery query) {
         SqlQuery<SysMenu> sysMenuSqlQuery = SqlQuery.from(entityRelation);
         checkBuildInQuery(entityRelation, sysMenuSqlQuery, SysMenu.ID_COLUMN_NAME, query.getIds());
-        if (!StringUtils.isEmpty(query.getPersonId())) {
+        if (StringUtils.hasText(query.getPersonId())) {
             sysMenuSqlQuery.in(entityRelation.getColumn(SysMenu.ID_COLUMN_NAME),
                     SqlQuery.from(EntityRolePermission.class, false)
                             .column(EntityRolePermissionInfo.PERMISSIONID)

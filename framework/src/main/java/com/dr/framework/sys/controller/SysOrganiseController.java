@@ -70,7 +70,7 @@ public class SysOrganiseController {
      */
     @RequestMapping("/delete")
     public ResultEntity<Boolean> delete(String id) {
-        Assert.isTrue(!StringUtils.isEmpty(id), "机构id不能为空");
+        Assert.isTrue(StringUtils.hasText(id), "机构id不能为空");
         return ResultEntity.success(organisePersonService.deleteOrganise(id) > 0);
     }
 

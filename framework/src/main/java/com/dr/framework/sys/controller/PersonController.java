@@ -38,7 +38,7 @@ public class PersonController {
             @RequestParam(defaultValue = "false") boolean registerLogin,
             String password,
             String organiseId) {
-        if (StringUtils.isEmpty(person.getId()))
+        if (!StringUtils.hasText(person.getId()))
             person.setId(UUID.randomUUID().toString());
         organisePersonService.addPerson(person, organiseId, registerLogin, password);
         return ResultEntity.success(person);

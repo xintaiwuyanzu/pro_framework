@@ -15,7 +15,7 @@ class TableAlias {
     String alias(String table) {
         table = table.toUpperCase();
         String alia = alias.get(table);
-        if (StringUtils.isEmpty(alia)) {
+        if (!StringUtils.hasText(alia)) {
             return buildAlia(table);
         }
         return alia;

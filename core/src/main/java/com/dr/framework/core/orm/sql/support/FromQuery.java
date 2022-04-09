@@ -7,6 +7,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,8 +83,8 @@ class FromQuery extends AbstractSqlQuery {
     }
 
     void alias(String table, String alias) {
-        if (!StringUtils.isEmpty(table)) {
-            if (!StringUtils.isEmpty(alias)) {
+        if (StringUtils.hasText(table)) {
+            if (StringUtils.hasText(alias)) {
                 Assert.isTrue(!tableAlias.alias.containsValue(alias), "不能设置重复的表别名【" + alias + "】");
             }
             tableAlias.alias.put(table.toUpperCase(), alias);
@@ -94,7 +95,7 @@ class FromQuery extends AbstractSqlQuery {
 
 
     public void aliasClass(Class ec, String alias) {
-        if (!StringUtils.isEmpty(alias)) {
+        if (StringUtils.hasText(alias)) {
             classStringMap.put(ec, alias);
         }
     }
@@ -111,14 +112,14 @@ class FromQuery extends AbstractSqlQuery {
     @Override
     String sql(TableAlias tableAlias, SqlQuery sqlQuery) {
         StringBuilder builder = new StringBuilder();
-        sqlClause(builder, " from ", Arrays.asList(table + " " + tableAlias.alias(table)), "", "", ", ");
+        sqlClause(builder, " from ", Collections.singletonList(table + " " + tableAlias.alias(table)), "", "", ", ");
         joins(tableAlias, builder);
         return builder.toString();
     }
 
     String table(TableAlias tableAlias, SqlQuery sqlQuery) {
         StringBuilder builder = new StringBuilder();
-        sqlClause(builder, "", Arrays.asList(table + " " + tableAlias.alias(table)), "", "", ", ");
+        sqlClause(builder, "", Collections.singletonList(table + " " + tableAlias.alias(table)), "", "", ", ");
         joins(tableAlias, builder);
         return builder.toString();
     }

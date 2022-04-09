@@ -147,7 +147,7 @@ public interface OrganisePersonService {
      */
     default @Nullable
     Person getPersonById(String id) {
-        Assert.isTrue(!StringUtils.isEmpty(id), "用户id不能为空");
+        Assert.isTrue(StringUtils.hasText(id), "用户id不能为空");
         return getPerson(new PersonQuery.Builder().idEqual(id).build());
     }
 
@@ -159,7 +159,7 @@ public interface OrganisePersonService {
      */
     default @Nullable
     Person getPersonByUserCode(String userCode) {
-        Assert.isTrue(!StringUtils.isEmpty(userCode), "用户编码不能为空");
+        Assert.isTrue(StringUtils.hasText(userCode), "用户编码不能为空");
         return getPerson(new PersonQuery.Builder().userCodeLike(userCode).build());
     }
 
@@ -171,7 +171,7 @@ public interface OrganisePersonService {
      */
     default @Nullable
     Person getPersonByIdNO(String idNO) {
-        Assert.isTrue(!StringUtils.isEmpty(idNO), "身份证号不能为空");
+        Assert.isTrue(StringUtils.hasText(idNO), "身份证号不能为空");
         return getPerson(new PersonQuery.Builder().idNoLike(idNO).build());
     }
 

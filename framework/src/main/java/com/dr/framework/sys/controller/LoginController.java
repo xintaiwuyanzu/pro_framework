@@ -72,13 +72,13 @@ public class LoginController {
             response.addHeader(SecurityHolder.TOKEN_HEADER_KEY, token);
             //设置超时时间为2小时
             String path = request.getContextPath();
-            if (StringUtils.isEmpty(path)) {
+            if (!StringUtils.hasText(path)) {
                 path = "/";
             }
             cookie.setMaxAge((int) timeout.getSeconds());
             cookie.setPath(path);
             cookie.setHttpOnly(true);
-            if (!StringUtils.isEmpty(clientInfo.getRemoteIp())) {
+            if (StringUtils.hasText(clientInfo.getRemoteIp())) {
                 //异常排除
                 cookie.setDomain(clientInfo.getRemoteIp());
             }

@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cglib.core.ReflectUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.io.Serializable;
 import java.util.*;
@@ -197,7 +197,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     @Override
     public Object get(Object key) {
         Object value = super.get(key);
-        if (StringUtils.isEmpty(value)) {
+        if (Objects.isNull(value)) {
             String keyStr = key.toString().trim().toLowerCase();
             switch (keyStr) {
                 case "$set":
@@ -405,7 +405,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     }
 
     private SqlQuery<E> like(Column column, boolean isLike, boolean pre, boolean end, Serializable data) {
-        if (!StringUtils.isEmpty(data)) {
+        if (!ObjectUtils.isEmpty(data)) {
             whereQuery.like(column, isLike, pre, end, data);
         }
         return this;

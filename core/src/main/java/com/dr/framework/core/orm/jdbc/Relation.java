@@ -73,7 +73,7 @@ public class Relation<C extends Column> {
     }
 
     public Relation addIndex(String name, String columnName, int columnPosition, TrueOrFalse asc, boolean unique, int type) {
-        if (StringUtils.isEmpty(name)) {
+        if (!StringUtils.hasText(name)) {
             name = DEFAULT_AUTO_NAME;
         } else if (primaryKeys != null) {
             //索引是主键，则添加主键定义
@@ -90,7 +90,7 @@ public class Relation<C extends Column> {
         if (primaryKeys != null && !primaryKeys.columns.isEmpty()) {
             String format = "primary key ( %2$s )";
             String pkName = primaryKeys.name;
-            if (StringUtils.isEmpty(pkName)) {
+            if (!StringUtils.hasText(pkName)) {
                 if (primaryKeys.columns.size() > 1) {
                     pkName = "PK_" + getName();
                     format = "constraint   %1$s  primary key ( %2$s )";
@@ -299,7 +299,7 @@ public class Relation<C extends Column> {
      * @return
      */
     Relation addUniqueKeys(String name, String columnName, int columnPosition) {
-        if (StringUtils.isEmpty(name)) {
+        if (!StringUtils.hasText(name)) {
             name = DEFAULT_AUTO_NAME;
         }
         uniqueKeys.computeIfAbsent(name, ColumnsHolder::new)

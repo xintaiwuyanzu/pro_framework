@@ -14,9 +14,11 @@ import com.dr.framework.core.security.service.SecurityManager;
 import com.dr.framework.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 @Service
 public class RoleService extends CacheAbleService<Role> implements RelationHelper, InitDataService.DataInit {
     public static final String adminRoleId = com.dr.framework.core.util.Constants.DEFAULT + "admin";
+    @Lazy
     @Autowired
     SecurityManager securityManager;
     @Autowired
@@ -38,11 +41,11 @@ public class RoleService extends CacheAbleService<Role> implements RelationHelpe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long insert(Role entity) {
-        if (!StringUtils.isEmpty(entity.getStatus())) {
+        if (!ObjectUtils.isEmpty(entity.getStatus())) {
             entity.setStatus(StatusEntity.STATUS_ENABLE);
         }
         //判断指定的编码是否存在
-        Assert.isTrue(!StringUtils.isEmpty(entity.getCode()), "权限编码不能为空");
+        Assert.isTrue(StringUtils.hasText(entity.getCode()), "权限编码不能为空");
         Assert.isTrue(!commonMapper.existsByQuery(SqlQuery.from(getEntityRelation())
                 .equal(getEntityRelation().getColumn("security_code"), entity.getCode())
         ), "已存在指定的权限编码");
@@ -61,7 +64,7 @@ public class RoleService extends CacheAbleService<Role> implements RelationHelpe
         //先查出来数据
         Role old = commonMapper.selectById(Role.class, role.getId());
         Assert.notNull(old, "未查询到指定的数据");
-        if (!StringUtils.isEmpty(role.getCode())) {
+        if (StringUtils.hasText(role.getCode())) {
             Assert.isTrue(role.getCode().equals(old.getCode()), "角色编码不能修改");
         }
         EntityRelation roleRelation = getEntityRelation();
@@ -85,9 +88,9 @@ public class RoleService extends CacheAbleService<Role> implements RelationHelpe
         EntityRelation roleRelation = getEntityRelation();
 
         List<String> roleIds = commonMapper.selectByQuery(
-                SqlQuery.from(roleRelation)
-                        .in(roleRelation.getColumn("security_code"), roleCode)
-        ).stream()
+                        SqlQuery.from(roleRelation)
+                                .in(roleRelation.getColumn("security_code"), roleCode)
+                ).stream()
                 .map(o -> ((Role) o).getId())
                 .collect(Collectors.toList());
         int count = 0;

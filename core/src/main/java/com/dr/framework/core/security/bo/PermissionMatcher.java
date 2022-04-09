@@ -20,7 +20,7 @@ public class PermissionMatcher implements Comparable<PermissionMatcher> {
     List<MatcherItem> permissionMatchers;
 
     public PermissionMatcher(String permissionCode) {
-        Assert.isTrue(!StringUtils.isEmpty(permissionCode), "权限编码不能为空！");
+        Assert.isTrue(StringUtils.hasText(permissionCode), "权限编码不能为空！");
         permissionMatchers = Stream.of(permissionCode.trim().split(groupSplit))
                 .map(MatcherItem::new)
                 .sorted()
@@ -29,7 +29,7 @@ public class PermissionMatcher implements Comparable<PermissionMatcher> {
     }
 
     public boolean match(String permissionCode) {
-        if (StringUtils.isEmpty(permissionCode)) {
+        if (!StringUtils.hasText(permissionCode)) {
             return true;
         }
         for (MatcherItem matcher : permissionMatchers) {
@@ -50,12 +50,12 @@ public class PermissionMatcher implements Comparable<PermissionMatcher> {
         Matcher first, second, third;
 
         MatcherItem(String permissionCode) {
-            Assert.isTrue(!StringUtils.isEmpty(permissionCode), "权限编码不能为空！");
+            Assert.isTrue(StringUtils.hasText(permissionCode), "权限编码不能为空！");
             permissionCode = permissionCode.trim();
             String firstStr = defaultMatcher;
             String secondStr = defaultMatcher;
             String thirdStr = defaultMatcher;
-            if (!StringUtils.isEmpty(permissionCode)) {
+            if (StringUtils.hasText(permissionCode)) {
                 String[] arr = permissionCode.split(WILDCARD_PERMISSION_SEPARATOR);
                 int length = arr.length;
                 if (length == 1) {
@@ -94,7 +94,7 @@ public class PermissionMatcher implements Comparable<PermissionMatcher> {
         }
 
         public boolean match(String code) {
-            if (!StringUtils.isEmpty(code)) {
+            if (StringUtils.hasText(code)) {
                 code = code.trim();
                 String[] arr = code.split(":");
                 int length = arr.length;
@@ -127,14 +127,9 @@ public class PermissionMatcher implements Comparable<PermissionMatcher> {
 
     }
 
-    Matcher treeMatcher = new Matcher() {
-        @Override
-        public boolean match(String str) {
-            return true;
-        }
-    };
+    Matcher treeMatcher = str -> true;
 
-    class PatternMatcher implements Matcher {
+    static class PatternMatcher implements Matcher {
         Pattern pattern;
 
         public PatternMatcher(String reg) {

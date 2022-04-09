@@ -56,7 +56,7 @@ public class PersonInterceptor implements HandlerInterceptor, InitializingBean {
     protected void handlePersonInfo(HttpServletRequest request) {
         if (request.getAttribute(CURRENT_PERSON_KEY) == null) {
             String token = getToken(request);
-            if (!StringUtils.isEmpty(token)) {
+            if (StringUtils.hasText(token)) {
                 Person person = loginService.deAuth(token);
                 request.setAttribute(CURRENT_PERSON_KEY, person);
             } else {
@@ -105,7 +105,7 @@ public class PersonInterceptor implements HandlerInterceptor, InitializingBean {
 
     protected String getToken(HttpServletRequest request) {
         String token = doGetToken(request, TOKEN_HEADER_KEY);
-        if (StringUtils.isEmpty(token)) {
+        if (!StringUtils.hasText(token)) {
             token = doGetToken(request, "dauth");
         }
         return token;
@@ -113,11 +113,11 @@ public class PersonInterceptor implements HandlerInterceptor, InitializingBean {
 
     protected String doGetToken(HttpServletRequest request, String tokenHeaderKey) {
         String token = request.getParameter(tokenHeaderKey);
-        if (StringUtils.isEmpty(token)) {
+        if (!StringUtils.hasText(token)) {
             token = (String) request.getAttribute(tokenHeaderKey);
-            if (StringUtils.isEmpty(token)) {
+            if (!StringUtils.hasText(token)) {
                 token = request.getHeader(tokenHeaderKey);
-                if (StringUtils.isEmpty(token)) {
+                if (!StringUtils.hasText(token)) {
                     Cookie[] cookies = request.getCookies();
                     if (cookies != null) {
                         for (Cookie cookie : cookies) {
@@ -130,7 +130,7 @@ public class PersonInterceptor implements HandlerInterceptor, InitializingBean {
                 }
             }
         }
-        if (!StringUtils.isEmpty(token)) {
+        if (StringUtils.hasText(token)) {
             request.setAttribute(tokenHeaderKey, token);
         }
         return token;

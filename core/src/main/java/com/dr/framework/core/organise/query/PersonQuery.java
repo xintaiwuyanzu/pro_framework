@@ -57,7 +57,7 @@ public class PersonQuery extends IdQuery {
 
         private List<String> newList(String... strings) {
             return Arrays.stream(strings)
-                    .filter(s -> !StringUtils.isEmpty(s))
+                    .filter(StringUtils::hasText)
                     .collect(Collectors.toList());
         }
 
@@ -175,14 +175,14 @@ public class PersonQuery extends IdQuery {
         }
 
         public Builder idNoLike(String idNo) {
-            if (!StringUtils.isEmpty(idNo)) {
+            if (StringUtils.hasText(idNo)) {
                 query.setIdNo(idNo);
             }
             return this;
         }
 
         public Builder createPersonEqual(String createPerson) {
-            if (!StringUtils.isEmpty(createPerson)) {
+            if (StringUtils.hasText(createPerson)) {
                 query.setCreatePerson(createPerson);
             }
             return this;

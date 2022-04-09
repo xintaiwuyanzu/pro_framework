@@ -27,8 +27,8 @@ public class DefaultPassWordEncrypt implements PassWordEncrypt {
 
     @Override
     public String encryptValidateLogin(String password, String salt, String loginType) {
-        Assert.isTrue(!StringUtils.isEmpty(password), "密码不能为空！");
-        Assert.isTrue(!StringUtils.isEmpty(salt), "加密盐不能为空！");
+        Assert.isTrue(StringUtils.hasText(password), "密码不能为空！");
+        Assert.isTrue(StringUtils.hasText(salt), "加密盐不能为空！");
         //解码密码
         password = decodePassword(password);
         //3、MD5加密

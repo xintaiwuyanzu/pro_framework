@@ -42,7 +42,7 @@ public class CacheController {
     @GetMapping("/clear")
     public void clearCache(String cacheName) {
         Stream<String> cac = cacheManager.getCacheNames().stream();
-        if (!StringUtils.isEmpty(cacheName)) {
+        if (StringUtils.hasText(cacheName)) {
             cac = cac.filter(c -> c.startsWith(cacheName));
         }
         cac.map(c -> cacheManager.getCache(c))

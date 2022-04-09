@@ -24,7 +24,7 @@ public class SysDictService {
     CommonService commonService;
 
     public List<TreeNode> dict(String type) {
-        if (StringUtils.isEmpty(type)) {
+        if (!StringUtils.hasText(type)) {
             return new ArrayList<>();
         } else {
             if (!type.endsWith(".")) {

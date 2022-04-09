@@ -8,7 +8,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -56,7 +56,7 @@ class ClassPathEntityScanner extends ClassPathBeanDefinitionScanner {
                 if (!modules.isEmpty()) {
                     Map<String, Object> tableAttrs = annotationMetadata.getAnnotationAttributes(tableAnnName);
                     Object moduleObj = tableAttrs.get("module");
-                    if (!StringUtils.isEmpty(moduleObj)) {
+                    if (!ObjectUtils.isEmpty(moduleObj)) {
                         return modules.contains(moduleObj.toString().toLowerCase().trim());
                     }
                 } else {

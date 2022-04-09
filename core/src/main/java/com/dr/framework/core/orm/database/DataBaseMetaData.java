@@ -140,7 +140,7 @@ public class DataBaseMetaData {
      * @return
      */
     public Relation<Column> getTable(String tableName, boolean forceLoad) {
-        Assert.isTrue(!StringUtils.isEmpty(tableName), "表名不能为空！");
+        Assert.isTrue(StringUtils.hasText(tableName), "表名不能为空！");
         if (forceLoad) {
             return doForceLoadTable(tableName);
         } else {

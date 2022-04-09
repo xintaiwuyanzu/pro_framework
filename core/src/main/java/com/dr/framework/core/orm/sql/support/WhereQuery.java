@@ -3,6 +3,7 @@ package com.dr.framework.core.orm.sql.support;
 import com.dr.framework.core.orm.sql.Column;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
@@ -44,7 +45,7 @@ class WhereQuery extends AbstractSqlQuery {
     }
 
     void orderBy(String alias, boolean desc) {
-        if (!StringUtils.isEmpty(alias)) {
+        if (StringUtils.hasText(alias)) {
             orderBys.add(new AliasOrderBy(alias, desc));
         }
     }
@@ -84,7 +85,7 @@ class WhereQuery extends AbstractSqlQuery {
     }
 
     void like(Column column, boolean isLike, boolean pre, boolean end, Serializable data) {
-        if (!StringUtils.isEmpty(data)) {
+        if (!ObjectUtils.isEmpty(data)) {
             whereSqls.concat(AND_, new LikeSqlWithData(column, isLike, pre, end, data));
         }
     }
@@ -130,7 +131,7 @@ class WhereQuery extends AbstractSqlQuery {
 
     private void parseWhere(StringBuilder builder, MetaObject metaobject, TableAlias tableAlias, SqlQuery sqlQuery) {
         String whereSql = whereSqls.sql(metaobject, tableAlias, sqlQuery);
-        if (!StringUtils.isEmpty(whereSql)) {
+        if (StringUtils.hasText(whereSql)) {
             builder.append(" where \n ((");
             builder.append(whereSql);
             builder.append("))");
@@ -145,7 +146,7 @@ class WhereQuery extends AbstractSqlQuery {
         return groupBys.stream().map(column -> {
             StringBuilder sb = new StringBuilder();
             //TODO 函数和别名的问题，TODO还有order by和having
-            if (!StringUtils.isEmpty(column.getTable())) {
+            if (StringUtils.hasText(column.getTable())) {
                 sb.append(tableAlias.alias(column.getTable()));
                 sb.append(".");
             }
@@ -173,7 +174,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
 
         void concat(String concat, WhereSql whereSql) {
-            if (StringUtils.isEmpty(this.concat)) {
+            if (!StringUtils.hasText(this.concat)) {
                 this.concat = concat;
                 this.sql = whereSql;
             } else {
@@ -193,14 +194,14 @@ class WhereQuery extends AbstractSqlQuery {
                 if (sql.test(metaObject)) {
                     sqlTested = true;
                     String sqlStr = sql.getSql(alias, sqlQuery);
-                    if (!StringUtils.isEmpty(sqlStr)) {
+                    if (StringUtils.hasText(sqlStr)) {
                         builder.append(sqlStr);
                     }
                 }
             }
             if (next != null) {
                 String nextSql = next.sql(metaObject, alias, sqlQuery);
-                if (!StringUtils.isEmpty(nextSql)) {
+                if (StringUtils.hasText(nextSql)) {
                     boolean canCancat = (builder.length() > 0 || !concat.equalsIgnoreCase(AND_)) && canCancat(nextSql);
                     if (canCancat) {
                         builder.append(concat);
@@ -239,7 +240,7 @@ class WhereQuery extends AbstractSqlQuery {
                         .append("{");
                 if (sqlQuery.containsKey((SqlQuery.QUERY_PARAM))) {
                     Object param = sqlQuery.get(SqlQuery.QUERY_PARAM);
-                    if (!StringUtils.isEmpty(param)) {
+                    if (!ObjectUtils.isEmpty(param)) {
                         stringBuilder.append(param);
                         stringBuilder.append(".");
                     }
@@ -273,7 +274,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    class CollectionSql extends TrueSql {
+    static class CollectionSql extends TrueSql {
         Column column;
         String prefix;
         String suffix;
@@ -308,7 +309,7 @@ class WhereQuery extends AbstractSqlQuery {
     }
 
 
-    class NoParamSql extends TrueSql {
+    static class NoParamSql extends TrueSql {
 
         Column left;
         Column right;
@@ -330,7 +331,7 @@ class WhereQuery extends AbstractSqlQuery {
 
         @Override
         boolean test(MetaObject metaobject) {
-            return !StringUtils.isEmpty(sql);
+            return StringUtils.hasText(sql);
         }
 
         @Override
@@ -339,7 +340,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    class ConcatSql extends TrueSql {
+    static class ConcatSql extends TrueSql {
         Column column;
         String preffix;
         String suffix;
@@ -382,7 +383,7 @@ class WhereQuery extends AbstractSqlQuery {
         boolean test(MetaObject metaobject) {
             Object object = metaobject.getValue(SqlQuery.ENTITY_KEY);
             if (object != null) {
-                return !StringUtils.isEmpty(metaobject.getValue(SqlQuery.ENTITY_KEY + "." + column.getAlias()));
+                return !ObjectUtils.isEmpty(metaobject.getValue(SqlQuery.ENTITY_KEY + "." + column.getAlias()));
             } else {
                 return false;
             }
@@ -445,7 +446,7 @@ class WhereQuery extends AbstractSqlQuery {
 
         @Override
         boolean test(MetaObject metaobject) {
-            return !StringUtils.isEmpty(data);
+            return !ObjectUtils.isEmpty(data);
         }
 
         @Override
@@ -473,7 +474,7 @@ class WhereQuery extends AbstractSqlQuery {
 
         @Override
         boolean test(MetaObject metaobject) {
-            return !(StringUtils.isEmpty(start) || StringUtils.isEmpty(end)) && start.compareTo(end) <= 0;
+            return !(ObjectUtils.isEmpty(start) || ObjectUtils.isEmpty(end)) && start.compareTo(end) <= 0;
         }
 
         @Override
@@ -584,7 +585,7 @@ class WhereQuery extends AbstractSqlQuery {
             Object object = metaobject.getValue(SqlQuery.ENTITY_KEY);
             if (object != null) {
                 data = (Serializable) metaobject.getValue(SqlQuery.ENTITY_KEY + "." + column.getAlias());
-                return !StringUtils.isEmpty(data);
+                return !ObjectUtils.isEmpty(data);
             } else {
                 return false;
             }

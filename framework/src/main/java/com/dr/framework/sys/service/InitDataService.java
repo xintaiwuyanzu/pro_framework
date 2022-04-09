@@ -36,7 +36,7 @@ public class InitDataService implements InitializingBean {
                     .sorted(Comparator.comparingInt(DataInit::order))
                     .forEach(dataInit -> {
                         String name = dataInit.name();
-                        if (StringUtils.isEmpty(name)) {
+                        if (!StringUtils.hasText(name)) {
                             name = dataInit.getClass().getSimpleName();
                         }
                         try {

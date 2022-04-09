@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -84,7 +85,7 @@ public class DefaultOrganisePersonService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<Organise> getParentOrganiseList(String organiseId, String... organiseType) {
-        Assert.isTrue(!StringUtils.isEmpty(organiseId), "机构编号不能为空！");
+        Assert.isTrue(StringUtils.hasText(organiseId), "机构编号不能为空！");
         Organise organise = commonMapper.selectById(Organise.class, organiseId);
         Assert.notNull(organise, "未查询到指定的机构信息");
         SqlQuery<Organise> sqlQuery = SqlQuery.from(organiseRelation)
@@ -101,7 +102,7 @@ public class DefaultOrganisePersonService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<Organise> getChildrenOrganiseList(String organiseId, String... organiseType) {
-        Assert.isTrue(!StringUtils.isEmpty(organiseId), "机构编号不能为空！");
+        Assert.isTrue(StringUtils.hasText(organiseId), "机构编号不能为空！");
         Organise organise = commonMapper.selectById(Organise.class, organiseId);
         Assert.notNull(organise, "未查询到指定的机构信息");
         SqlQuery<Organise> sqlQuery = SqlQuery.from(organiseRelation)
@@ -151,7 +152,7 @@ public class DefaultOrganisePersonService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addOrganise(Organise organise) {
-        if (StringUtils.isEmpty(organise.getGroupId())) {
+        if (!StringUtils.hasText(organise.getGroupId())) {
             organise.setGroupId(com.dr.framework.core.util.Constants.DEFAULT);
         }
         Assert.isTrue(
@@ -161,10 +162,10 @@ public class DefaultOrganisePersonService
                                 .equal(organiseRelation.getColumn("group_id"), organise.getGroupId())
                 ), "已存在指定的机构编码：" + organise.getOrganiseCode());
         CommonService.bindCreateInfo(organise);
-        if (StringUtils.isEmpty(organise.getParentId()) && !DEFAULT_ROOT_ID.equalsIgnoreCase(organise.getId())) {
+        if (!StringUtils.hasText(organise.getParentId()) && !DEFAULT_ROOT_ID.equalsIgnoreCase(organise.getId())) {
             organise.setParentId(DEFAULT_ROOT_ID);
         }
-        if (StringUtils.isEmpty(organise.getStatus())) {
+        if (!StringUtils.hasText(organise.getStatus())) {
             organise.setStatus(StatusEntity.STATUS_ENABLE_STR);
         }
         commonMapper.insert(organise);
@@ -200,8 +201,8 @@ public class DefaultOrganisePersonService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addPerson(Person person, String organiseId, boolean registerLogin, String password) {
-        Assert.isTrue(!StringUtils.isEmpty(person.getUserCode()), "人员编码不能为空");
-        Assert.isTrue(!StringUtils.isEmpty(organiseId), "机构编码不能为空");
+        Assert.isTrue(StringUtils.hasText(person.getUserCode()), "人员编码不能为空");
+        Assert.isTrue(StringUtils.hasText(organiseId), "机构编码不能为空");
         Assert.isTrue(
                 !commonMapper.existsByQuery(
                         SqlQuery.from(personRelation)
@@ -209,7 +210,7 @@ public class DefaultOrganisePersonService
                 )
                 , "已存在指定的人员编码：" + person.getUserCode());
         //解析身份证信息
-        if (!StringUtils.isEmpty(person.getIdNo())) {
+        if (StringUtils.hasText(person.getIdNo())) {
             try {
                 IDNo idNo = IDNo.from(person.getIdNo());
                 person.setBirthday(Long.parseLong(idNo.getBirthday()));
@@ -222,7 +223,7 @@ public class DefaultOrganisePersonService
         CommonService.bindCreateInfo(person);
         SecurityHolder securityHolder = SecurityHolder.get();
         Organise currentOrganise = securityHolder.currentOrganise();
-        if (currentOrganise != null && StringUtils.isEmpty(person.getCreateOrganiseId())) {
+        if (currentOrganise != null && !StringUtils.hasText(person.getCreateOrganiseId())) {
             person.setCreateOrganiseId(currentOrganise.getId());
         }
         addPersonOrganise(person.getId(), organiseId);
@@ -264,12 +265,12 @@ public class DefaultOrganisePersonService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addGroup(PersonGroup group, String... personIds) {
-        if (StringUtils.isEmpty(group.getId())) {
+        if (!StringUtils.hasText(group.getId())) {
             group.setId(UUID.randomUUID().toString());
         }
-        Assert.isTrue(!StringUtils.isEmpty(group.getName()), "用户组名称不能为空！");
+        Assert.isTrue(StringUtils.hasText(group.getName()), "用户组名称不能为空！");
         CommonService.bindCreateInfo(group);
-        if (StringUtils.isEmpty(group.getStatus())) {
+        if (!StringUtils.hasText(group.getStatus())) {
             group.setStatus(StatusEntity.STATUS_ENABLE_STR);
         }
         commonMapper.insert(group);
@@ -298,7 +299,7 @@ public class DefaultOrganisePersonService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addPersonToGroup(String groupId, String... personIds) {
-        Assert.isTrue(!StringUtils.isEmpty(groupId), "分组id不能为空！");
+        Assert.isTrue(StringUtils.hasText(groupId), "分组id不能为空！");
         Assert.isTrue(personIds != null && personIds.length > 0, "人员不能为空！");
         Assert.isTrue(commonMapper.exists(PersonGroup.class, groupId), "不存在指定的人员分组！");
         List<String> savedPersons = commonMapper.selectByQuery(
@@ -342,11 +343,11 @@ public class DefaultOrganisePersonService
         //先查出来原来的机构信息
         Organise old = getOrganise(new OrganiseQuery.Builder().idEqual(organise.getId()).build());
         Assert.notNull(old, "未查询到指定的机构");
-        if (!StringUtils.isEmpty(organise.getOrganiseCode())) {
+        if (StringUtils.hasText(organise.getOrganiseCode())) {
             Assert.isTrue(old.getOrganiseCode().equals(organise.getOrganiseCode()), "机构代码不能更改");
         }
         //如果机构parentid改了，更新机构关联关系
-        if (!StringUtils.isEmpty(organise.getParentId()) && !old.getParentId().equals(organise.getParentId())) {
+        if (StringUtils.hasText(organise.getParentId()) && !old.getParentId().equals(organise.getParentId())) {
             Assert.notNull(getOrganise(new OrganiseQuery.Builder().idEqual(organise.getId()).build()), "未查询到指定的父机构");
             //1、先删除所有的之前的机构关联关系
             commonMapper.deleteByQuery(SqlQuery.from(EntityOrganiseOrganise.class)
@@ -400,11 +401,11 @@ public class DefaultOrganisePersonService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long deleteOrganise(String organiseId) {
-        Assert.isTrue(!StringUtils.isEmpty(organiseId), "机构id不能为空");
+        Assert.isTrue(StringUtils.hasText(organiseId), "机构id不能为空");
         Organise old = getOrganise(new OrganiseQuery.Builder().idEqual(organiseId).build());
         Assert.notNull(old, "未查询到指定的机构");
         List<Organise> child = getChildrenOrganiseList(organiseId);
-        List<String> organiseIds = Arrays.asList(organiseId);
+        List<String> organiseIds = Collections.singletonList(organiseId);
         if (child != null && !child.isEmpty()) {
             organiseIds.addAll(child.stream().map(BaseEntity::getId).collect(Collectors.toList()));
         }
@@ -442,7 +443,7 @@ public class DefaultOrganisePersonService
         //TODO 这里只是更新基本信息
         Person old = getPerson(new PersonQuery.Builder().idEqual(person.getId()).build());
         Assert.notNull(old, "未查询到指定的用户");
-        if (!StringUtils.isEmpty(person.getUserCode())) {
+        if (StringUtils.hasText(person.getUserCode())) {
             Assert.isTrue(old.getUserCode().equals(person.getUserCode()), "用户编号不能更改");
         }
         SqlQuery sqlQuery = SqlQuery.from(personRelation)
@@ -465,10 +466,10 @@ public class DefaultOrganisePersonService
                 .set(personRelation.getColumn(ORDER_COLUMN_NAME), person.getOrder())
                 .equal(personRelation.getColumn(ID_COLUMN_NAME), old.getId());
 
-        if (!StringUtils.isEmpty(person.getUpdateDate())) {
+        if (!ObjectUtils.isEmpty(person.getUpdateDate())) {
             sqlQuery.set(personRelation.getColumn("updateDate"), person.getUpdateDate());
         }
-        if (!StringUtils.isEmpty(person.getUpdatePerson())) {
+        if (StringUtils.hasText(person.getUpdatePerson())) {
             sqlQuery.set(personRelation.getColumn("updatePerson"), person.getUpdatePerson());
         }
         commonMapper.updateByQuery(sqlQuery);
@@ -490,14 +491,14 @@ public class DefaultOrganisePersonService
                         String loginId = e.getValue();
                         String oldLoginId = oldLoginTypeValues.get(loginType);
 
-                        if (StringUtils.isEmpty(loginId)) {
+                        if (!StringUtils.hasText(loginId)) {
                             //如果新的loginId为空，删除指定的登录账户
                             UserLogin userLogin = userLoginMap.get(loginType);
                             if (userLogin != null) {
                                 loginService.removeLogin(userLogin.getLoginId());
                             }
                         } else {
-                            if (StringUtils.isEmpty(oldLoginId)) {
+                            if (!StringUtils.hasText(oldLoginId)) {
                                 //如果老的login为空，则添加默认的登录账户
                                 loginService.addLoginWithDefaultPassWord(person.getId(), loginType, loginId);
                             } else {
@@ -549,8 +550,8 @@ public class DefaultOrganisePersonService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long changePersonOrganise(String personId, String organiseId) {
-        Assert.isTrue(!StringUtils.isEmpty(personId), "用户id不能为空");
-        Assert.isTrue(!StringUtils.isEmpty(organiseId), "机构id不能为空");
+        Assert.isTrue(StringUtils.hasText(personId), "用户id不能为空");
+        Assert.isTrue(StringUtils.hasText(organiseId), "机构id不能为空");
         Person person = getPersonById(personId);
         Assert.notNull(person, "未查询到指定用户");
         Assert.isTrue(!organiseId.equals(person.getDefaultOrganiseId()), "新机构与原有机构不能相同");
@@ -564,7 +565,7 @@ public class DefaultOrganisePersonService
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long deletePerson(String personId) {
-        Assert.isTrue(!StringUtils.isEmpty(personId), "人员id不能为空");
+        Assert.isTrue(StringUtils.hasText(personId), "人员id不能为空");
         Person old = getPersonById(personId);
         //删除人员本身
         commonMapper.deleteByQuery(SqlQuery.from(personRelation).equal(personRelation.getColumn(IdEntity.ID_COLUMN_NAME), personId));
@@ -706,7 +707,7 @@ public class DefaultOrganisePersonService
                             .in(EntityOrganiseOrganiseInfo.PARENTID, organiseQuery.getTreeParentId())
             );
         }
-        if (!StringUtils.isEmpty(organiseQuery.getCodeEqual())) {
+        if (StringUtils.hasText(organiseQuery.getCodeEqual())) {
             query.equal(organiseRelation.getColumn("organise_code"), organiseQuery.getCodeEqual());
         }
         query.orderBy(organiseRelation.getColumn(ORDER_COLUMN_NAME));
@@ -721,7 +722,7 @@ public class DefaultOrganisePersonService
      */
     protected SqlQuery<Person> personQueryToSqlQuery(PersonQuery personQuery) {
         SqlQuery query = SqlQuery.from(personRelation);
-        if (!StringUtils.isEmpty(personQuery.getCreatePerson())) {
+        if (StringUtils.hasText(personQuery.getCreatePerson())) {
             query.equal(personRelation.getColumn("createPerson"), personQuery.getCreatePerson());
         }
         checkBuildInQuery(personRelation, query, IdEntity.ID_COLUMN_NAME, personQuery.getIds());

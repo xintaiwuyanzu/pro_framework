@@ -15,7 +15,7 @@ import javax.sql.DataSource;
 public class DriverUtils {
 
     public static DataSource buildDataSource(DataSourceProperties properties) {
-        if (!StringUtils.isEmpty(properties.getUrl()) && StringUtils.isEmpty(properties.getDriverClassName())) {
+        if (StringUtils.hasText(properties.getUrl()) && !StringUtils.hasText(properties.getDriverClassName())) {
             if (isDm(properties.getUrl())) {
                 properties.setDriverClassName("dm.jdbc.driver.DmDriver");
             }
@@ -25,7 +25,7 @@ public class DriverUtils {
 
 
     public static String xaDriverClass(String url) {
-        Assert.isTrue(!StringUtils.isEmpty(url), "数据库链接不能为空！");
+        Assert.isTrue(StringUtils.hasText(url), "数据库链接不能为空！");
         DatabaseDriver driver = DatabaseDriver.fromJdbcUrl(url);
         if (driver != null) {
             return driver.getXaDataSourceClassName();

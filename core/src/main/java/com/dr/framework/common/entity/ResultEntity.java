@@ -57,7 +57,7 @@ public class ResultEntity<T> {
         } else {
             this.code = "500";
         }
-        if (StringUtils.isEmpty(message)) {
+        if (!StringUtils.hasText(message)) {
             if (success) {
                 this.message = "请求成功！";
             } else {

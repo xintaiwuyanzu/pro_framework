@@ -29,7 +29,7 @@ public class MatcherTest {
         System.out.println("aaa#bbb".split("#")[1]);
 
 
-        System.out.println(String.format("aaa  %s", "bbb"));
+        System.out.printf("aaa  %s%n", "bbb");
         String aaa = "aaa $aaa() $aaa()ddd $aaa";
         System.out.println(aaa.replaceAll("\\$aaa", "bbb"));
 

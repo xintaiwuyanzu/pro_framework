@@ -27,10 +27,7 @@ public class ImportExcelUitl {
     public static List<Map> readExcel(String personId, MultipartFile file, String[] headers, Object obj) throws Exception {
 
         String fileName = file.getOriginalFilename();
-        boolean isExcel2003 = true;
-        if (fileName.matches("^.+\\.(?i)(xlsx)$")) {
-            isExcel2003 = false;
-        }
+        boolean isExcel2003 = !fileName.matches("^.+\\.(?i)(xlsx)$");
         Map<String, Object> map;
         InputStream is = null;
         Workbook wb = null;

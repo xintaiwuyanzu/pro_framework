@@ -41,7 +41,7 @@ public class TableInfoProperties extends Properties {
         this.tableInfo = tableInfo;
         this.isInsert = isInsert;
         this.hasSqlQuery = hasSqlQuery;
-        if (!StringUtils.isEmpty(paramsKey)) {
+        if (StringUtils.hasText(paramsKey)) {
             queryTemplate = "${" + paramsKey + "%s}";
             tableAlias = String.format("${%s.$alias%s}", paramsKey, tableInfo.getName());
         }
@@ -75,7 +75,7 @@ public class TableInfoProperties extends Properties {
     @Override
     public String getProperty(String key) {
         String value = super.getProperty(key);
-        if (StringUtils.isEmpty(value)) {
+        if (!StringUtils.hasText(value)) {
             String[] arr = key.split("#");
             key = arr[0];
             String append = arr.length == 2 ? arr[1] : "";

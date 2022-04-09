@@ -5,9 +5,9 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.node.Node;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,7 +18,7 @@ public class ElasticSearchTest {
     Node node;
     Client client;
 
-    @Before
+    @BeforeAll
     public void init() throws Exception {
         URL resource1 = getClass().getClassLoader().getResource("elasticsearch.yml");
         Path path = Paths.get(resource1.toURI());
@@ -33,7 +33,7 @@ public class ElasticSearchTest {
         client.admin().indices().create(new CreateIndexRequest("aaaa"));
     }
 
-    @After
+    @AfterAll
     public void close() throws IOException {
         if (node != null) {
             node.close();

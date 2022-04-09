@@ -129,14 +129,14 @@ public class DefaultResourceManager implements ResourceManager, InitDataService.
             return Collections.emptyList();
         }
         return CommonService.listToTree(
-                treeNodes,
-                groupId,
-                PermissionResource::getId,
-                PermissionResource::getParentId,
-                PermissionResource::getOrder,
-                PermissionResource::getName,
-                null,
-                false)
+                        treeNodes,
+                        groupId,
+                        PermissionResource::getId,
+                        PermissionResource::getParentId,
+                        PermissionResource::getOrder,
+                        PermissionResource::getName,
+                        null,
+                        false)
                 .stream().map(
                         t -> (TreeNode<PermissionResource>) t
                 ).collect(Collectors.toList());
@@ -203,7 +203,7 @@ public class DefaultResourceManager implements ResourceManager, InitDataService.
     public synchronized void listenResourceChange(SecurityEvent event) {
         if (event instanceof PermissionResourceChangeEvent) {
             String type = (String) event.getSource();
-            if (!StringUtils.isEmpty(type) && typeKeyMap.containsKey(type)) {
+            if (StringUtils.hasText(type) && typeKeyMap.containsKey(type)) {
                 Set<String> cacheKeySet = typeKeyMap.get(type);
                 cacheKeySet.forEach(k -> personResourceCache.evictIfPresent(k));
                 typeKeyMap.remove(type);
@@ -216,7 +216,7 @@ public class DefaultResourceManager implements ResourceManager, InitDataService.
     /**
      * 清空缓存
      */
-    private void clearCache() {
+    private synchronized void clearCache() {
         personResourceCache.clear();
         typeKeyMap.clear();
     }

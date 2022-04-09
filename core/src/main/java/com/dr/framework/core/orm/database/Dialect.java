@@ -37,7 +37,7 @@ public abstract class Dialect {
      * @return
      */
     public String parseDialectSql(String sqlSource) {
-        if (StringUtils.isEmpty(sqlSource)) {
+        if (!StringUtils.hasText(sqlSource)) {
             return sqlSource;
         } else if (sqlSource.startsWith("<") && !sqlSource.startsWith("<script>") && !sqlSource.startsWith("<SCRIPT>")) {
             try {
@@ -268,7 +268,7 @@ public abstract class Dialect {
                 String.format("drop table %s", relation.getName()),
                 String.format("删除表【%s】", relation.getName())
         );
-        return Arrays.asList(dropTableInfo);
+        return Collections.singletonList(dropTableInfo);
     }
 
     /**
@@ -302,7 +302,7 @@ public abstract class Dialect {
             createTable.append(columnsSql);
             //主键
             String primaryKeySql = relation.primaryKeySql();
-            if (!StringUtils.isEmpty(primaryKeySql)) {
+            if (StringUtils.hasText(primaryKeySql)) {
                 createTable.append(',').append(primaryKeySql);
             }
             createTable.append(')');
@@ -312,13 +312,13 @@ public abstract class Dialect {
             sqls.add(new DataBaseChangeInfo(createTable.toString(), "新建表：" + relation.getName()));
             //注释sql
             if (supportCommentOn()) {
-                if (!StringUtils.isEmpty(remark)) {
+                if (StringUtils.hasText(remark)) {
                     String commentTableSql = "comment on table " + convertObjectName(relation.getName()) + " is '" + remark + "'";
                     sqls.add(new DataBaseChangeInfo(commentTableSql, String.format("表：【%s】，添加注释【%s】", relation.getName(), remark)));
                 }
                 relation.getColumns()
                         .stream()
-                        .filter(c -> !StringUtils.isEmpty(c.getRemark()))
+                        .filter(c -> StringUtils.hasText(c.getRemark()))
                         .forEach(c ->
                                 sqls.add(new DataBaseChangeInfo(
                                         String.format("comment on column %s.%s is '%s'", convertObjectName(relation.getName()), c.getName(), c.getRemark()),
@@ -331,7 +331,7 @@ public abstract class Dialect {
                     .forEach((k, v) -> sqls.add(new DataBaseChangeInfo(v, String.format("表：【%s】，添加索引【%s】", relation.getName(), k))));
         } else {
             //视图的处理
-            if (!StringUtils.isEmpty(relation.getCreateSql())) {
+            if (StringUtils.hasText(relation.getCreateSql())) {
                 //TODO 校验sql语句格式是否正确
                 sqls.add(new DataBaseChangeInfo(relation.getCreateSql(), String.format("新建视图：【%s】", relation.getName())));
             }
@@ -380,7 +380,7 @@ public abstract class Dialect {
     protected String getColumnType(Column column) {
         for (ClassTypeHolder classTypeHolder : classTypeHolders) {
             String name = classTypeHolder.getTypeName(column.getType(), column.getDecimalDigits(), column.getSize());
-            if (!StringUtils.isEmpty(name)) {
+            if (StringUtils.hasText(name)) {
                 return name;
             }
         }
@@ -463,7 +463,7 @@ public abstract class Dialect {
     protected void appendColumnBaseInfo(StringBuffer stringBuffer, Column column) {
         //默认值
         String defaultValue = column.getDefaultValue();
-        if (!StringUtils.isEmpty(defaultValue)) {
+        if (StringUtils.hasText(defaultValue)) {
             stringBuffer.append(" default ").append(defaultValue);
         }
         //是否为空
@@ -523,7 +523,7 @@ public abstract class Dialect {
                 return sqls;
             }
             //修改表注释
-            if (!StringUtils.isEmpty(relation.getRemark())) {
+            if (StringUtils.hasText(relation.getRemark())) {
                 if (!relation.getRemark().equals(jdbcTable.getRemark()) && supportCommentOn()) {
                     //TODO oracle 默认配置获取不到注释信息
                     if (!(this instanceof OracleDialect)) {
@@ -549,7 +549,7 @@ public abstract class Dialect {
             if (!oldPkColumns.equalsIgnoreCase(newPkColumns)) {
                 //主键定义不同
                 String oldPkName = jdbcTable.getPrimaryKeyName();
-                if (!StringUtils.isEmpty(oldPkName) || !StringUtils.isEmpty(oldPkColumns)) {
+                if (StringUtils.hasText(oldPkName) || StringUtils.hasText(oldPkColumns)) {
                     sqls.add(new DataBaseChangeInfo(getDropPrimaryKeySql(jdbcTable),
                             String.format("表：【%s】，删除主键【%s】", relation.getName(), oldPkName)
                     ));
@@ -631,7 +631,7 @@ public abstract class Dialect {
         //单独处理注释
         if (supportCommentOn()) {
             //不支持注释的就不管了，修改注释数据库影响很大
-            if (!StringUtils.isEmpty(newColumn.getRemark()) && !newColumn.getRemark().equalsIgnoreCase(oldColumn.getRemark())) {
+            if (StringUtils.hasText(newColumn.getRemark()) && !newColumn.getRemark().equalsIgnoreCase(oldColumn.getRemark())) {
                 //TODO oracle 默认不获取备注信息
                 if (!(this instanceof OracleDialect)) {
                     sqls.add(new DataBaseChangeInfo(

@@ -181,7 +181,7 @@ public class OrganiseQuery extends IdQuery {
 
         private List<String> newList(String... strings) {
             return Arrays.stream(strings)
-                    .filter(s -> !StringUtils.isEmpty(s))
+                    .filter(StringUtils::hasText)
                     .collect(Collectors.toList());
         }
 
@@ -197,7 +197,7 @@ public class OrganiseQuery extends IdQuery {
          * @return
          */
         public Builder groupIdEqual(String id) {
-            if (!StringUtils.isEmpty(id)) {
+            if (StringUtils.hasText(id)) {
                 query.setGroupId(id);
             }
             return this;

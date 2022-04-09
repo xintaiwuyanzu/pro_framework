@@ -29,7 +29,7 @@ public class SysDictController extends BaseController<SysDict> {
     @Override
     protected void onBeforeInsert(HttpServletRequest request, SysDict entity) {
         super.onBeforeInsert(request, entity);
-        if (entity != null && StringUtils.isEmpty(entity.getType()) && !StringUtils.isEmpty(entity.getKey())) {
+        if (entity != null && !StringUtils.hasText(entity.getType()) && StringUtils.hasText(entity.getKey())) {
             entity.setType(entity.getKey().split("\\.")[0]);
         }
     }
@@ -47,7 +47,7 @@ public class SysDictController extends BaseController<SysDict> {
     @RequestMapping("/validate")
     public ResultEntity validate(String key) {
         boolean exist = false;
-        if (!StringUtils.isEmpty(key)) {
+        if (StringUtils.hasText(key)) {
             exist = commonService.exists(SqlQuery.from(SysDict.class).equal(SysDictInfo.KEYINFO, key));
         }
         if (exist) {

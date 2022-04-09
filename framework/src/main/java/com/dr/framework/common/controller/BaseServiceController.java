@@ -95,7 +95,7 @@ public abstract class BaseServiceController<S extends BaseService<E>, E extends 
     protected SqlQuery<E> buildDeleteQuery(HttpServletRequest request, E entity) {
         EntityRelation relation = dataBaseService.getTableInfo(entity.getClass());
         SqlQuery<? extends IdEntity> sqlQuery = SqlQuery.from(relation, false);
-        Assert.isTrue(!StringUtils.isEmpty(entity.getId()), "删除条件不能为空!");
+        Assert.isTrue(StringUtils.hasText(entity.getId()), "删除条件不能为空!");
         Column idColumn = relation.getColumn(IdEntity.ID_COLUMN_NAME);
         sqlQuery.column(idColumn).in(idColumn, entity.getId().split(IdEntity.MULTI_STR_SPLIT_CHAR));
         return (SqlQuery<E>) sqlQuery;
@@ -128,7 +128,7 @@ public abstract class BaseServiceController<S extends BaseService<E>, E extends 
      * @return
      */
     protected SqlQuery<E> buildDetailQuery(HttpServletRequest request, E entity, String id) {
-        if (!StringUtils.isEmpty(id)) {
+        if (StringUtils.hasText(id)) {
             EntityRelation entityRelation = dataBaseService.getTableInfo(entity.getClass());
             SqlQuery<E> sqlQuery = SqlQuery.from(entityRelation);
             sqlQuery.equal(entityRelation.getColumn(IdEntity.ID_COLUMN_NAME), id);

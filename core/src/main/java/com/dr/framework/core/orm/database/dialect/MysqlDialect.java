@@ -91,7 +91,7 @@ public class MysqlDialect extends Dialect {
     @Override
     protected String getTableRemark(String remark) {
         StringBuilder sb = new StringBuilder(" default charset=utf8 ");
-        if (!StringUtils.isEmpty(remark)) {
+        if (StringUtils.hasText(remark)) {
             sb.append(" comment='")
                     .append(remark)
                     .append("' ");
@@ -102,7 +102,7 @@ public class MysqlDialect extends Dialect {
     @Override
     protected String getColumnRemark(String remark) {
         StringBuilder sb = new StringBuilder();
-        if (!StringUtils.isEmpty(remark)) {
+        if (StringUtils.hasText(remark)) {
             sb.append(" comment '")
                     .append(remark)
                     .append("' ");
@@ -128,7 +128,7 @@ public class MysqlDialect extends Dialect {
         sb.append(getColumnType(oldColumn));
         appendColumnBaseInfo(sb, oldColumn);
         //baseInfo 中带有备注
-        /*if (!StringUtils.isEmpty(newColumn.getRemark())) {
+        /*if (StringUtils.hasText(newColumn.getRemark())) {
             sb.append(" comment ")
                     .append(newColumn.getRemark());
         }*/

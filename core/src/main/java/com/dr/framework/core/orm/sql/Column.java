@@ -13,7 +13,7 @@ public class Column {
     public static Column function(Column column, String function, String alias) {
         Column column1 = new Column(column.getTable(), column.getName(), column.getAlias(), column.getJdbcType());
         column1.function = function;
-        if (!StringUtils.isEmpty(alias)) {
+        if (StringUtils.hasText(alias)) {
             column1.alias = alias;
         }
         return column1;
@@ -109,7 +109,7 @@ public class Column {
     }
 
     public Column alias(String alias) {
-        if (StringUtils.isEmpty(alias)) {
+        if (!StringUtils.hasText(alias)) {
             return this;
         } else {
             Column column = new Column(getTable(), getName(), alias, getJdbcType());
@@ -121,7 +121,7 @@ public class Column {
     public Column function(String function, String alias) {
         Column column1 = new Column(this.table, this.name, this.alias, getJdbcType());
         column1.function = function;
-        if (!StringUtils.isEmpty(alias)) {
+        if (StringUtils.hasText(alias)) {
             column1.alias = alias;
         }
         return column1;

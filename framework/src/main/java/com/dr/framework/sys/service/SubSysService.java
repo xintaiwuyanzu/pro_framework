@@ -24,7 +24,7 @@ public class SubSysService extends PermissionResourceService<SubSystem> implemen
 
     @Transactional(rollbackFor = Exception.class)
     public long deleteById(String id) {
-        Assert.isTrue(!StringUtils.isEmpty(id), "子系统id不能为空！");
+        Assert.isTrue(StringUtils.hasText(id), "子系统id不能为空！");
         return 0;
     }
 
@@ -53,7 +53,7 @@ public class SubSysService extends PermissionResourceService<SubSystem> implemen
     @Override
     @Transactional(rollbackFor = Exception.class)
     public long insert(SubSystem entity) {
-        if (StringUtils.isEmpty(entity.getStatus())) {
+        if (!StringUtils.hasText(entity.getStatus())) {
             entity.setStatus(StatusEntity.STATUS_ENABLE_STR);
         }
         return super.insert(entity);

@@ -116,7 +116,7 @@ public class BaseController<T extends IdEntity> {
      */
     protected void onBeforeInsert(HttpServletRequest request, T entity) {
         if (entity instanceof CreateInfoEntity) {
-            if (StringUtils.isEmpty(((CreateInfoEntity) entity).getCreatePerson())) {
+            if (!StringUtils.hasText(((CreateInfoEntity) entity).getCreatePerson())) {
                 ((CreateInfoEntity) entity).setCreateDate(System.currentTimeMillis());
                 ((CreateInfoEntity) entity).setUpdateDate(System.currentTimeMillis());
                 Person person = getUserlogin(request);
@@ -187,7 +187,7 @@ public class BaseController<T extends IdEntity> {
     public ResultEntity<Boolean> delete(HttpServletRequest request, T entity) {
         EntityRelation entityRelation = dataBaseService.getTableInfo(entity.getClass());
         SqlQuery<T> sqlQuery = SqlQuery.from(entityRelation);
-        if (!StringUtils.isEmpty(entity.getId())) {
+        if (StringUtils.hasText(entity.getId())) {
             List<String> pks = entityRelation.primaryKeyColumns();
             Assert.isTrue(pks.size() == 1, ()
                     -> String.format("实体类【%s】的主键数量为：%s，【%s】，请手动处理删除逻辑！",
@@ -216,7 +216,7 @@ public class BaseController<T extends IdEntity> {
 
     @RequestMapping("/detail")
     public ResultEntity<T> detail(String id, T entity) {
-        if (!StringUtils.isEmpty(id)) {
+        if (StringUtils.hasText(id)) {
             T t = (T) commonService.findById(entity.getClass(), id);
             if (t != null) {
                 return ResultEntity.success(t);

@@ -195,7 +195,7 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
                             .map(table -> {
                                 Table t = (Table) table;
                                 String comment = t.comment();
-                                if (StringUtils.isEmpty(comment)) {
+                                if (!StringUtils.hasText(comment)) {
                                     comment = t.name();
                                 }
                                 TreeNode tree = new TreeNode(t.name(), comment);
@@ -232,7 +232,7 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
                 )
                 .map(table -> {
                     String comment = table.getRemark();
-                    if (StringUtils.isEmpty(comment)) {
+                    if (!StringUtils.hasText(comment)) {
                         comment = table.getName();
                     }
                     TreeNode tableTree = new TreeNode(table.getName(), comment);
