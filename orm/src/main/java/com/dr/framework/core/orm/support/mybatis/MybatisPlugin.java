@@ -81,7 +81,7 @@ public class MybatisPlugin implements Interceptor {
         Relation relation;
         Object param;
 
-        public ParamHolder(MappedStatement ms, Object params) {
+        ParamHolder(MappedStatement ms, Object params) {
             MybatisConfigurationBean configuration = (MybatisConfigurationBean) ms.getConfiguration();
             this.param = params;
             if (params instanceof SqlQuery) {
@@ -232,6 +232,8 @@ public class MybatisPlugin implements Interceptor {
             if (children != null) {
                 children.forEach(c -> bindRelationInfo(configurationBean, c));
             }
+            //绑定方言
+            params.put(SqlQuery.DIALECT_KEY, configurationBean.getDataSourceProperties().getDialect());
         }
     }
 
@@ -290,6 +292,7 @@ public class MybatisPlugin implements Interceptor {
                 GenericTokenParser parser = new GenericTokenParser("!!{", "}", new VariableTokenHandler(
                         new TableInfoProperties(
                                 paramHolder.relation
+                                , configurationBean.getDataSourceProperties().getDialect()
                                 , ms.getSqlCommandType().equals(SqlCommandType.INSERT)
                                 , paramHolder.sqlQuery != null
                                 , paramHolder.sqlQuery == null ? null : (String) paramHolder.sqlQuery.get(SqlQuery.QUERY_PARAM)

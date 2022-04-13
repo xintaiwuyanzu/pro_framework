@@ -122,8 +122,8 @@ public class MysqlDialect extends Dialect {
     protected String getRenameColumnSql(Column newColumn, Column oldColumn, String renameColumnName) {
         StringBuffer sb = new StringBuffer(String.format(" %s  change  %s %s"
                 , getAlterTableString(oldColumn.getTableName())
-                , convertObjectName(oldColumn.getName())
-                , convertObjectName(renameColumnName)))
+                , convertColumnName(oldColumn.getName())
+                , convertColumnName(renameColumnName)))
                 .append(' ');
         sb.append(getColumnType(oldColumn));
         appendColumnBaseInfo(sb, oldColumn);
@@ -142,6 +142,6 @@ public class MysqlDialect extends Dialect {
 
     @Override
     protected String getDropIndexSql(Relation relation, String indexName) {
-        return String.format("drop index %s on %s", convertObjectName(indexName), convertObjectName(relation.getName()));
+        return String.format("drop index %s on %s", convertColumnName(indexName), convertTableName(relation.getName()));
     }
 }

@@ -23,6 +23,7 @@ public class DataBaseMetaData {
 
     private static final String SQL_FILTER_MATCH_ALL = "%";
 
+
     private int versionOfNoVersion(int version) {
         return version < 0 ? NO_VERSION : version;
     }
@@ -65,9 +66,9 @@ public class DataBaseMetaData {
     private String host, userName, password;
     private Integer port;
 
-    public DataBaseMetaData(DataSource dataSource, String name) {
+    public DataBaseMetaData(DataSource selfManagedDatasource, String name, CaseType tableCaseType, CaseType columnCaseType) {
         this.name = name;
-        this.dataSource = dataSource;
+        this.dataSource = selfManagedDatasource;
         try (Connection connection = openSelfManagedConnection()) {
             DatabaseMetaData source = connection.getMetaData();
             //获取名称和版本信息
@@ -86,13 +87,16 @@ public class DataBaseMetaData {
                     } catch (Exception e) {
                         logger.error("初始化数据库方言失败！", e);
                     }
+                    //设置转换类型
+                    dialect.setColumnCaseType(columnCaseType);
+                    dialect.setTableCaseType(tableCaseType);
                     //这里需要单独处理，oracle不能从jdbc中获取到表空间信息
                     if (Oracle8iDialect.class.isAssignableFrom(dialectClass)) {
                         try {
                             Statement statement = connection.createStatement();
                             ResultSet resultSet = statement.executeQuery("SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') FROM DUAL");
                             if (resultSet.next()) {
-                                setSchema(dialect.convertObjectName(resultSet.getString(1)));
+                                setSchema(dialect.convertTableName(resultSet.getString(1)));
                             }
                         } catch (SQLException e) {
                             logger.error("绑定数据库链接默认信息失败", e);
@@ -193,10 +197,10 @@ public class DataBaseMetaData {
         Connection connection = null;
         try {
             connection = openSelfManagedConnection();
-            tableName = dialect.convertObjectName(tableName);
+            tableName = dialect.convertTableName(tableName);
             DatabaseMetaData databaseMetaData = connection.getMetaData();
             //查询表信息
-            Map<String, Relation<Column>> concurrentMap = dialect.parseTableInfo(databaseMetaData.getTables(getCatalog(), getSchema(), dialect.convertObjectName(tableName), dialect.getTableTypes()))
+            Map<String, Relation<Column>> concurrentMap = dialect.parseTableInfo(databaseMetaData.getTables(getCatalog(), getSchema(), tableName, dialect.getTableTypes()))
                     .stream()
                     .collect(
                             Collectors.toConcurrentMap(

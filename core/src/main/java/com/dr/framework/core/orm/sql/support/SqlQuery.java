@@ -1,6 +1,7 @@
 package com.dr.framework.core.orm.sql.support;
 
 import com.dr.framework.core.orm.annotations.Table;
+import com.dr.framework.core.orm.database.Dialect;
 import com.dr.framework.core.orm.jdbc.Relation;
 import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.sql.Column;
@@ -31,6 +32,8 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     public static final String WHERE_NO_ORERY_BY = "!!{query#$whereNO}";
     public static final String QUERY_CLASS_SUFFIX = "Info";
     public static final String QUERY_PARAM = "$QP";
+    public static final String DIALECT_KEY = "$dialect";
+
     protected static final String ENTITY_KEY = "ENTITY";
 
     private static final String ENTITY_CLASS_KEY = "ENTITY_CLASS";
@@ -221,7 +224,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
                 default:
                     if (keyStr.startsWith("$alias")) {
                         String table = keyStr.replace("$alias", "");
-                        value = fromQuery.tableAlias.alias(table.toUpperCase());
+                        value = fromQuery.tableAlias.alias(table);
                     }
                     break;
             }
@@ -747,4 +750,7 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
         return columnsQuery.columnSize();
     }
 
+    protected Dialect getDialect() {
+        return (Dialect) get(DIALECT_KEY);
+    }
 }

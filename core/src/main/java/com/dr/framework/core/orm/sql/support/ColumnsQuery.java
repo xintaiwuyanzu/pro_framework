@@ -59,7 +59,7 @@ class ColumnsQuery extends AbstractSqlQuery {
                 , columnMap
                         .values()
                         .stream()
-                        .map(column -> formatSql(column, tableAlias))
+                        .map(column -> formatSql(column, tableAlias,sqlQuery))
                         .collect(Collectors.toList())
                 , ""
                 , ""

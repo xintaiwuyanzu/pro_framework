@@ -117,7 +117,7 @@ class WhereQuery extends AbstractSqlQuery {
         parseWhere(builder, metaobject, tableAlias, sqlQuery);
         if (includeOrderBy) {
             sqlClause(builder, " GROUP BY ", groupByParts(tableAlias), "", "", ", ");
-            sqlClause(builder, " ORDER BY ", orderByParts(tableAlias), "", "", ", ");
+            sqlClause(builder, " ORDER BY ", orderByParts(tableAlias, sqlQuery), "", "", ", ");
         }
         return builder.toString();
     }
@@ -138,8 +138,8 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
-    private List<String> orderByParts(TableAlias tableAlias) {
-        return orderBys.stream().map(orderBy -> orderBy.sql(tableAlias)).collect(Collectors.toList());
+    private List<String> orderByParts(TableAlias tableAlias, SqlQuery sqlQuery) {
+        return orderBys.stream().map(orderBy -> orderBy.sql(tableAlias, sqlQuery)).collect(Collectors.toList());
     }
 
     private List<String> groupByParts(TableAlias tableAlias) {
@@ -223,8 +223,8 @@ class WhereQuery extends AbstractSqlQuery {
     }
 
     abstract static class WhereSql {
-        StringBuilder formatColumn(Column column, TableAlias tableAlias) {
-            return new StringBuilder(AbstractSqlQuery.formatSql(column, tableAlias, false));
+        StringBuilder formatColumn(Column column, TableAlias tableAlias, SqlQuery sqlQuery) {
+            return new StringBuilder(AbstractSqlQuery.formatSql(column, tableAlias, false, sqlQuery));
         }
 
         StringBuilder queryParam(SqlQuery sqlQuery) {
@@ -291,7 +291,7 @@ class WhereQuery extends AbstractSqlQuery {
         String getSql(TableAlias alias, SqlQuery sqlQuery) {
             String sql = "";
             if (sqlQuery.containsKey(SqlQuery.ENTITY_KEY)) {
-                StringBuilder sb = formatColumn(column, alias)
+                StringBuilder sb = formatColumn(column, alias, sqlQuery)
                         .append(prefix);
                 sb.append(collection.
                         stream()
@@ -336,7 +336,7 @@ class WhereQuery extends AbstractSqlQuery {
 
         @Override
         String getSql(TableAlias alias, SqlQuery sqlQuery) {
-            return formatColumn(column, alias).append(' ').append(sql).toString();
+            return formatColumn(column, alias, sqlQuery).append(' ').append(sql).toString();
         }
     }
 
@@ -355,7 +355,7 @@ class WhereQuery extends AbstractSqlQuery {
         String getSql(TableAlias alias, SqlQuery sqlQuery) {
             String sql = "";
             if (sqlQuery.containsKey(SqlQuery.ENTITY_KEY)) {
-                sql = formatColumn(column, alias)
+                sql = formatColumn(column, alias, sqlQuery)
                         .append(' ')
                         .append(preffix)
                         .append(columnKey(column, sqlQuery))
@@ -417,7 +417,7 @@ class WhereQuery extends AbstractSqlQuery {
             String key = getColumnKey();
             data.setParent(sqlQuery, key);
             sqlQuery.put(key, data);
-            return formatColumn(column, alias)
+            return formatColumn(column, alias, sqlQuery)
                     .append(' ')
                     .append(preffix)
                     .append("(select ")
@@ -453,7 +453,7 @@ class WhereQuery extends AbstractSqlQuery {
         String getSql(TableAlias alias, SqlQuery sqlQuery) {
             String key = getColumnKey();
             sqlQuery.put(key, data);
-            return formatColumn(column, alias)
+            return formatColumn(column, alias, sqlQuery)
                     .append(' ')
                     .append(preffix)
                     .append(columnKey(sqlQuery, key))
@@ -481,7 +481,7 @@ class WhereQuery extends AbstractSqlQuery {
         String getSql(TableAlias alias, SqlQuery sqlQuery) {
             String statKey = getColumnKey();
             String endKey = getColumnKey();
-            StringBuilder sqlBuilder = formatColumn(column, alias);
+            StringBuilder sqlBuilder = formatColumn(column, alias, sqlQuery);
             sqlBuilder.append(" between ");
             sqlQuery.put(statKey, start);
             sqlBuilder.append(columnKey(sqlQuery, statKey));
@@ -564,7 +564,7 @@ class WhereQuery extends AbstractSqlQuery {
                 dataBuilder.append("%");
             }
             sqlQuery.put(key, dataBuilder.toString());
-            StringBuilder sqlBuilder = formatColumn(column, alias);
+            StringBuilder sqlBuilder = formatColumn(column, alias, sqlQuery);
             if (isLike) {
                 sqlBuilder.append(" like ");
             } else {
@@ -599,7 +599,7 @@ class WhereQuery extends AbstractSqlQuery {
             this.desc = desc;
         }
 
-        abstract String sql(TableAlias alias);
+        abstract String sql(TableAlias alias, SqlQuery sqlQuery);
     }
 
     static class ColumnOrderBy extends OrderBy {
@@ -611,8 +611,8 @@ class WhereQuery extends AbstractSqlQuery {
         }
 
         @Override
-        String sql(TableAlias alias) {
-            StringBuilder sb = new StringBuilder(AbstractSqlQuery.formatSql(column, alias, false));
+        String sql(TableAlias alias, SqlQuery sqlQuery) {
+            StringBuilder sb = new StringBuilder(AbstractSqlQuery.formatSql(column, alias, false, sqlQuery));
             if (desc) {
                 sb.append(" desc");
             }
@@ -629,7 +629,7 @@ class WhereQuery extends AbstractSqlQuery {
         }
 
         @Override
-        String sql(TableAlias tableAlias) {
+        String sql(TableAlias tableAlias, SqlQuery sqlQuery) {
             return desc ? alias + " desc" : alias;
         }
     }

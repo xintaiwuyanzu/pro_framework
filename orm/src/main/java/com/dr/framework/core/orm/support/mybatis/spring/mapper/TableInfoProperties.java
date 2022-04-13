@@ -1,5 +1,6 @@
 package com.dr.framework.core.orm.support.mybatis.spring.mapper;
 
+import com.dr.framework.core.orm.database.Dialect;
 import com.dr.framework.core.orm.jdbc.Column;
 import com.dr.framework.core.orm.jdbc.Relation;
 import org.apache.ibatis.type.JdbcType;
@@ -32,13 +33,15 @@ public class TableInfoProperties extends Properties {
     private static final String IN_KEY = "in";
     private static final String QUERY = "query";
     private Relation tableInfo;
+    private Dialect dialect;
     private boolean isInsert;
     private String tableAlias = "A";
     private String queryTemplate = "${%s}";
     private boolean hasSqlQuery;
 
-    public TableInfoProperties(Relation tableInfo, boolean isInsert, boolean hasSqlQuery, String paramsKey) {
+    public TableInfoProperties(Relation tableInfo, Dialect dialect, boolean isInsert, boolean hasSqlQuery, String paramsKey) {
         this.tableInfo = tableInfo;
+        this.dialect = dialect;
         this.isInsert = isInsert;
         this.hasSqlQuery = hasSqlQuery;
         if (StringUtils.hasText(paramsKey)) {
@@ -81,7 +84,8 @@ public class TableInfoProperties extends Properties {
             String append = arr.length == 2 ? arr[1] : "";
             switch (key.trim().toLowerCase()) {
                 case TABLE_KEY:
-                    value = isInsert ? tableInfo.getName() : tableInfo.getName() + " " + tableAlias;
+                    String tableName = dialect.convertTableName(tableInfo.getName());
+                    value = isInsert ? tableName : tableName + " " + tableAlias;
                     break;
                 case VALUES_KEY:
                     value = String.format("(%s) values (%s)", join(false, "%s", ","), join(false, "#{%2$s,jdbcType=%4$s}", ","));
@@ -186,7 +190,7 @@ public class TableInfoProperties extends Properties {
         return columnStream(filterId)
                 .map(column ->
                         String.format(templateFunction.apply(column)
-                                , column.getName()
+                                , dialect.convertColumnName(column.getName())
                                 , column.getAlias()
                                 , tableAlias
                                 , JdbcType.forCode(column.getType()).name()
@@ -199,7 +203,7 @@ public class TableInfoProperties extends Properties {
         return columnStream(filterId)
                 .map(column ->
                         String.format(template
-                                , column.getName()
+                                , dialect.convertColumnName(column.getName())
                                 , column.getAlias()
                                 , tableAlias
                                 , JdbcType.forCode(column.getType()).name()

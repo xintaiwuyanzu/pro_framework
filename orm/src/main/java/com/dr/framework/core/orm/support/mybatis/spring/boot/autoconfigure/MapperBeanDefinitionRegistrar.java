@@ -31,7 +31,6 @@ import static com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigur
  */
 public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware, BeanClassLoaderAware {
     private ClassLoader classLoader;
-    private Environment environment;
     private Binder binder;
     private Logger logger = LoggerFactory.getLogger(MapperBeanDefinitionProcessor.class);
 
@@ -43,14 +42,14 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
             AnnotationAttributes annotationAttributes = AnnotationAttributes.fromMap(classMetadata.getAnnotationAttributes(autoMapperClassName));
             AnnotationAttributes[] databases = annotationAttributes.getAnnotationArray("databases");
             if (databases.length == 0) {
-                MultiDataSourceProperties dataSourceProperties = readDataSourceProties(MapperBeanDefinitionProcessor.DEFAULT_PREFIX, null);
+                MultiDataSourceProperties dataSourceProperties = readDataSourceProperties(MapperBeanDefinitionProcessor.DEFAULT_PREFIX, null);
                 dataSourceProperties.setUseXa(false);
                 BeanDefinition beanDefinition = buildBeanDefinition(dataSourceProperties, true);
                 singleDataSourceName = dataSourceProperties.getName();
                 registerBeanDefinitionIfNotExist(registry, beanDefinition, dataSourceProperties.getName());
             } else if (databases.length == 1) {
                 AnnotationAttributes annotationAttributes1 = databases[0];
-                MultiDataSourceProperties dataSourceProperties = readDataSourceProties(annotationAttributes1.getString("prefix"), annotationAttributes1.getString("name"));
+                MultiDataSourceProperties dataSourceProperties = readDataSourceProperties(annotationAttributes1.getString("prefix"), annotationAttributes1.getString("name"));
                 dataSourceProperties.setUseXa(false);
                 BeanDefinition beanDefinition = buildBeanDefinition(dataSourceProperties, true);
                 singleDataSourceName = dataSourceProperties.getName();
@@ -59,7 +58,7 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
                 Set<String> includedModules = new HashSet<>();
                 for (AnnotationAttributes database : databases) {
                     boolean primary = database.getBoolean("primary");
-                    MultiDataSourceProperties dataSourceProperties = readDataSourceProties(database.getString(PREFIX_KEY), database.getString("name"));
+                    MultiDataSourceProperties dataSourceProperties = readDataSourceProperties(database.getString(PREFIX_KEY), database.getString("name"));
                     int setSize = includedModules.size();
                     includedModules.addAll(dataSourceProperties.getIncludeModules());
                     Assert.isTrue(setSize + dataSourceProperties.getIncludeModules().size() == includedModules.size()
@@ -100,7 +99,7 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
      * @param name
      * @return
      */
-    private MultiDataSourceProperties readDataSourceProties(String prefix, String name) {
+    private MultiDataSourceProperties readDataSourceProperties(String prefix, String name) {
         String beanName = name;
         if (!StringUtils.hasText(name)) {
             beanName = MapperBeanDefinitionProcessor.DEFAULT_DATASOURCE_NAME;
@@ -138,7 +137,6 @@ public class MapperBeanDefinitionRegistrar implements ImportBeanDefinitionRegist
 
     @Override
     public void setEnvironment(Environment environment) {
-        this.environment = environment;
         this.binder = Binder.get(environment);
     }
 

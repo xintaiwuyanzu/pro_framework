@@ -127,11 +127,11 @@ public class SQLServer2005Dialect extends Dialect {
     }
 
     @Override
-    protected String getRenameColumnSql(Column newColumn,Column oldColumn, String renameColumnName) {
+    protected String getRenameColumnSql(Column newColumn, Column oldColumn, String renameColumnName) {
         return String.format("exec sp_rename '%s.%s','%s'"
-                , convertObjectName(newColumn.getTableName())
-                , convertObjectName(newColumn.getName())
-                , convertObjectName(renameColumnName));
+                , convertTableName(newColumn.getTableName())
+                , convertColumnName(newColumn.getName())
+                , convertColumnName(renameColumnName));
     }
 
     @Override
@@ -141,6 +141,6 @@ public class SQLServer2005Dialect extends Dialect {
 
     @Override
     protected String getDropIndexSql(Relation relation, String indexName) {
-        return String.format("drop index %s on %s", convertObjectName(indexName), convertObjectName(relation.getName()));
+        return String.format("drop index %s on %s", convertColumnName(indexName), convertTableName(relation.getName()));
     }
 }

@@ -22,9 +22,9 @@ class SetQuery extends AbstractSqlQuery {
                     .entrySet()
                     .stream()
                     .map(entry ->
-                            formatSql(entry.getKey(), tableAlias, false) +
+                            formatSql(entry.getKey(), tableAlias, false, sqlQuery) +
                                     "=" +
-                                    formatSql(entry.getValue(), tableAlias, false)
+                                    formatSql(entry.getValue(), tableAlias, false, sqlQuery)
                     )
                     .collect(Collectors.toList());
             sqlClause(builder, "", sqlParts, "", "", ", ");

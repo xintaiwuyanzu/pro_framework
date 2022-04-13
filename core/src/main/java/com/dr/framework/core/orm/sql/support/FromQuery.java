@@ -112,14 +112,18 @@ class FromQuery extends AbstractSqlQuery {
     @Override
     String sql(TableAlias tableAlias, SqlQuery sqlQuery) {
         StringBuilder builder = new StringBuilder();
-        sqlClause(builder, " from ", Collections.singletonList(table + " " + tableAlias.alias(table)), "", "", ", ");
+        sqlClause(builder, " from ", Collections.singletonList(convertTableName(sqlQuery) + " " + tableAlias.alias(table)), "", "", ", ");
         joins(tableAlias, builder);
         return builder.toString();
     }
 
+    String convertTableName(SqlQuery sqlQuery) {
+        return sqlQuery.getDialect().convertTableName(table);
+    }
+
     String table(TableAlias tableAlias, SqlQuery sqlQuery) {
         StringBuilder builder = new StringBuilder();
-        sqlClause(builder, "", Collections.singletonList(table + " " + tableAlias.alias(table)), "", "", ", ");
+        sqlClause(builder, "", Collections.singletonList(convertTableName(sqlQuery) + " " + tableAlias.alias(table)), "", "", ", ");
         joins(tableAlias, builder);
         return builder.toString();
     }

@@ -1,5 +1,6 @@
 package com.dr.framework.core.orm.support.mybatis.spring.boot.autoconfigure;
 
+import com.dr.framework.core.orm.database.CaseType;
 import com.dr.framework.core.orm.database.DataBaseMetaData;
 import com.dr.framework.core.orm.database.Dialect;
 import com.dr.framework.core.orm.support.mybatis.spring.DriverUtils;
@@ -44,6 +45,8 @@ public class MultiDataSourceProperties extends DataSourceProperties {
     private boolean useXa = true;
     private DataSource selfManagedDatasource;
     private DataBaseMetaData dataBaseMetaData;
+    private CaseType tableCaseType = CaseType.AUTO;
+    private CaseType columnCaseType = CaseType.AUTO;
     Pattern p = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)");
 
     @Override
@@ -55,7 +58,7 @@ public class MultiDataSourceProperties extends DataSourceProperties {
             ((HikariDataSource) selfManagedDatasource).getDataSourceProperties().setProperty("remarksReporting", "true");
             ((HikariDataSource) selfManagedDatasource).getDataSourceProperties().setProperty("remarksReporting", "true");
         }
-        dataBaseMetaData = new DataBaseMetaData(selfManagedDatasource, getName());
+        dataBaseMetaData = new DataBaseMetaData(selfManagedDatasource, getName(), tableCaseType, columnCaseType);
         dataBaseMetaData.setUserName(getUsername());
         dataBaseMetaData.setPassword(getPassword());
         try {
@@ -145,5 +148,21 @@ public class MultiDataSourceProperties extends DataSourceProperties {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
+    }
+
+    public CaseType getTableCaseType() {
+        return tableCaseType;
+    }
+
+    public void setTableCaseType(CaseType tableCaseType) {
+        this.tableCaseType = tableCaseType;
+    }
+
+    public CaseType getColumnCaseType() {
+        return columnCaseType;
+    }
+
+    public void setColumnCaseType(CaseType columnCaseType) {
+        this.columnCaseType = columnCaseType;
     }
 }

@@ -31,6 +31,15 @@ public abstract class Dialect {
     List<ClassTypeHolder> classTypeHolders = Collections.synchronizedList(new ArrayList<>());
 
     /**
+     * 表大小写敏感类型
+     */
+    private CaseType tableCaseType = CaseType.AUTO;
+    /**
+     * 列大小写敏感类型
+     */
+    private CaseType columnCaseType = CaseType.AUTO;
+
+    /**
      * 解析sql注解中的sql语句为适用特定数据库的sql
      *
      * @param sqlSource
@@ -85,6 +94,66 @@ public abstract class Dialect {
      */
     protected abstract String getName();
 
+    /**
+     * 表名大小写转换
+     *
+     * @param tableName
+     * @return
+     */
+    public String convertTableName(String tableName) {
+        switch (tableCaseType) {
+            case AUTO:
+                return doConvertTableName(tableName);
+            case LOWER_CASE:
+                return tableName.toLowerCase();
+            case UPPER_CASE:
+                return tableName.toUpperCase();
+            default:
+                return tableName;
+        }
+    }
+
+    /**
+     * 真正执行表名转换
+     *
+     * @param tableName
+     * @return
+     */
+    protected String doConvertTableName(String tableName) {
+        return convertObjectName(tableName);
+    }
+
+    /**
+     * 列名大小写转换
+     *
+     * @param columnName
+     * @return
+     */
+    public String convertColumnName(String columnName) {
+        switch (columnCaseType) {
+            case AUTO:
+                return doConvertColumnName(columnName);
+            case LOWER_CASE:
+                return columnName.toLowerCase();
+            case UPPER_CASE:
+                return columnName.toUpperCase();
+            default:
+                return columnName;
+        }
+    }
+
+    /**
+     * 真正执行列名转换
+     *
+     * @param columnName
+     * @return
+     */
+    protected String doConvertColumnName(String columnName) {
+        return convertObjectName(columnName);
+    }
+
+
+    @Deprecated
     public String convertObjectName(String source) {
         return source;
     }
@@ -287,13 +356,13 @@ public abstract class Dialect {
             //建表sql
             StringBuilder createTable = new StringBuilder(getCreateTableString())
                     .append(' ')
-                    .append(convertObjectName(relation.getName()))
+                    .append(convertTableName(relation.getName()))
                     .append(" (");
             //列
             String columnsSql = relation.getColumns()
                     .stream()
                     .map(c -> {
-                        StringBuffer stringBuffer = new StringBuffer(convertObjectName(c.getName()))
+                        StringBuffer stringBuffer = new StringBuffer(convertColumnName(c.getName()))
                                 .append(' ')
                                 .append(getColumnType(c));
                         appendColumnBaseInfo(stringBuffer, c);
@@ -313,7 +382,7 @@ public abstract class Dialect {
             //注释sql
             if (supportCommentOn()) {
                 if (StringUtils.hasText(remark)) {
-                    String commentTableSql = "comment on table " + convertObjectName(relation.getName()) + " is '" + remark + "'";
+                    String commentTableSql = "comment on table " + convertTableName(relation.getName()) + " is '" + remark + "'";
                     sqls.add(new DataBaseChangeInfo(commentTableSql, String.format("表：【%s】，添加注释【%s】", relation.getName(), remark)));
                 }
                 relation.getColumns()
@@ -321,7 +390,7 @@ public abstract class Dialect {
                         .filter(c -> StringUtils.hasText(c.getRemark()))
                         .forEach(c ->
                                 sqls.add(new DataBaseChangeInfo(
-                                        String.format("comment on column %s.%s is '%s'", convertObjectName(relation.getName()), c.getName(), c.getRemark()),
+                                        String.format("comment on column %s.%s is '%s'", convertTableName(relation.getName()), c.getName(), c.getRemark()),
                                         String.format("表：【%s】，列：%s添加注释【%s】", relation.getName(), c.getName(), c.getRemark())
                                 ))
                         );
@@ -496,7 +565,7 @@ public abstract class Dialect {
         if (supportsIfExistsAfterAlterTable()) {
             sb.append("if exists ");
         }
-        sb.append(convertObjectName(tableName));
+        sb.append(convertTableName(tableName));
         return sb.toString();
     }
 
@@ -527,7 +596,7 @@ public abstract class Dialect {
                 if (!relation.getRemark().equals(jdbcTable.getRemark()) && supportCommentOn()) {
                     //TODO oracle 默认配置获取不到注释信息
                     if (!(this instanceof OracleDialect)) {
-                        String commentTableSql = "comment on table " + convertObjectName(relation.getName()) + " is '" + relation.getRemark() + "'";
+                        String commentTableSql = "comment on table " + convertTableName(relation.getName()) + " is '" + relation.getRemark() + "'";
                         sqls.add(new DataBaseChangeInfo(commentTableSql, String.format("表：【%s】，添加注释【%s】", relation.getName(), relation.getRemark())));
                     }
                 }
@@ -584,7 +653,7 @@ public abstract class Dialect {
     }
 
     protected String getDropIndexSql(Relation relation, String indexName) {
-        return String.format("drop index %s.%s", convertObjectName(indexName), convertObjectName(relation.getName()));
+        return String.format("drop index %s.%s", convertColumnName(indexName), convertTableName(relation.getName()));
     }
 
     protected String getDropPrimaryKeySql(Relation jdbcTable) {
@@ -635,7 +704,7 @@ public abstract class Dialect {
                 //TODO oracle 默认不获取备注信息
                 if (!(this instanceof OracleDialect)) {
                     sqls.add(new DataBaseChangeInfo(
-                            String.format("comment on column %s.%s is '%s'", convertObjectName(oldColumn.getRelation().getName()), oldColumn.getName(), newColumn.getRemark()),
+                            String.format("comment on column %s.%s is '%s'", convertTableName(oldColumn.getRelation().getName()), oldColumn.getName(), newColumn.getRemark()),
                             String.format("表【%s】列【%s】修改注释为【%s】", oldColumn.getRelation().getName(), oldColumn.getName(), newColumn.getRemark())
                     ));
                 }
@@ -653,7 +722,7 @@ public abstract class Dialect {
                 .append(getModifyColumnString())
                 .append(' ')
                 //列名
-                .append(convertObjectName(newColumn.getName()))
+                .append(convertColumnName(newColumn.getName()))
                 .append(' ');
         String newColumnType = getColumnType(newColumn);
         //列类型
@@ -805,8 +874,8 @@ public abstract class Dialect {
     protected String getRenameColumnSql(Column newColumn, Column oldColumn, String renameColumnName) {
         return String.format("%s rename column %s to %s"
                 , getAlterTableString(newColumn.getTableName())
-                , convertObjectName(newColumn.getName())
-                , convertObjectName(renameColumnName));
+                , convertColumnName(newColumn.getName())
+                , convertColumnName(renameColumnName));
     }
 
     private String getRenameColumnName(Column oldColumn, int i) {
@@ -830,4 +899,19 @@ public abstract class Dialect {
         return false;
     }
 
+    public CaseType getTableCaseType() {
+        return tableCaseType;
+    }
+
+    public void setTableCaseType(CaseType tableCaseType) {
+        this.tableCaseType = tableCaseType;
+    }
+
+    public CaseType getColumnCaseType() {
+        return columnCaseType;
+    }
+
+    public void setColumnCaseType(CaseType columnCaseType) {
+        this.columnCaseType = columnCaseType;
+    }
 }

@@ -1,15 +1,12 @@
 package com.dr.framework.core.orm.sql.support;
 
 import com.dr.framework.core.orm.sql.Column;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
 
 abstract class AbstractSqlQuery {
-    Logger logger = LoggerFactory.getLogger(AbstractSqlQuery.class);
 
     static final String AND_NEW = ")) \nAND ((";
     static final String OR_NEW = ")) \nOR ((";
@@ -48,11 +45,11 @@ abstract class AbstractSqlQuery {
      */
     abstract String sql(TableAlias tableAlias, SqlQuery sqlQuery);
 
-    static String formatSql(Column column, TableAlias tableAlias) {
-        return formatSql(column, tableAlias, true);
+    static String formatSql(Column column, TableAlias tableAlias, SqlQuery sqlQuery) {
+        return formatSql(column, tableAlias, true, sqlQuery);
     }
 
-    static String formatSql(Column column, TableAlias tableAlias, boolean withAlias) {
+    static String formatSql(Column column, TableAlias tableAlias, boolean withAlias, SqlQuery sqlQuery) {
         StringBuilder sb = new StringBuilder();
         boolean hasFunction = StringUtils.hasText(column.getFunction());
         if (hasFunction) {
@@ -60,7 +57,7 @@ abstract class AbstractSqlQuery {
             if (StringUtils.hasText(column.getTable())) {
                 columnStr += tableAlias.alias(column.getTable()) + ".";
             }
-            columnStr += column.getName();
+            columnStr += sqlQuery.getDialect().convertColumnName(column.getName());
             String template = column.getFunction().indexOf('(') > -1 ? column.getFunction() : column.getFunction() + "(%s)";
             sb.append(String.format(template, columnStr));
         } else {
@@ -68,7 +65,7 @@ abstract class AbstractSqlQuery {
                 sb.append(tableAlias.alias(column.getTable()));
                 sb.append(".");
             }
-            sb.append(column.getName());
+            sb.append(sqlQuery.getDialect().convertColumnName(column.getName()));
         }
         if (withAlias && StringUtils.hasText(column.getAlias())) {
             sb.append(" as ");
