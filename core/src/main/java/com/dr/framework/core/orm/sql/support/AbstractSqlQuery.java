@@ -1,5 +1,6 @@
 package com.dr.framework.core.orm.sql.support;
 
+import com.dr.framework.core.orm.database.Dialect;
 import com.dr.framework.core.orm.sql.Column;
 import org.springframework.util.StringUtils;
 
@@ -52,12 +53,13 @@ abstract class AbstractSqlQuery {
     static String formatSql(Column column, TableAlias tableAlias, boolean withAlias, SqlQuery sqlQuery) {
         StringBuilder sb = new StringBuilder();
         boolean hasFunction = StringUtils.hasText(column.getFunction());
+        Dialect dialect = sqlQuery.getDialect();
         if (hasFunction) {
             String columnStr = "";
             if (StringUtils.hasText(column.getTable())) {
                 columnStr += tableAlias.alias(column.getTable()) + ".";
             }
-            columnStr += sqlQuery.getDialect().convertColumnName(column.getName());
+            columnStr += dialect == null ? column.getName() : dialect.convertColumnName(column.getName());
             String template = column.getFunction().indexOf('(') > -1 ? column.getFunction() : column.getFunction() + "(%s)";
             sb.append(String.format(template, columnStr));
         } else {
@@ -65,7 +67,7 @@ abstract class AbstractSqlQuery {
                 sb.append(tableAlias.alias(column.getTable()));
                 sb.append(".");
             }
-            sb.append(sqlQuery.getDialect().convertColumnName(column.getName()));
+            sb.append(dialect == null ? column.getName() : dialect.convertColumnName(column.getName()));
         }
         if (withAlias && StringUtils.hasText(column.getAlias())) {
             sb.append(" as ");

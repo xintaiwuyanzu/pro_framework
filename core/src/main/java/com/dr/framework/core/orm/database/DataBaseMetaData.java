@@ -66,6 +66,10 @@ public class DataBaseMetaData {
     private String host, userName, password;
     private Integer port;
 
+    public DataBaseMetaData(DataSource selfManagedDatasource, String name) {
+        this(selfManagedDatasource, name, CaseType.AUTO, CaseType.AUTO);
+    }
+
     public DataBaseMetaData(DataSource selfManagedDatasource, String name, CaseType tableCaseType, CaseType columnCaseType) {
         this.name = name;
         this.dataSource = selfManagedDatasource;
