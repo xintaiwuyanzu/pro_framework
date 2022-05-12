@@ -743,7 +743,6 @@ public class DefaultOrganisePersonService
         checkBuildLikeQuery(personRelation, query, "user_name", personQuery.getPersonName());
         checkBuildLikeQuery(personRelation, query, "nick_name", personQuery.getNickName());
         checkBuildLikeQuery(personRelation, query, "email", personQuery.getEmail());
-        checkBuildLikeQuery(personRelation, query, "user_name", personQuery.getPersonName());
         checkBuildLikeQuery(personRelation, query, "phone", personQuery.getPhone());
         checkBuildLikeQuery(personRelation, query, "qq", personQuery.getQq());
         checkBuildLikeQuery(personRelation, query, "weiChatId", personQuery.getWeiChatId());
@@ -790,7 +789,6 @@ public class DefaultOrganisePersonService
                             .column(EntityPersonOrganiseInfo.PERSONID)
                             .in(EntityPersonOrganiseInfo.ORGANISEID, personQuery.getDefaultOrganiseId())
                             .equal(EntityPersonOrganiseInfo.ISDEFAULT, true)
-
             );
         }
         if (personQuery.getBirthDayStart() != null && personQuery.getBirthDayStart() > 0) {
@@ -817,7 +815,6 @@ public class DefaultOrganisePersonService
         if (needDefaultOrderBy) {
             query.orderBy(personRelation.getColumn(ORDER_COLUMN_NAME));
         }
-        query.equal(EntityPersonOrganiseInfo.ISDEFAULT, true);
         return personQueryJoin(query);
     }
 
