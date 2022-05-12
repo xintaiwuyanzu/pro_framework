@@ -43,6 +43,7 @@ public class PersonQuery extends IdQuery {
     private List<String> sourceRefNotIn;
     private String sysId;
     private String userCode;
+    private String userCodeEqual;
     private String duty;
 
     private String createPerson;
@@ -69,6 +70,11 @@ public class PersonQuery extends IdQuery {
 
         public Builder userCodeLike(String userCode) {
             query.userCode = userCode;
+            return this;
+        }
+
+        public Builder userCodeEqual(String userCode) {
+            query.userCodeEqual = userCode;
             return this;
         }
 
@@ -292,6 +298,14 @@ public class PersonQuery extends IdQuery {
 
     public void setUserCode(String userCode) {
         this.userCode = userCode;
+    }
+
+    public String getUserCodeEqual() {
+        return userCodeEqual;
+    }
+
+    public void setUserCodeEqual(String userCodeEqual) {
+        this.userCodeEqual = userCodeEqual;
     }
 
     public String getDuty() {

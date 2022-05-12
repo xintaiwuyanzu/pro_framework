@@ -3,6 +3,7 @@ package com.dr.framework.sys.service;
 import com.dr.framework.common.entity.StatusEntity;
 import com.dr.framework.common.page.Page;
 import com.dr.framework.common.service.PermissionResourceService;
+import com.dr.framework.core.orm.sql.Column;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.security.entity.SubSystem;
@@ -80,7 +81,19 @@ public class SubSysService extends PermissionResourceService<SubSystem> implemen
     protected SqlQuery<SubSystem> subSysQueryToSqlQuery(SubSysQuery query) {
         SqlQuery<SubSystem> sqlQuery = SqlQuery.from(entityRelation);
         checkBuildInQuery(entityRelation, sqlQuery, SubSystem.ID_COLUMN_NAME, query.getIds());
-        sqlQuery.orderBy(entityRelation.getColumn(SubSystem.ORDER_COLUMN_NAME));
+
+        boolean needDefaultOrderBy = true;
+        if (query.getOrderBy() != null) {
+            needDefaultOrderBy = false;
+            sqlQuery.orderBy(query.getOrderBy().toArray(new Column[0]));
+        }
+        if (query.getOrderByDesc() != null) {
+            needDefaultOrderBy = false;
+            sqlQuery.orderByDesc(query.getOrderByDesc().toArray(new Column[0]));
+        }
+        if (needDefaultOrderBy) {
+            sqlQuery.orderBy(entityRelation.getColumn(SubSystem.ORDER_COLUMN_NAME));
+        }
         return sqlQuery;
     }
 

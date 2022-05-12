@@ -4,6 +4,7 @@ import com.dr.framework.common.entity.StatusEntity;
 import com.dr.framework.common.page.Page;
 import com.dr.framework.common.service.DataBaseService;
 import com.dr.framework.common.service.PermissionResourceService;
+import com.dr.framework.core.orm.sql.Column;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.security.entity.SubSystem;
@@ -78,7 +79,18 @@ public class SysMenuService extends PermissionResourceService<SysMenu> implement
         if (query.isEnable()) {
             sysMenuSqlQuery.equal(entityRelation.getColumn(StatusEntity.STATUS_COLUMN_KEY), StatusEntity.STATUS_ENABLE_STR);
         }
-        sysMenuSqlQuery.orderBy(entityRelation.getColumn(SysMenu.ORDER_COLUMN_NAME));
+        boolean needDefaultOrderBy = true;
+        if (query.getOrderBy() != null) {
+            needDefaultOrderBy = false;
+            sysMenuSqlQuery.orderBy(query.getOrderBy().toArray(new Column[0]));
+        }
+        if (query.getOrderByDesc() != null) {
+            needDefaultOrderBy = false;
+            sysMenuSqlQuery.orderByDesc(query.getOrderByDesc().toArray(new Column[0]));
+        }
+        if (needDefaultOrderBy) {
+            sysMenuSqlQuery.orderBy(entityRelation.getColumn(SysMenu.ORDER_COLUMN_NAME));
+        }
         return sysMenuSqlQuery;
     }
 

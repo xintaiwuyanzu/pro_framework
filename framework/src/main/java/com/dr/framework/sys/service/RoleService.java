@@ -6,8 +6,10 @@ import com.dr.framework.common.page.Page;
 import com.dr.framework.common.service.CacheAbleService;
 import com.dr.framework.common.service.DataBaseService;
 import com.dr.framework.core.orm.module.EntityRelation;
+import com.dr.framework.core.orm.sql.Column;
 import com.dr.framework.core.orm.sql.support.SqlQuery;
 import com.dr.framework.core.security.entity.Role;
+import com.dr.framework.core.security.entity.SubSystem;
 import com.dr.framework.core.security.event.SecurityEvent;
 import com.dr.framework.core.security.query.RoleQuery;
 import com.dr.framework.core.security.service.SecurityManager;
@@ -129,7 +131,19 @@ public class RoleService extends CacheAbleService<Role> implements RelationHelpe
         SqlQuery<Role> sqlQuery = SqlQuery.from(roleRelation);
         checkBuildInQuery(roleRelation, sqlQuery, IdEntity.ID_COLUMN_NAME, query.getIds());
         checkBuildLikeQuery(roleRelation, sqlQuery, "security_code", query.getCodeLike());
-        sqlQuery.orderBy(roleRelation.getColumn(Role.ORDER_COLUMN_NAME));
+
+        boolean needDefaultOrderBy = true;
+        if (query.getOrderBy() != null) {
+            needDefaultOrderBy = false;
+            sqlQuery.orderBy(query.getOrderBy().toArray(new Column[0]));
+        }
+        if (query.getOrderByDesc() != null) {
+            needDefaultOrderBy = false;
+            sqlQuery.orderByDesc(query.getOrderByDesc().toArray(new Column[0]));
+        }
+        if (needDefaultOrderBy) {
+            sqlQuery.orderBy(roleRelation.getColumn(Role.ORDER_COLUMN_NAME));
+        }
         return sqlQuery;
     }
 

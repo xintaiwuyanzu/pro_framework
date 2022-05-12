@@ -106,7 +106,7 @@ public class DefaultSecurityManager implements RelationHelper, SecurityManager, 
         Assert.isTrue(StringUtils.hasText(roleId), "角色Id不能为空！");
         long result = commonMapper.deleteByQuery(SqlQuery.from(EntityRolePerson.class).equal(EntityRolePersonInfo.ROLEID, roleId));
         //重新添加关联数据
-        if (!StringUtils.hasText(personIds)) {
+        if (StringUtils.hasText(personIds)) {
             for (String p : personIds.split(",")) {
                 result += addRoleToUser(p, roleId);
             }

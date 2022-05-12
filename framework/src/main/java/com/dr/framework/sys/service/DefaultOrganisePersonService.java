@@ -458,9 +458,11 @@ public class DefaultOrganisePersonService
                 .set(personRelation.getColumn("phone"), person.getPhone())
                 .set(personRelation.getColumn("nation"), person.getNation())
                 .set(personRelation.getColumn("weiChatId"), person.getWeiChatId())
+                .set(personRelation.getColumn("id_no"), person.getIdNo())
                 .set(personRelation.getColumn("qq"), person.getQq())
-                .set(personRelation.getColumn("address"), person.getAddressId())
+                .set(personRelation.getColumn("address_id"), person.getAddressId())
                 .set(personRelation.getColumn("status_info"), person.getStatus())
+                .set(personRelation.getColumn("sex"), person.getSex())
                 .set(personRelation.getColumn("order_info"), person.getOrder())
                 .set(personRelation.getColumn("avatar_file_id"), person.getAvatarFileId())
                 .set(personRelation.getColumn(ORDER_COLUMN_NAME), person.getOrder())
@@ -710,7 +712,18 @@ public class DefaultOrganisePersonService
         if (StringUtils.hasText(organiseQuery.getCodeEqual())) {
             query.equal(organiseRelation.getColumn("organise_code"), organiseQuery.getCodeEqual());
         }
-        query.orderBy(organiseRelation.getColumn(ORDER_COLUMN_NAME));
+        boolean needDefaultOrderBy = true;
+        if (organiseQuery.getOrderBy() != null) {
+            needDefaultOrderBy = false;
+            query.orderBy(organiseQuery.getOrderBy().toArray(new Column[0]));
+        }
+        if (organiseQuery.getOrderByDesc() != null) {
+            needDefaultOrderBy = false;
+            query.orderByDesc(organiseQuery.getOrderByDesc().toArray(new Column[0]));
+        }
+        if (needDefaultOrderBy) {
+            query.orderBy(organiseRelation.getColumn(ORDER_COLUMN_NAME));
+        }
         return query;
     }
 
@@ -737,6 +750,10 @@ public class DefaultOrganisePersonService
         checkBuildLikeQuery(personRelation, query, "person_type", personQuery.getTypeLike());
         checkBuildLikeQuery(personRelation, query, "duty", personQuery.getDuty());
         checkBuildLikeQuery(personRelation, query, "user_code", personQuery.getUserCode());
+        //根据用户编码查询用户
+        if (StringUtils.hasText(personQuery.getUserCodeEqual())) {
+            query.equal(personRelation.getColumn("user_code"), personQuery.getUserCode());
+        }
         checkBuildNotLikeQuery(personRelation, query, "person_type", personQuery.getTypeNotLike());
         checkBuildInQuery(personRelation, query, "nation", personQuery.getNation());
         checkBuildInQuery(personRelation, query, "person_type", personQuery.getPersonType());
@@ -788,8 +805,19 @@ public class DefaultOrganisePersonService
         if (personQuery.getCreateDayStart() != null && personQuery.getCreateDayEnd() >= personQuery.getCreateDayStart() && personQuery.getCreateDayEnd() > 0) {
             query.lessThanEqual(personRelation.getColumn("createDate"), personQuery.getCreateDayEnd());
         }
-        query.orderBy(personRelation.getColumn(ORDER_COLUMN_NAME))
-                .equal(EntityPersonOrganiseInfo.ISDEFAULT, true);
+        boolean needDefaultOrderBy = true;
+        if (personQuery.getOrderBy() != null) {
+            needDefaultOrderBy = false;
+            query.orderBy(personQuery.getOrderBy().toArray(new Column[0]));
+        }
+        if (personQuery.getOrderByDesc() != null) {
+            needDefaultOrderBy = false;
+            query.orderByDesc(personQuery.getOrderByDesc().toArray(new Column[0]));
+        }
+        if (needDefaultOrderBy) {
+            query.orderBy(personRelation.getColumn(ORDER_COLUMN_NAME));
+        }
+        query.equal(EntityPersonOrganiseInfo.ISDEFAULT, true);
         return personQueryJoin(query);
     }
 
