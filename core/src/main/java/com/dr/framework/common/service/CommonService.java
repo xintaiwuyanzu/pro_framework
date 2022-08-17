@@ -230,6 +230,18 @@ public class CommonService {
                                                 Function<T, String> labelFunction,
                                                 Function<T, Boolean> leafFunction,
                                                 boolean checkEmpty) {
+        return listToTree(treeList, parentId, idFunction, parentFunction, orderFunction, labelFunction, leafFunction, Constants.DEFAULT, checkEmpty);
+    }
+
+    public static <T> List<TreeNode> listToTree(List<T> treeList,
+                                                String parentId,
+                                                Function<T, String> idFunction,
+                                                Function<T, String> parentFunction,
+                                                Function<T, Integer> orderFunction,
+                                                Function<T, String> labelFunction,
+                                                Function<T, Boolean> leafFunction,
+                                                String defaultNullPid,
+                                                boolean checkEmpty) {
         // 先将list转换成map
         Map<String, List<TreeNode>> pidMaps = new HashMap<>();
         for (T treeEntity : treeList) {
@@ -237,7 +249,7 @@ public class CommonService {
             String pid = parentFunction.apply(treeEntity);
             if (!StringUtils.hasText(pid)) {
                 //pid = "$default_parentId";
-                pid = Constants.DEFAULT;
+                pid = defaultNullPid;
             }
             treeNode.setParentId(pid);
             if (orderFunction != null) {

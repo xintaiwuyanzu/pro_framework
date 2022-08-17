@@ -8,12 +8,14 @@ import com.dr.framework.core.security.bo.PermissionResource;
 import com.dr.framework.core.security.bo.PermissionResourcePart;
 import com.dr.framework.core.security.bo.ResourceProviderInfo;
 import com.dr.framework.core.security.entity.Permission;
+import com.dr.framework.core.security.entity.SubSystem;
 import com.dr.framework.core.security.entity.SysMenu;
 import com.dr.framework.core.security.event.PermissionResourceChangeEvent;
 import com.dr.framework.core.security.event.SecurityEvent;
 import com.dr.framework.core.security.service.ResourceManager;
 import com.dr.framework.core.security.service.ResourceProvider;
 import com.dr.framework.core.security.service.SecurityManager;
+import com.dr.framework.core.util.Constants;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -115,7 +117,13 @@ public class DefaultResourceManager implements ResourceManager, InitDataService.
         typeKeyMap.computeIfAbsent(resourceType, k -> Collections.synchronizedSet(new HashSet<>()))
                 .add(cacheKey);
         //缓存没有则在计算
-        return personResourceCache.get(cacheKey, () -> doGetResources(userId, resourceType, groupId));
+        return personResourceCache.get(cacheKey, () -> {
+            List<? extends PermissionResource> resources = doGetResources(userId, resourceType, groupId);
+            if (resources.isEmpty()) {
+                resources = resourceProviderMap.get(resourceType).getResourcesWhenEmpty(userId, groupId);
+            }
+            return resources;
+        });
     }
 
     @Override
@@ -128,18 +136,34 @@ public class DefaultResourceManager implements ResourceManager, InitDataService.
         if (treeNodes == null || treeNodes.isEmpty()) {
             return Collections.emptyList();
         }
-        return CommonService.listToTree(
-                        treeNodes,
-                        groupId,
-                        PermissionResource::getId,
-                        PermissionResource::getParentId,
-                        PermissionResource::getOrder,
-                        PermissionResource::getName,
-                        null,
-                        false)
-                .stream().map(
-                        t -> (TreeNode<PermissionResource>) t
-                ).collect(Collectors.toList());
+        //特殊处理系统编码，系统默认id为default，加载菜单的时候会出问题
+        if (treeNodes.get(0) instanceof SubSystem && Constants.DEFAULT.equals(groupId)) {
+            return CommonService.listToTree(
+                            treeNodes,
+                            "$pid_DEFAULT",
+                            PermissionResource::getId,
+                            o -> "$pid_DEFAULT",
+                            PermissionResource::getOrder,
+                            PermissionResource::getName,
+                            null,
+                            false)
+                    .stream().map(
+                            t -> (TreeNode<PermissionResource>) t
+                    ).collect(Collectors.toList());
+        } else {
+            return CommonService.listToTree(
+                            treeNodes,
+                            groupId,
+                            PermissionResource::getId,
+                            PermissionResource::getParentId,
+                            PermissionResource::getOrder,
+                            PermissionResource::getName,
+                            null,
+                            false)
+                    .stream().map(
+                            t -> (TreeNode<PermissionResource>) t
+                    ).collect(Collectors.toList());
+        }
     }
 
     /**

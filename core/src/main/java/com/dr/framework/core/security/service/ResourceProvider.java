@@ -32,6 +32,17 @@ public interface ResourceProvider {
     List<? extends PermissionResource> getResources(String groupId);
 
     /**
+     * 当没有配置权限的时候，可以通过业务逻辑提供默认权限功能
+     *
+     * @param personId
+     * @param groupId
+     * @return
+     */
+    default List<? extends PermissionResource> getResourcesWhenEmpty(String personId, String groupId) {
+        return Collections.EMPTY_LIST;
+    }
+
+    /**
      * 根据主键获取一条资源
      *
      * @param resourceId
