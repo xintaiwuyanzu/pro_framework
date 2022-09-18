@@ -4,6 +4,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -92,6 +93,8 @@ public class PermissionMatcher implements Comparable<PermissionMatcher> {
         Matcher newMatcher(String str) {
             if (str.equalsIgnoreCase(defaultMatcher)) {
                 return treeMatcher;
+            } else if (str.contains(",")) {
+                return new SplitMatcher(str.split(","));
             } else {
                 return new PatternMatcher(str);
             }
@@ -178,5 +181,24 @@ public class PermissionMatcher implements Comparable<PermissionMatcher> {
             return code;
         }
     }
+
+    class SplitMatcher implements Matcher {
+        Set<String> codes;
+
+        public SplitMatcher(String... codes) {
+            this.codes = Stream.of(codes).collect(Collectors.toSet());
+        }
+
+        @Override
+        public String getCode() {
+            return String.join(",", codes);
+        }
+
+        @Override
+        public boolean match(String str) {
+            return codes.contains(str);
+        }
+    }
+
 
 }

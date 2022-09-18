@@ -142,9 +142,10 @@ public interface SecurityManager {
      * @param userId
      * @param permissionType
      * @param permissionGroup
+     * @param partCode
      * @return
      */
-    Set<String> userPermissionParts(String userId, String permissionType, String permissionGroup);
+    Set<String> userPermissionParts(String userId, String permissionType, String permissionGroup, String partCode);
 
     /**
      * 指定角色的所有用户

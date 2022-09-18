@@ -166,12 +166,14 @@ public class DefaultSecurityManager implements RelationHelper, SecurityManager, 
     }
 
     @Override
-    public Set<String> userPermissionParts(String userId, String permissionType, String permissionGroup) {
+    public Set<String> userPermissionParts(String userId, String permissionType, String permissionGroup, String partCode) {
         Set<String> result = new HashSet<>();
         List<PermissionMatcher> matchers = userPermissions(userId, permissionType, permissionGroup);
         for (PermissionMatcher matcher : matchers) {
             for (PermissionMatcher.MatcherItem permissionMatcher : matcher.getPermissionMatchers()) {
-                result.add(permissionMatcher.getSecond().getCode());
+                if (permissionMatcher.getSecond().match(partCode)) {
+                    result.add(permissionMatcher.getFirst().getCode());
+                }
             }
         }
         return result;
