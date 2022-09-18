@@ -40,12 +40,16 @@ public class PermissionMatcher implements Comparable<PermissionMatcher> {
         return false;
     }
 
+    public List<MatcherItem> getPermissionMatchers() {
+        return permissionMatchers;
+    }
+
     @Override
     public int compareTo(PermissionMatcher o) {
         return order - o.order;
     }
 
-    class MatcherItem implements Comparable<MatcherItem> {
+    public class MatcherItem implements Comparable<MatcherItem> {
         int index = 0;
         Matcher first, second, third;
 
@@ -112,6 +116,18 @@ public class PermissionMatcher implements Comparable<PermissionMatcher> {
             return false;
         }
 
+        public Matcher getFirst() {
+            return first;
+        }
+
+        public Matcher getSecond() {
+            return second;
+        }
+
+        public Matcher getThird() {
+            return third;
+        }
+
         @Override
         public int compareTo(MatcherItem o) {
             return index - o.index;
@@ -122,23 +138,44 @@ public class PermissionMatcher implements Comparable<PermissionMatcher> {
     /**
      * 工具类
      */
-    interface Matcher {
+    public interface Matcher {
+        /**
+         * 用来判断权限是否符合指定的权限编码
+         *
+         * @param str
+         * @return
+         */
         boolean match(String str);
 
+        /**
+         * 获取权限编码
+         *
+         * @return
+         */
+        default String getCode() {
+            return defaultMatcher;
+        }
     }
 
     Matcher treeMatcher = str -> true;
 
     static class PatternMatcher implements Matcher {
         Pattern pattern;
+        String code;
 
         public PatternMatcher(String reg) {
+            this.code = reg;
             pattern = Pattern.compile(reg);
         }
 
         @Override
         public boolean match(String str) {
             return pattern.matcher(str).matches();
+        }
+
+        @Override
+        public String getCode() {
+            return code;
         }
     }
 

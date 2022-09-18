@@ -26,7 +26,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -115,8 +117,27 @@ public class DefaultSecurityManager implements RelationHelper, SecurityManager, 
         return result;
     }
 
+    /**
+     * TODO 这里使用太频繁需要添加缓存
+     *
+     * @param userId
+     * @param permissionType
+     * @param permissionGroup
+     * @return
+     */
     @Override
     public List<PermissionMatcher> userPermissions(String userId, String permissionType, String permissionGroup) {
+        List<Permission> permissions = userPermission(userId, permissionType, permissionGroup);
+        return permissions
+                .stream()
+                .filter(p -> new PermissionMatcher(p.getGroupId()).match(permissionGroup))
+                .map(p -> new PermissionMatcher(p.getCode()))
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Permission> userPermission(String userId, String permissionType, String permissionGroup) {
         checkUser(userId);
         SqlQuery<EntityRolePerson> rolePersonSqlQuery = SqlQuery.from(EntityRolePerson.class, "rpe", false)
                 .column(EntityRolePersonInfo.ROLEID)
@@ -129,13 +150,31 @@ public class DefaultSecurityManager implements RelationHelper, SecurityManager, 
                 .equal(permissionRelation.getColumn("security_type"), permissionType)
                 .equal(permissionRelation.getColumn(StatusEntity.STATUS_COLUMN_KEY), StatusEntity.STATUS_ENABLE)
                 .setReturnClass(Permission.class);
+        return commonMapper.selectByQuery(sqlQuery);
+    }
 
-        return commonMapper.selectByQuery(sqlQuery)
-                .stream()
-                .filter(p -> new PermissionMatcher(p.getGroupId()).match(permissionGroup))
-                .map(p -> new PermissionMatcher(p.getCode()))
-                .sorted()
-                .collect(Collectors.toList());
+    @Override
+    public Set<String> userPermissionCodes(String userId, String permissionType, String permissionGroup) {
+        Set<String> result = new HashSet<>();
+        List<PermissionMatcher> matchers = userPermissions(userId, permissionType, permissionGroup);
+        for (PermissionMatcher matcher : matchers) {
+            for (PermissionMatcher.MatcherItem permissionMatcher : matcher.getPermissionMatchers()) {
+                result.add(permissionMatcher.getFirst().getCode());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Set<String> userPermissionParts(String userId, String permissionType, String permissionGroup) {
+        Set<String> result = new HashSet<>();
+        List<PermissionMatcher> matchers = userPermissions(userId, permissionType, permissionGroup);
+        for (PermissionMatcher matcher : matchers) {
+            for (PermissionMatcher.MatcherItem permissionMatcher : matcher.getPermissionMatchers()) {
+                result.add(permissionMatcher.getSecond().getCode());
+            }
+        }
+        return result;
     }
 
     @Override

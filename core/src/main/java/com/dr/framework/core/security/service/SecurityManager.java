@@ -7,6 +7,7 @@ import com.dr.framework.core.security.entity.Role;
 import com.dr.framework.core.util.Constants;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author dr
@@ -114,6 +115,36 @@ public interface SecurityManager {
      * @return
      */
     List<PermissionMatcher> userPermissions(String userId, String permissionType, String permissionGroup);
+
+    /**
+     * 获取用户权限配置
+     *
+     * @param userId
+     * @param permissionType
+     * @param permissionGroup
+     * @return
+     */
+    List<Permission> userPermission(String userId, String permissionType, String permissionGroup);
+
+    /**
+     * 用户权限编码
+     *
+     * @param userId
+     * @param permissionType
+     * @param permissionGroup
+     * @return
+     */
+    Set<String> userPermissionCodes(String userId, String permissionType, String permissionGroup);
+
+    /**
+     * 获取用户指定类型权限的功能编码
+     *
+     * @param userId
+     * @param permissionType
+     * @param permissionGroup
+     * @return
+     */
+    Set<String> userPermissionParts(String userId, String permissionType, String permissionGroup);
 
     /**
      * 指定角色的所有用户
