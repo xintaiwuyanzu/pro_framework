@@ -70,6 +70,10 @@ class WhereQuery extends AbstractSqlQuery {
         }
     }
 
+    void concatWithColumn(Column column, String operation, Column other) {
+        whereSqls.concat(AND_, new NoParamSql(column, other, operation));
+    }
+
     void concatTestSql(Column column, String prefix, String suffix) {
         whereSqls.concat(AND_, new ConcatTestSql(column, prefix, suffix));
     }
@@ -314,9 +318,20 @@ class WhereQuery extends AbstractSqlQuery {
         Column left;
         Column right;
 
+        String operation;
+
+        public NoParamSql(Column left, Column right, String operation) {
+            this.left = left;
+            this.right = right;
+            this.operation = operation;
+        }
+
         @Override
         String getSql(TableAlias alias, SqlQuery sqlQuery) {
-            return null;
+            return formatColumn(left, alias, sqlQuery)
+                    .append(operation)
+                    .append(formatColumn(right, alias, sqlQuery))
+                    .toString();
         }
     }
 
