@@ -279,6 +279,12 @@
                 <artifactId>driver</artifactId>
                 <version>8.0</version>
             </dependency>
+            <dependency>
+                <groupId>com.dameng</groupId>
+                <artifactId>DmJdbcDriver18</artifactId>
+                <version>8.1.2.192</version>
+            </dependency>
+
             <!--单点登录-->
             <dependency>
                 <groupId>org.pac4j</groupId>

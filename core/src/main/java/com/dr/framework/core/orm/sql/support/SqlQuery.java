@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * TODO
  * 联合查询
  * 自关联查询
- *
+ * having
  * @author dr
  */
 public final class SqlQuery<E> extends HashMap<String, Object> {

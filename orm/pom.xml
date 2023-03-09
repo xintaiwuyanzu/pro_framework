@@ -66,6 +66,11 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>DmJdbcDriver18</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!--<dependency>
             <groupId>com.dm.jdbc</groupId>
             <artifactId>oracle-wraper</artifactId>
