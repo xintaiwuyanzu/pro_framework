@@ -152,7 +152,7 @@ public interface OrganisePersonService {
     }
 
     /**
-     * 根据code查询用户
+     * 根据code查询用户，模糊查询
      *
      * @param userCode
      * @return
@@ -161,6 +161,18 @@ public interface OrganisePersonService {
     Person getPersonByUserCode(String userCode) {
         Assert.isTrue(StringUtils.hasText(userCode), "用户编码不能为空");
         return getPerson(new PersonQuery.Builder().userCodeLike(userCode).build());
+    }
+
+    /**
+     * 根据code查询用户，精确查询
+     *
+     * @param userCode
+     * @return
+     */
+    default @Nullable
+    Person getPersonByUserCodeEqual(String userCode) {
+        Assert.isTrue(!StringUtils.isEmpty(userCode), "用户编码不能为空");
+        return getPerson(new PersonQuery.Builder().userCodeEqual(userCode).build());
     }
 
     /**

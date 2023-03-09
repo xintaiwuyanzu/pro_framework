@@ -38,11 +38,11 @@ public class DataBaseMetaData {
     /**
      * 数据库主版本号
      */
-    private int databaseMajorVersion;
+    private int databaseMajorVersion = 0;
     /**
      * 数据库次版本号
      */
-    private int databaseMinorVersion;
+    private int databaseMinorVersion = 0;
     /**
      * 数据库链接驱动名称
      */
@@ -50,11 +50,11 @@ public class DataBaseMetaData {
     /**
      * 数据库驱动主版本号
      */
-    private int driverMajorVersion;
+    private int driverMajorVersion = 0;
     /**
      * 数据库次版本号
      */
-    private int driverMinorVersion;
+    private int driverMinorVersion = 0;
     private String catalog;
     private String schema;
     private String name;
@@ -78,10 +78,14 @@ public class DataBaseMetaData {
             //获取名称和版本信息
             setDatabaseProductName(source.getDatabaseProductName());
             setDriverName(source.getDriverName());
-            setDatabaseMajorVersion(versionOfNoVersion(source.getDatabaseMajorVersion()));
-            setDatabaseMinorVersion(versionOfNoVersion(source.getDatabaseMinorVersion()));
-            setDriverMajorVersion(versionOfNoVersion(source.getDriverMajorVersion()));
-            setDriverMinorVersion(versionOfNoVersion(source.getDriverMinorVersion()));
+            try {
+                setDatabaseMajorVersion(versionOfNoVersion(source.getDatabaseMajorVersion()));
+                setDatabaseMinorVersion(versionOfNoVersion(source.getDatabaseMinorVersion()));
+                setDriverMajorVersion(versionOfNoVersion(source.getDriverMajorVersion()));
+                setDriverMinorVersion(versionOfNoVersion(source.getDriverMinorVersion()));
+            } catch (Exception e) {
+                //达梦数据库这个方法有bug
+            }
             //获取数据库方言信息
             for (DataBase dataBase : DataBase.values()) {
                 if (dataBase.match(getDatabaseProductName())) {

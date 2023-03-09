@@ -751,7 +751,7 @@ public class DefaultOrganisePersonService
         checkBuildLikeQuery(personRelation, query, "user_code", personQuery.getUserCode());
         //根据用户编码查询用户
         if (StringUtils.hasText(personQuery.getUserCodeEqual())) {
-            query.equal(personRelation.getColumn("user_code"), personQuery.getUserCode());
+            query.equal(personRelation.getColumn("user_code"), personQuery.getUserCodeEqual());
         }
         checkBuildNotLikeQuery(personRelation, query, "person_type", personQuery.getTypeNotLike());
         checkBuildInQuery(personRelation, query, "nation", personQuery.getNation());

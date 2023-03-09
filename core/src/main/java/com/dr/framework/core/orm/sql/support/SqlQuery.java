@@ -44,6 +44,15 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     static protected Logger logger = LoggerFactory.getLogger(SqlQuery.class);
     private static Map<Class, Class<? extends TableInfo>> sqlQueryMap = Collections.synchronizedMap(new HashMap<>());
 
+
+    private static String EQUAL = " = ";
+    private static String GREAT_THAN = " > ";
+    private static String GREAT_THAN_EQUAL = " >= ";
+    private static String LESS_THAN = " < ";
+    private static String LESS_THAN_EQUAL = " <= ";
+
+    private static String NOT_EQUAL = " != ";
+
     /**
      * 根据model类获取该类的query帮助类
      *
@@ -400,6 +409,11 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
         return this;
     }
 
+    private SqlQuery<E> concatWithColumn(Column column, String operation, Column other) {
+        whereQuery.concatWithColumn(column, operation, other);
+        return this;
+    }
+
     private SqlQuery<E> concatWithSubQuery(Column column, String prefix, String suffix, SqlQuery query) {
         List<SqlQuery> sqlQueries = (List<SqlQuery>) computeIfAbsent("$children", k -> new ArrayList<>());
         sqlQueries.add(query);
@@ -490,91 +504,115 @@ public final class SqlQuery<E> extends HashMap<String, Object> {
     }
 
     public SqlQuery<E> equal(Column... columns) {
-        return concat("=", "", columns);
+        return concat(EQUAL, "", columns);
     }
 
     public SqlQuery<E> equal(Column column, Serializable data) {
-        return concatWithData(column, "=", "", data);
+        return concatWithData(column, EQUAL, "", data);
+    }
+
+    public SqlQuery<E> equal(Column left, Column right) {
+        return concatWithColumn(left, EQUAL, right);
     }
 
     public SqlQuery<E> equal(Column column, SqlQuery query) {
-        return concatWithSubQuery(column, "=", "", query);
+        return concatWithSubQuery(column, EQUAL, "", query);
     }
 
     public SqlQuery<E> equalIfNotNull(Column... columns) {
-        return concatTest("=", "", columns);
+        return concatTest(EQUAL, "", columns);
     }
 
     public SqlQuery<E> notEqual(Column... columns) {
-        return concat("!=", "", columns);
+        return concat(NOT_EQUAL, "", columns);
     }
 
     public SqlQuery<E> notEqual(Column column, Serializable data) {
-        return concatWithData(column, "!=", "", data);
+        return concatWithData(column, NOT_EQUAL, "", data);
+    }
+
+    public SqlQuery<E> notEqual(Column left, Column right) {
+        return concatWithColumn(left, NOT_EQUAL, right);
     }
 
     public SqlQuery<E> notEqual(Column column, SqlQuery query) {
-        return concatWithSubQuery(column, "!=", "", query);
+        return concatWithSubQuery(column, NOT_EQUAL, "", query);
     }
 
     public SqlQuery<E> notEqualIfNotNull(Column... columns) {
-        return concatTest("!=", "", columns);
+        return concatTest(NOT_EQUAL, "", columns);
     }
 
     public SqlQuery<E> lessThan(Column... columns) {
-        return concat("<", "", columns);
+        return concat(LESS_THAN, "", columns);
+    }
+
+    public SqlQuery<E> lessThan(Column left, Column right) {
+        return concatWithColumn(left, LESS_THAN, right);
     }
 
     public SqlQuery<E> lessThan(Column column, SqlQuery query) {
-        return concatWithSubQuery(column, "<", "", query);
+        return concatWithSubQuery(column, LESS_THAN, "", query);
     }
 
     public SqlQuery<E> lessThan(Column column, Serializable data) {
-        return concatWithData(column, "<", "", data);
+        return concatWithData(column, LESS_THAN, "", data);
     }
 
     public SqlQuery<E> lessThanIfNotNull(Column... columns) {
-        return concatTest("<", "", columns);
+        return concatTest(LESS_THAN, "", columns);
     }
 
     public SqlQuery<E> lessThanEqual(Column... columns) {
-        return concat("<=", "", columns);
+        return concat(LESS_THAN_EQUAL, "", columns);
+    }
+
+    public SqlQuery<E> lessThanEqual(Column left, Column right) {
+        return concatWithColumn(left, LESS_THAN_EQUAL, right);
     }
 
     public SqlQuery<E> lessThanEqual(Column column, Serializable data) {
-        return concatWithData(column, "<=", "", data);
+        return concatWithData(column, LESS_THAN_EQUAL, "", data);
     }
 
     public SqlQuery<E> lessThanEqualIfNotNull(Column... columns) {
-        return concatTest("<=", "", columns);
+        return concatTest(LESS_THAN_EQUAL, "", columns);
     }
 
     public SqlQuery<E> greaterThan(Column... columns) {
         return concat(">", "", columns);
     }
 
+    public SqlQuery<E> greaterThan(Column left, Column right) {
+        return concatWithColumn(left, GREAT_THAN, right);
+    }
+
     public SqlQuery<E> greaterThan(Column column, Serializable data) {
-        return concatWithData(column, ">", "", data);
+        return concatWithData(column, GREAT_THAN, "", data);
     }
 
     public SqlQuery<E> greaterThan(Column column, SqlQuery query) {
-        return concatWithSubQuery(column, ">", "", query);
+        return concatWithSubQuery(column, GREAT_THAN, "", query);
     }
 
     public SqlQuery<E> greaterThanIfNotNull(Column... columns) {
-        return concatTest(">", "", columns);
+        return concatTest(GREAT_THAN, "", columns);
+    }
+
+    public SqlQuery<E> greaterThanEqual(Column left, Column right) {
+        return concatWithColumn(left, GREAT_THAN_EQUAL, right);
     }
 
     public SqlQuery<E> greaterThanEqual(Column... columns) {
-        return concat(">=", "", columns);
+        return concat(GREAT_THAN_EQUAL, "", columns);
     }
 
     public SqlQuery<E> greaterThanEqual(Column column, Serializable data) {
-        return concatWithData(column, ">=", "", data);
+        return concatWithData(column, GREAT_THAN_EQUAL, "", data);
     }
 
     public SqlQuery<E> greaterThanEqualIfNotNull(Column... columns) {
-        return concatTest(">=", "", columns);
+        return concatTest(GREAT_THAN_EQUAL, "", columns);
     }
 
 
