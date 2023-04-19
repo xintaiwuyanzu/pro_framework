@@ -5,6 +5,7 @@ import com.dr.framework.common.dao.CommonMapper;
 import com.dr.framework.common.entity.BaseEntity;
 import com.dr.framework.common.entity.IdEntity;
 import com.dr.framework.common.entity.StatusEntity;
+import com.dr.framework.common.entity.TreeNode;
 import com.dr.framework.common.page.Page;
 import com.dr.framework.common.service.CommonService;
 import com.dr.framework.common.service.DataBaseService;
@@ -303,9 +304,9 @@ public class DefaultOrganisePersonService
         Assert.isTrue(personIds != null && personIds.length > 0, "人员不能为空！");
         Assert.isTrue(commonMapper.exists(PersonGroup.class, groupId), "不存在指定的人员分组！");
         List<String> savedPersons = commonMapper.selectByQuery(
-                        SqlQuery.from(EntityPersonGroupRelation.class)
-                                .equal(EntityPersonGroupRelationInfo.GROUPID, groupId)
-                ).stream()
+                SqlQuery.from(EntityPersonGroupRelation.class)
+                        .equal(EntityPersonGroupRelationInfo.GROUPID, groupId)
+        ).stream()
                 .map(EntityPersonGroupRelation::getPersonId)
                 .collect(Collectors.toList());
         Arrays.stream(personIds)
@@ -389,6 +390,7 @@ public class DefaultOrganisePersonService
                 .set(organiseRelation.getColumn("group_id"), organise.getGroupId())
                 .set(organiseRelation.getColumn(ORDER_COLUMN_NAME), organise.getOrder())
                 .set(organiseRelation.getColumn(STATUS_COLUMN_KEY), organise.getStatus())
+                .set(organiseRelation.getColumn("organise_attribute"), organise.getOrganiseAttribute())
                 .equal(organiseRelation.getColumn(ID_COLUMN_NAME), old.getId());
         commonMapper.updateIgnoreNullByQuery(organiseUpdate);
 
@@ -818,5 +820,35 @@ public class DefaultOrganisePersonService
         return personQueryJoin(query);
     }
 
+    /**
+     * 根据机构id获取人员树
+     *
+     * @param orgId
+     * @return
+     */
+    @Override
+    public List<TreeNode> personTreeByOrgId(String orgId) {
+        List<TreeNode> treeNodeList = new ArrayList<>();
+        List<Person> personList = getOrganiseAllPersons(orgId);
+        for (Person person : personList) {
+            TreeNode treeNode = new TreeNode(person.getId(), person.getUserName(), person);
+            treeNodeList.add(treeNode);
+        }
+        return treeNodeList;
+    }
 
+    /**
+     * 获取当前登录人所在机构下的人员
+     *
+     * @param organiseId
+     * @return
+     */
+    @Override
+    public List<Person> getOrganiseAllPersons(String organiseId) {
+        if (StringUtils.hasText(organiseId)) {
+            return getOrganiseDefaultPersons(organiseId);
+        } else {
+            return Collections.EMPTY_LIST;
+        }
+    }
 }

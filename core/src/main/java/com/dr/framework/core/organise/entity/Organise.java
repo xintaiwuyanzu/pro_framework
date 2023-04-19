@@ -78,6 +78,11 @@ public class Organise extends BaseTreeEntity<String> implements SourceRefEntity 
      */
     @Column(name = "group_id", comment = "所属分组", length = 50)
     private String groupId;
+    /**
+     * 给项目上扩展使用的
+     */
+    @Column(name = "organise_attribute", comment = "机构属性", length = 50)
+    private String organiseAttribute;
 
     public String getOrganiseName() {
         return organiseName;
@@ -199,5 +204,13 @@ public class Organise extends BaseTreeEntity<String> implements SourceRefEntity 
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public String getOrganiseAttribute() {
+        return organiseAttribute;
+    }
+
+    public void setOrganiseAttribute(String organiseAttribute) {
+        this.organiseAttribute = organiseAttribute;
     }
 }
