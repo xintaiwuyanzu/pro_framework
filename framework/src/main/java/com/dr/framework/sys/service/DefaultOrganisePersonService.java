@@ -389,6 +389,7 @@ public class DefaultOrganisePersonService
                 .set(organiseRelation.getColumn("group_id"), organise.getGroupId())
                 .set(organiseRelation.getColumn(ORDER_COLUMN_NAME), organise.getOrder())
                 .set(organiseRelation.getColumn(STATUS_COLUMN_KEY), organise.getStatus())
+                .set(organiseRelation.getColumn("organise_department_type"), organise.getOrganiseDepartmentType())
                 .equal(organiseRelation.getColumn(ID_COLUMN_NAME), old.getId());
         commonMapper.updateIgnoreNullByQuery(organiseUpdate);
 

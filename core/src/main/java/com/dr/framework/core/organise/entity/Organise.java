@@ -78,6 +78,11 @@ public class Organise extends BaseTreeEntity<String> implements SourceRefEntity 
      */
     @Column(name = "group_id", comment = "所属分组", length = 50)
     private String groupId;
+    /**
+     * 机构或部门类型
+     */
+    @Column(name = "organise_department_type", comment = "机构或部门类型", length = 50)
+    private String organiseDepartmentType;
 
     public String getOrganiseName() {
         return organiseName;
@@ -199,5 +204,13 @@ public class Organise extends BaseTreeEntity<String> implements SourceRefEntity 
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public String getOrganiseDepartmentType() {
+        return organiseDepartmentType;
+    }
+
+    public void setOrganiseDepartmentType(String organiseDepartmentType) {
+        this.organiseDepartmentType = organiseDepartmentType;
     }
 }
