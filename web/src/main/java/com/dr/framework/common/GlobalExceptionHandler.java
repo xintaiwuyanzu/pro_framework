@@ -44,7 +44,8 @@ public class GlobalExceptionHandler {
             return ResultEntity.error(ex.getMessage(), "403", null);
         }
         logger.error("服务器错误", ex);
-        return ResultEntity.error("服务器错误：" + ex.getMessage());
+//        return ResultEntity.error("服务器错误：" + ex.getMessage());
+        return ResultEntity.error("提示信息：" + ex.getMessage());
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
