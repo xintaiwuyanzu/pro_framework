@@ -914,4 +914,14 @@ public abstract class Dialect {
     public void setColumnCaseType(CaseType columnCaseType) {
         this.columnCaseType = columnCaseType;
     }
+
+    /**
+     * 获取数据库列名特殊字符时的前后缀
+     *
+     * 在数据库大小写不敏感，但是代码大小写敏感的时候有用
+     * @return
+     */
+    public String getColumnCaseFix(){
+        return "";
+    }
 }

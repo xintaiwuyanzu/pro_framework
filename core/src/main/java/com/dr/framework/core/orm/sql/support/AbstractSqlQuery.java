@@ -1,5 +1,6 @@
 package com.dr.framework.core.orm.sql.support;
 
+import com.dr.framework.common.service.DefaultDataBaseService;
 import com.dr.framework.core.orm.database.Dialect;
 import com.dr.framework.core.orm.sql.Column;
 import org.springframework.util.StringUtils;
@@ -71,7 +72,9 @@ abstract class AbstractSqlQuery {
         }
         if (withAlias && StringUtils.hasText(column.getAlias())) {
             sb.append(" as ");
-            sb.append(column.getAlias());
+            String fix = DefaultDataBaseService.getInstance().getColumFix(sqlQuery.getRelation());
+            //别名加转义符，防止数据库大小写敏感转义
+            sb.append(fix + column.getAlias() + fix);
         }
         return sb.toString();
     }

@@ -8,6 +8,7 @@ import com.dr.framework.core.orm.module.EntityRelation;
 import com.dr.framework.core.orm.module.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -26,7 +27,13 @@ import java.util.stream.Collectors;
  * @author dr
  */
 @Service
-public class DefaultDataBaseService implements DataBaseService {
+public class DefaultDataBaseService implements DataBaseService, InitializingBean {
+    static DataBaseService instance;
+
+    public static DataBaseService getInstance() {
+        return instance;
+    }
+
     Logger logger = LoggerFactory.getLogger(DefaultDataBaseService.class);
     protected Map<String, DataBaseMetaData> databaseMetaMap = Collections.synchronizedMap(new HashMap<>());
     protected Map<String, Module> moduleMap = Collections.synchronizedMap(new HashMap<>());
@@ -169,11 +176,7 @@ public class DefaultDataBaseService implements DataBaseService {
         Assert.notNull(module, "未找到指定的模块声明：" + moduleName);
         Relation relation = module.getTable(tableName);
         if (relation instanceof EntityRelation) {
-            logger.warn("指定模块【{}】的表定义【{}】有相应的java类【{}】与其映射，不能直接删除"
-                    , moduleName
-                    , tableName
-                    , ((EntityRelation) relation).getEntityClass()
-            );
+            logger.warn("指定模块【{}】的表定义【{}】有相应的java类【{}】与其映射，不能直接删除", moduleName, tableName, ((EntityRelation) relation).getEntityClass());
             return;
         } else if (relation == null) {
             relation = getTableInfo(tableName, moduleName);
@@ -184,10 +187,7 @@ public class DefaultDataBaseService implements DataBaseService {
             List<DataBaseChangeInfo> dropInfos = dataBaseMetaData.getDialect().getDropTableInfo(relation);
             doExecTableDDl(relation, dropInfos);
         } else {
-            logger.warn("指定模块【{}】的表定义【{}】在数据库中没有创建，不执行任何操作"
-                    , moduleName
-                    , tableName
-            );
+            logger.warn("指定模块【{}】的表定义【{}】在数据库中没有创建，不执行任何操作", moduleName, tableName);
         }
     }
 
@@ -211,9 +211,21 @@ public class DefaultDataBaseService implements DataBaseService {
     public DefaultDataBaseService addEntityRelation(EntityRelation entityRelation, String dbName) {
         String moduleName = entityRelation.getModule();
         addModule(moduleName, dbName);
-        moduleMap.get(entityRelation.getModule().toUpperCase())
-                .addRelation(entityRelation);
+        moduleMap.get(entityRelation.getModule().toUpperCase()).addRelation(entityRelation);
         return this;
     }
 
+    @Override
+    public String getColumFix(String module) {
+        DataBaseMetaData dataBaseMetaData = getDataBaseMetaDataByModuleName(module);
+        if (dataBaseMetaData != null) {
+            return dataBaseMetaData.getDialect().getColumnCaseFix();
+        }
+        return "";
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        instance = this;
+    }
 }

@@ -95,13 +95,28 @@ public interface DataBaseService {
     /**
      * TODO  下面是数据迁移的功能
      * 初始化数据库
-     *
+     * <p>
      * 初始化数据库数据
-     *
+     * <p>
      * 按照指定条件备份数据库
-     *
+     * <p>
      * 导入备份的数据
-     *
-     *
      */
+    /**
+     * 别名加转义符，防止数据库大小写敏感转义
+     *
+     * @param relation
+     * @return
+     */
+    default String getColumFix(Relation relation) {
+        return getColumFix(relation.getModule());
+    }
+
+    /**
+     * 别名加转义符，防止数据库大小写敏感转义
+     *
+     * @param module
+     * @return
+     */
+    String getColumFix(String module);
 }

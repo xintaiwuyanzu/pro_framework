@@ -1,5 +1,6 @@
 package com.dr.framework.core.orm.support.mybatis.spring.mapper;
 
+import com.dr.framework.common.service.DefaultDataBaseService;
 import com.dr.framework.core.orm.database.Dialect;
 import com.dr.framework.core.orm.jdbc.Column;
 import com.dr.framework.core.orm.jdbc.Relation;
@@ -111,7 +112,9 @@ public class TableInfoProperties extends Properties {
                     value = "#{" + tableInfo.getPrimaryKeyAlias() + "}";
                     break;
                 case COLUMNS_KEY:
-                    value = join(false, "%3$s.%1$s as %2$s", ",");
+                    //别名加转义符，防止数据库大小写敏感转义
+                    String fix = DefaultDataBaseService.getInstance().getColumFix(tableInfo.getModule());
+                    value = join(false, "%3$s.%1$s as " + fix + "%2$s" + fix, ",");
                     break;
                 case SET_KEY:
                     value = " set " + join(true, "%3$s.%1$s = #{%2$s,jdbcType=%4$s}", ",");

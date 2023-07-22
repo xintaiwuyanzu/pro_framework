@@ -87,4 +87,9 @@ public class PostgreSQLDialect extends Dialect {
     protected String getDropPrimaryKeySql(Relation jdbcTable) {
         return String.format("%s drop constraint %s", getAlterTableString(jdbcTable.getName()), jdbcTable.getPrimaryKeyName());
     }
+
+    @Override
+    public String getColumnCaseFix() {
+        return "\"";
+    }
 }
