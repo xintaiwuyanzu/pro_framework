@@ -1,5 +1,6 @@
 package com.dr.framework.core.organise.service;
 
+import com.dr.framework.common.entity.TreeNode;
 import com.dr.framework.common.page.Page;
 import com.dr.framework.core.organise.entity.Organise;
 import com.dr.framework.core.organise.entity.Person;
@@ -338,4 +339,20 @@ public interface OrganisePersonService {
      * @return 影响数据条数
      */
     long deletePerson(String personId);
+
+    /**
+     * 根据机构id获取人员树
+     *
+     * @param orgId
+     * @return
+     */
+    List<TreeNode> personTreeByOrgId(String orgId);
+
+    /**
+     * 获取当前登录人所在机构下的人员
+     *
+     * @param organiseId
+     * @return
+     */
+    List<Person> getOrganiseAllPersons(String organiseId);
 }
