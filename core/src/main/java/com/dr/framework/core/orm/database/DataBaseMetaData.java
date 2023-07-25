@@ -5,6 +5,7 @@ import com.dr.framework.core.orm.jdbc.Column;
 import com.dr.framework.core.orm.jdbc.Relation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -65,6 +66,7 @@ public class DataBaseMetaData {
 
     private String host, userName, password;
     private Integer port;
+    private ApplicationEventPublisher eventPublisher;
 
     public DataBaseMetaData(DataSource selfManagedDatasource, String name) {
         this(selfManagedDatasource, name, CaseType.AUTO, CaseType.AUTO);
@@ -235,6 +237,12 @@ public class DataBaseMetaData {
                     dialect.parseIndexInfo(databaseMetaData.getIndexInfo(getCatalog(), getSchema(), relation.getName(), false, true), concurrentMap);
                 }
             }
+            if (eventPublisher != null) {
+                for (Relation<Column> value : concurrentMap.values()) {
+                    TableRelationLoadEvent event = new TableRelationLoadEvent(value, dialect, dataSource);
+                    eventPublisher.publishEvent(event);
+                }
+            }
             return concurrentMap;
         } catch (Exception e) {
             logger.error("获取数据库表结构失败", e);
@@ -355,5 +363,9 @@ public class DataBaseMetaData {
 
     public void setPort(Integer port) {
         this.port = port;
+    }
+
+    public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
     }
 }

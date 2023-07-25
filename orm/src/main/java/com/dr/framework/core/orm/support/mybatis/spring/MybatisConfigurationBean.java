@@ -74,6 +74,7 @@ public class MybatisConfigurationBean extends Configuration implements Initializ
         Assert.notNull(getEnvironment(), "没有设置environment属性，不能管理事务");
         dataBaseService = (DefaultDataBaseService) applicationContext.getBean(DataBaseService.class);
         Assert.notNull(dataBaseService, "没有找到数据库管理service:" + DataBaseService.class);
+        dataSourceProperties.getDataBaseMetaData().setEventPublisher(applicationContext);
         dataBaseService.addDb(dataSourceProperties.getDataBaseMetaData());
 
         AnnotationTableReader annotationTableReader = new AnnotationTableReader();
